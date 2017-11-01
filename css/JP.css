@@ -1,0 +1,19 @@
+.vertical-center {
+  min-height: 100%;  /* Fallback for browsers do NOT support vh unit */
+  min-height: 100vh; /* These two lines are counted as one :-)       */
+  display: flex;
+  align-items: center;
+}
+.big-checkbox {width: 60px; height: 60px;}
+.colapse-navbar{margin-left:30px;}
+
+table.floatThead-table {
+    border-top: none;
+    border-bottom: none;
+    background-color: #fff;
+}
+
+.centered {
+	display:inline-flex;
+	align-content: center;
+}
