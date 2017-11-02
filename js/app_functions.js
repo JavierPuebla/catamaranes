@@ -51,7 +51,9 @@ function checkCantidad(e){
 	}
 }
 
-
+function nueva_func(){
+	//algo nuevo
+}
 
 /**************
 ///TODO VIEJO
