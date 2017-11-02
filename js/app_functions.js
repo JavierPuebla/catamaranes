@@ -53,6 +53,7 @@ function checkCantidad(e){
 
 function nueva_func(){
 	//algo nuevo
+	// un nuevo agregado para nueva func
 }
 
 /**************
