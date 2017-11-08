@@ -1,6 +1,13 @@
 
 function emitirTks(){
-	// respuesta ok de ajax
+	// preparar data para enviar
+	
+	// llamar a php y gestionar el ticket
+
+
+	// respuesta de ajax o error
+
+	//limpiar imput fields y pantalla 
 	$('#modalFooterMsg').removeClass('hidden')
 
 	setTimeout(function() {

@@ -4,119 +4,29 @@ class app_model extends CI_Model {
 		$this -> load -> database();
 	}
 
-// supervisor Models
-	function pedidos_report($year){
-		$q = "SELECT `pedido_id`, `order_number`, `client_id`, `owner_id`, `date`, `prodId`, `descript`, `qtty`, `price`, `tot` FROM `pedidos` WHERE `date` LIKE '{$year}%' ";
-		$x = $this -> db -> query($q);
-		return ($x)?$x -> result_array() : false;
-	}
-//no lo estoy usando ...
-	function contacts_report($year,$campId){
-		$q = "SELECT `contacts_id`,`client_id`,`campaign_id`,`agent_id`,`date`,`result`,`order_id` FROM `contacts` WHERE `date` LIKE '{$year}%' AND `campaign_id` = '{$campId}' ORDER BY `date` ASC";
-		$x = $this -> db -> query($q);
-		return ($x)?$x -> result_array() : false;
-	}
-
-	// end supervisor models -------------------------
-
-
-
-	public function get_last_order_number(){
-		$q = "SELECT `order_number` FROM `pedidos` ORDER BY `order_number` DESC LIMIT 1;";
-		$query = $this -> db ->query($q);
-		return $query -> row_array();
-	}
-
-	 function checkout_order($data,$items){
-		// data[client_id,items_arr,]
-		$last_ordnum = $this->get_last_order_number();
-		$new_order_number = intval($last_ordnum['order_number'])+1;
-// loopea $data insertando el pedido
-		$q = true;
-		foreach ($items as $item) {
-			$item['date']= $data['date'];
-			$item['client_id'] = $data['client_id'];
-			$item['owner_id'] = $data['user_id'];
-			$item['order_number']=$new_order_number;
-			$q = ($this->insert('pedidos',$item)!='' && $q==true)?true:false;
-		}
-		//$query = "UPDATE `pedidos` SET `order_number`='{$new_order_number}',`state`= '1' WHERE `client_id` = '{$client_id}' AND `state` = 0 ;";
-		//$q = $this -> db -> query($query);
-		if($q){
-			return $new_order_number;
-		}else {
-			return false;
-		}
-	}
-
-
-	function get_AgntsActivity($agent_id){
-		$sql = "SELECT `client_id`,`campaign_id`,`date`,`result`,`order_id`  FROM `contacts` WHERE `agent_id` = '{$agent_id}' ORDER BY `date` DESC";
-		$x = $this -> db -> query($sql);
-		return ($x)?$x -> result_array() : false;
-	}
-	function get_agents(){
-		$sql = "SELECT * FROM `Usuarios` WHERE `tipo` = 'agent' ";
-		$x = $this -> db -> query($sql);
-		return ($x)?$x -> result_array() : false;
-	}
-
-function get_layout($utp,$layout_id){
-	$q = "SELECT * FROM `layouts` WHERE `usertype` = '{$utp}' AND `layout_id` = {$layout_id} ORDER BY `order_of_apearance` ASC";
-	$x = $this->db->query($q);
-	$l = ($x)?$x -> result_array() : false;
-	if($l){
-		foreach ($l as $key => $value) {
-			$atts=$value['elem_attribs'];
-			$clbls = $value['elem_cont_labels'];
-			$cds = $value['elem_cont_data_src'];
-			$l[$key]['elem_attribs'] = json_decode($atts);
-			$l[$key]['elem_cont_labels'] = json_decode($clbls);
-			$l[$key]['elem_cont_data_src'] = json_decode($cds);
-		}
-	}
-	return $l;
-}
-
-function get_clients(){
-	$q = "SELECT `clients`.`client_id`,`clients`.`RAZON_SOCIAL`,`clients`.`LOCALIDAD`,`clients`.`CALLE`,`clients`.`ALTURA` FROM `clients` ";
-	$x = $this->db->query($q);
-	return ($x)?$x -> result_array() : false;
-
-}
-
-function get_clients_by_cmpnid($cmpn_id){
-	$q = "SELECT `clients`.`client_id`,`clients`.`RAZON_SOCIAL`,`clients`.`LOCALIDAD`,`clients`.`CALLE`,`clients`.`ALTURA`, `campaign_client`.`campaign_id` FROM `clients` join `campaign_client` ON `campaign_client`.`client_id` = `clients`.`client_id` WHERE `campaign_client`.`campaign_id` = {$cmpn_id}";
-	$x = $this->db->query($q);
-	return ($x)?$x -> result_array() : false;
-}
-function get_family_by_id($id){
-	$q = "SELECT * FROM `prod_families` WHERE `prod_families_id` = '{$id}'";
-	$query = $this -> db ->query($q);
-	return ($query->num_rows() > 0)? $query -> row_array() : false;
-}
-
-function get_prod_by_family_id($id){
-	$q = "SELECT * FROM `products` WHERE `parent_id` = '{$id}' ORDER BY `product_id` ASC ";
-	$query = $this -> db ->query($q);
-	return ($query->num_rows() > 0)? $query -> result_array() : false;
-
-}
-
-function get_contacts_by_usrcamp($id,$cmpn_id){
-	$q = "SELECT * FROM `contacts` WHERE `agent_id` = '{$id}' AND `campaign_id` = '{$cmpn_id}' ORDER BY `contacts`.`date` DESC ";
-	$x = $this -> db ->query($q);
-	return ($x)?$x -> result_array() : false;
-
-}
-
-function get_extended_data($owner_tbl,$owner_id){
-	$q = "SELECT `data_extend_id`,`owner_id`,`label`,`value` from `data_extend` WHERE `owner_table` = '{$owner_tbl}' AND `owner_id` = '{$owner_id}'; ";
+function get_servicios_disponibles($hora,$tipo){
+	$q= "SELECT hs.hora_salida,hs.servicios_id, s.tipo,s.subtipo,s.tarifa,b.nombre,b.capacidad FROM `cat_historial_servicios` hs LEFT OUTER JOIN cat_servicios s on hs.servicios_id = s.id LEFT OUTER JOIN cat_barcos b on hs.barcos_id = b.id WHERE hs.hora_salida = '{$hora}' AND s.tipo = '{$tipo}' AND hs.estado LIKE 'D' ORDER BY s.tipo ASC";
 	$x = $this->db->query($q);
 	return ($x)?$x -> result_array() : false;
 }
 
+function get_hora_servicios_disponibles(){
+	$q="SELECT DISTINCT hora_salida FROM `cat_historial_servicios` ORDER BY hora_salida";
+	$x = $this->db->query($q);
+	return ($x)?$x -> result_array() : false;
+}
 
+function get_tipos_servicios(){
+	$q="SELECT DISTINCT tipo FROM `cat_servicios`";
+	$x = $this->db->query($q);
+	return ($x)?$x -> result_array() : false;
+}
+
+function get_subtipos_servicios(){
+	$q="SELECT DISTINCT subtipo  FROM `cat_servicios`";
+	$x = $this->db->query($q);
+	return ($x)?$x -> result_array() : false;
+}
 
 function get_activities($user_id){
 	$q="SELECT acciones_id from `actividades` WHERE usuarios_id = {$user_id}";
@@ -152,8 +62,9 @@ function insert($table,$data){
 
 //*************** funciones viejas  ********************
 
-	// OBTIENE UN NUEVO NUMERO DE ORDEN DE LA TABLA PEDIDOS
-	function get_new_order_number(){
+// OBTIENE UN NUEVO NUMERO DE ORDEN DE LA TABLA PEDIDOS
+
+function get_new_order_number(){
 		//  OBTENGO EL NUEVO NUMERO DE ORDEN DEL ULTIMO REGISTRO EN LA TABLA +1
 		$mqy= "SELECT order_number FROM parts_pedidos ORDER BY pedido_id DESC LIMIT 1";
 		$p2=$this->db->query($mqy);
@@ -364,10 +275,10 @@ function insert($table,$data){
 
 */
 	// no estoy usando esto?? ****
-	public function get_tipodeusuario($userid) {
+public function get_tipodeusuario($userid) {
 		$query = $this -> db -> get_where('B_usuarios', array('idusuario' => $userid));
 		return $query -> row_array();
-	}
+}
 
 
 	public function get_user_data($userid){

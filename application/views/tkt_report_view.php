@@ -1,24 +1,33 @@
+
 <div class="bs-component">
 	<div class="container-fluid" id='mainContainer'>
-		<div class="list-group">
-			<h5 href="#" class="list-group-item active">
-				Servicios Disponibles  
-			</h5>
-			<?php 
-				
-				$p ='';
-				foreach ($data as $s) {
-					// echo('<pre/>');
-					// print_r($s);
-					$p .="<a href='#' class='list-group-item'><div class='col-md-6'><h4>{$s[0]['hora_salida']} -- {$s[0]['tipo']} -- Barco : {$s[0]['nombre']} </h4></div>";
-					foreach ($s as $st) {
-						$p .="<button class='btn btn-primary' style='margin-right:20px;' onclick=select_servicio('{$st['hora_salida']}','".str_replace(" ", "-", $st['tipo'])."','".str_replace(" ", "-", $st['subtipo'])."','{$st['tarifa']}','".str_replace(" ", "-", $st['nombre'])."')>{$st['subtipo']}</button>";
-					}
-					$p .="</a>";	
-				};
-				echo $p;
- 			?>
+		<table class="table table-striped table-hover ">
+			<thead>
+				<tr>
 
+				<?php foreach ($tikets['header'] as $tkth) {
+					echo "<th>{$tkth}</th>"
+				} ?>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+				<?php 
+					$res = "";
+					$tot = 0;
+					foreach ($tkts as $tkt) {
+						$res .= "<td>{$tkt['col']}</td>";
+						$tot += $tkt['monto']
+					}
+					echo $res; 
+				?>
+				</tr>	
+			</tbody>
+		</table>
+		<div class="panel panel-default">
+		  <div class="panel-body">
+		    Total: <?php $tot ?>
+		  </div>
 		</div>				
 	</div>
 </div>
@@ -30,12 +39,13 @@
 			<div class="modal-content">
 				<div class="modal-header">
 					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-					<h3 class="modal-title" id="tktNumero">Ticket De Servicio</h3>
+					<h3 class="modal-title">Emitiendo Ticket Nro: 999999</h3>
 				</div>
 				<div class="modal-body">
 					<div class="panel panel-default">
 						<div class="panel-body">
-							<h5 id="descripServicio"></h5>
+							<h4>Salida: 10:00 -- Paseo: Regular  1 Hora -- Tarifa $: 150 </h4>
+
 						</div>
 					</div>
 					<div class="panel panel-default">
@@ -69,7 +79,7 @@
 					</div>
 					<div class="col-md-6">
 						<button type="button " class="btn btn-default " data-dismiss="modal">Cancelar</button>
-						<button type="button" id="btnEmitirTks" onclick="emitirTks()" type="submit" class="btn btn-primary">Emitir</button>	
+						<button type="button" id="btnEmitirTks" onclick="emitirTks()" class="btn btn-primary">Emitir</button>	
 					</div>
 				</div>
 			</div>

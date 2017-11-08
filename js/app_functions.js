@@ -1,12 +1,45 @@
+// Top context
+var tcx = {'selectedService':''};
+
 
 function emitirTks(){
+	
+	data = {
+		'tickets':$('#cantidadTks').val(),
+	 	'selectedService':tcx.selectedService,
+	 	'formaDePago':$("#formaDePago option:selected").val(),
+	 	'nroTransacTarjeta':$("#nroTransacTarjeta").val()
+	}
+	 	
+	 	console.log('sending data',data);
+	 //loader('show');
+			return $.ajax({
+				type : "POST",
+				url : "tickets/make_tkt",
+				data : data,
+				dataType : "json",
+				success : function(r) {
+					//loader('hide');
+					console.log(r)
+					//window[r.action](r);
+				},
+				error : function(xhr, ajaxOptions, thrownError) {
+					console.log('err:',xhr)
+					//myAlertLoader('failed',thrownError);
+				}
+			});
+
 	// respuesta ok de ajax
 	$('#modalFooterMsg').removeClass('hidden')
 
 	setTimeout(function() {$('#myModal').modal('hide')},2500);
 }
 
-function select_servicio(el) {
+// select_servicio('10:00','1-Hora','REGULAR','180.00','Río-Jet-1')
+function select_servicio(h,tp,sbtp,trf,brco) {
+  	tcx.selectedService = {'hora':h,'tipo':tp,'subtipo':sbtp,'tarifa':trf,'barco':brco};
+  	var titSbtp = (sbtp !='ESTUDIANTIL')?sbtp:'';
+  	$('#descripServicio').html('Salida:&nbsp;'+h+"Hs&nbsp;&nbsp;&nbsp;Paseo: "+tp+' '+titSbtp+'&nbsp;&nbsp;Barco: '+brco );
   	$('#modalFooterMsg').addClass('hidden');
 	$("#formaDePago option[value='EFECTIVO']").prop('selected', true);
 	$("#nroTransacTarjeta").val('');
@@ -206,31 +239,32 @@ function colortemp(percent){
 *********************************************************/
 
 //controler,action,user,dat
-function Do(d){
-	if(d.typeof != 'undefined' ){
-		if(d.hasOwnProperty('controller')){
-			myAlertLoader('show');
-			return $.ajax({
-				type : "POST",
-				url : d.controller,
-				data : d,
-				dataType : "json",
-				success : function(r) {
-					myAlertLoader('hide');
-					console.log(r)
-					//window[r.action](r);
-				},
-				error : function(xhr, ajaxOptions, thrownError) {
-					console.log('err:',xhr)
-					myAlertLoader('failed',thrownError);
-				}
-			});
+// function Do(d){
+// 	if(d.typeof != 'undefined' ){
+// 		if(d.hasOwnProperty('controller')){
+// 			myAlertLoader('show');
+// 			return $.ajax({
+// 				type : "POST",
+// 				url : d.controller,
+// 				data : d,
+// 				dataType : "json",
+// 				success : function(r) {
+// 					myAlertLoader('hide');
+// 					console.log(r)
+// 					//window[r.action](r);
+// 				},
+// 				error : function(xhr, ajaxOptions, thrownError) {
+// 					console.log('err:',xhr)
+// 					myAlertLoader('failed',thrownError);
+// 				}
+// 			});
 
-		}else{
-				window[d.action](d);
-		}
-	}
-}
+// 		}else{
+// 				console.log('action',d)
+// 				window[d.action](d);
+// 		}
+// 	}
+// }
 // muestra un item de la tabla layout
 function show(i){
 	//i es el layout item
