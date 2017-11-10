@@ -5,7 +5,7 @@ class app_model extends CI_Model {
 	}
 
 function get_servicios_disponibles($hora,$tipo){
-	$q= "SELECT hs.hora_salida,hs.servicios_id, s.tipo,s.subtipo,s.tarifa,b.nombre,b.capacidad FROM `cat_historial_servicios` hs LEFT OUTER JOIN cat_servicios s on hs.servicios_id = s.id LEFT OUTER JOIN cat_barcos b on hs.barcos_id = b.id WHERE hs.hora_salida = '{$hora}' AND s.tipo = '{$tipo}' AND hs.estado LIKE 'D' ORDER BY s.tipo ASC";
+	$q= "SELECT hs.id,hs.fecha_servicio,hs.hora_salida,hs.servicios_id, s.tipo,s.subtipo,s.tarifa,b.nombre,b.capacidad FROM `cat_historial_servicios` hs LEFT OUTER JOIN cat_servicios s on hs.servicios_id = s.id LEFT OUTER JOIN cat_barcos b on hs.barcos_id = b.id WHERE hs.hora_salida = '{$hora}' AND s.tipo = '{$tipo}' AND hs.estado LIKE 'D' ORDER BY s.tipo ASC";
 	$x = $this->db->query($q);
 	return ($x)?$x -> result_array() : false;
 }

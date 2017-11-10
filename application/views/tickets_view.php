@@ -8,11 +8,12 @@
 				
 				$p ='';
 				foreach ($data as $s) {
-					// echo('<pre/>');
-					// print_r($s);
-					$p .="<a href='#' class='list-group-item'><div class='col-md-6'><h4>{$s[0]['hora_salida']} -- {$s[0]['tipo']} -- Barco : {$s[0]['nombre']} </h4></div>";
+					 //echo('<pre/>');
+					 //print_r($s);
+					$p .="<a href='#' class='list-group-item'><div class='col-md-6'><h4>Salida:&nbsp;
+					{$s[0]['hora_salida']}Hs &nbsp;Paseo:&nbsp; {$s[0]['tipo']} </h4></div>";
 					foreach ($s as $st) {
-						$p .="<button class='btn btn-primary' style='margin-right:20px;' onclick=select_servicio('{$st['hora_salida']}','".str_replace(" ", "-", $st['tipo'])."','".str_replace(" ", "-", $st['subtipo'])."','{$st['tarifa']}','".str_replace(" ", "-", $st['nombre'])."')>{$st['subtipo']}</button>";
+						$p .="<button class='btn btn-primary' style='margin-right:20px;' onclick=select_servicio('{$st['hora_salida']}','".str_replace(" ", "-", $st['tipo'])."','".str_replace(" ", "-", $st['subtipo'])."','".str_replace(" ", "-", $st['nombre'])."','".$st['servicios_id']."','".$st['tarifa']."','".$st['id']."','".$st['fecha_servicio']."')>{$st['subtipo']}</button>";
 					}
 					$p .="</a>";	
 				};
@@ -65,6 +66,7 @@
 				</div>
 				<div class="modal-footer">
 					<div class="col-md-6" >
+						<h4 class="modal-title" id="totImporte"></h4>
 						<big><strong><span id="modalFooterMsg" class="label label-success glyphicon glyphicon-ok hidden"><span id="modalFooterMsgtxt" > Imprimiendo Ticket...</span> </span></strong></big>	
 					</div>
 					<div class="col-md-6">
@@ -76,5 +78,12 @@
 		</form>
 	</div>
 </div>
+<script type="text/javascript">
+	$( window ).load(function() {
+		// Top context
+		window.tcx = {'selectedService':'','userId':<?php echo json_encode($user); ?>};
 
+		console.log('load tikets',tcx)
+	});
+</script>
 </html>

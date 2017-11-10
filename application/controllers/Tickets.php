@@ -17,11 +17,8 @@ class Tickets extends CI_Controller {
     if (is_array($user)) {
       $userActs = $this -> app_model -> get_activities($user['userId']);
       $acts = explode(',',$userActs['acciones_id']);
-
-
-      // ****** GET SERVICIOS DISPONIBLES put it into var
-      //$hora = date('H:i');
-      
+    // ****** GET SERVICIOS DISPONIBLES put it into var
+      //$fechaHora = date('H:i');
       $servicios = [];
       $horarios = $this -> app_model -> get_hora_servicios_disponibles();
       $tipos = $this -> app_model -> get_tipos_servicios();
@@ -33,9 +30,8 @@ class Tickets extends CI_Controller {
         }
       }
       
-      
       $user_data = $this -> app_model -> get_user_data($user['userId']);
-        $var=array('data'=>$servicios,'user'=>$user_data);
+        $var=array('data'=>$servicios,'user'=>$user['userId']);
         $this -> load -> view('header-responsive');
         $this -> load -> view('navbar',array('acts'=>$acts,'username'=>$user_data['usuario']));
         $this -> load -> view('tickets_view',$var);
@@ -47,8 +43,23 @@ class Tickets extends CI_Controller {
 
   public function make_tkt(){
     $data = $this->input->post();
-    echo json_encode($data);
+     echo json_encode($data); 
+    //fecha tipo  numero  importe_neto  importe_iva rnr_id  hist_servicio_id  personal_id puntodeventa_id reservas_id
+     
 
+    // $table ='cat_comprobantes';
+    // $datos = ['fecha'=> date('d/m/Y H:i'),
+    //           'tipo' =>'TIKET',
+    //           'numero' =>'',
+    //           'importe_neto' => $data['tarifa'],
+    //           'importe_iva' =>'',
+    //           'rnr_id' =>'NR',
+    //           'hist_servicio_id' =>'',
+    //           'personal_id' => $data['userId'],
+    //           'puntodeventa_id' =>'', 
+    //           'reservas_id' =>''
+    //          ];
+    // echo json_encode($datos);
   }
 
 }

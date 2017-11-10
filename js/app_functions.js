@@ -1,12 +1,12 @@
-// Top context
-var tcx = {'selectedService':''};
 
 
 function emitirTks(){
 	
 	data = {
-		'tickets':$('#cantidadTks').val(),
-	 	'selectedService':tcx.selectedService,
+		'cantTickets':$('#cantidadTks').val(),
+	 	'servicios_id': window.tcx.selectedService.servicios_id,
+	 	'hora_salida':window.tcx.selectedService.hora,
+	 	'tarifa':window.tcx.selectedService.tarifa,
 	 	'formaDePago':$("#formaDePago option:selected").val(),
 	 	'nroTransacTarjeta':$("#nroTransacTarjeta").val()
 	}
@@ -20,7 +20,7 @@ function emitirTks(){
 				dataType : "json",
 				success : function(r) {
 					//loader('hide');
-					console.log(r)
+					console.log('recieved',r)
 					//window[r.action](r);
 				},
 				error : function(xhr, ajaxOptions, thrownError) {
@@ -36,10 +36,11 @@ function emitirTks(){
 }
 
 // select_servicio('10:00','1-Hora','REGULAR','180.00','Río-Jet-1')
-function select_servicio(h,tp,sbtp,trf,brco) {
-  	tcx.selectedService = {'hora':h,'tipo':tp,'subtipo':sbtp,'tarifa':trf,'barco':brco};
+function select_servicio(h,tp,sbtp,brco,srvid,trf,hsId,srvDate) {
+  	window.tcx.selectedService = {'hora':h,'servicios_id':srvid,'tarifa':trf,'hsId':hsId,'fecha_servicio':srvDate};
   	var titSbtp = (sbtp !='ESTUDIANTIL')?sbtp:'';
   	$('#descripServicio').html('Salida:&nbsp;'+h+"Hs&nbsp;&nbsp;&nbsp;Paseo: "+tp+' '+titSbtp+'&nbsp;&nbsp;Barco: '+brco );
+  	$("#totImporte").html("Total a Cobrar $: "+ (parseInt(window.tcx.selectedService.tarifa) * $("#cantidadTks").val() ) );
   	$('#modalFooterMsg').addClass('hidden');
 	$("#formaDePago option[value='EFECTIVO']").prop('selected', true);
 	$("#nroTransacTarjeta").val('');
@@ -81,6 +82,7 @@ function checkCantidad(e){
 		$("#fgCantTks").removeClass("has-error");
 		$("#lblCantTks").html("Cantidad Seleccionada");
 		$("#btnEmitirTks").removeClass("disabled");
+		$("#totImporte").html("Total a Cobrar $: "+ (parseInt(window.tcx.selectedService.tarifa) * $("#"+e.id).val() ) );
 	}
 }
 
