@@ -88,6 +88,7 @@ function checkCantidad(e){
 
 function nueva_func(){
 	//testing push al repo
+	//testing push to repo 2
 	//algo nuevo
 	// un nuevo agregado para nueva func
 }
