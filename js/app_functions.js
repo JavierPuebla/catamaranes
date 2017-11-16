@@ -137,13 +137,38 @@ function serv_edit(){
 //data-toggle="tooltip" data-placement="top" title="" data-original-title="Tooltip on top"
 // ''
 
-function mk_tooltip(arrTrp){
-	var txtTrp = "";
-	for (var i = 0; i < arrTrp.length; i++) {
-		txtTrp += arrTrp[i].nombre+" "+arrTrp[i].apellido+", "+arrTrp[i].actividad+'\n';
+function show_tripl(idx){
+	var arrTrp = window.tcx.data[idx].tripulacion;
+	var objSrv = window.tcx.data[idx].servicio;
+	var header = Object.keys(arrTrp[0]);
+	var htit = "";
+	for (var i = 0; i < header.length; i++) {
+		console.log(header[i])
+		htit += "<th>"+header[i]+"</th>";
 	}
-	var scrn = "<span class=\"glyphicon glyphicon-user\" aria-hidden=\"true\" data-toggle=\"tooltip\" data-placement=\"top\" title='' data-original-title='"+txtTrp+"'></span>";
-	return scrn;
+	var txtTrp = "";
+	for (var y = 0; y < arrTrp.length; y++) {
+		txtTrp += "<tr>";
+		for (var x = 0; x < header.length; x++) {
+			txtTrp += "<td>"+arrTrp[y][header[x]]+"</td>";
+		}
+		txtTrp += "</tr>";
+	}
+	var srvtit = "<h5><strong> Servicio: "+objSrv.fecha_servicio+" - "+objSrv.hora_salida+"Hs - "+objSrv.tipo+" "+objSrv.subtipo+"&nbsp;"+objSrv.barco+"</strong></h5>";
+	var scrn = "<h5>Tripulación</h5>";
+	scrn += "<table class='table table-bordered table-responsive table-striped table-hover'>\
+			<thead><tr>"+htit+"</tr></thead>\
+			<tbody>"+txtTrp+"</tbody></table>";
+	
+	$('#myModalOper').on('hidden.bs.modal', function (e) {
+		$('#myModalOperTitle').html('');
+		$('#myModalOperBody').html('');			
+	})
+
+	$('#myModalOperTitle').html(srvtit);
+	$('#myModalOperBody').html(scrn);			
+	$('#myModalOper').modal('show');
+
 }
 
 function getServicios(){
@@ -160,17 +185,17 @@ function getServicios(){
 				dataType : "json",
 				success : function(r) {
 					$.unblockUI(); 
-					console.log('recieved',r.result.length)
+					console.log('recieved',r.result)
 					
 					
 					if(r.result === false){
 						
 					}else{
 					// respuesta ok de ajax
-					//"+r.result[i]['servicios_id']+"
+					window.tcx.data = r.result
 					var screen = '';
 					for (var i = 0; i < r.result.length; i++) {
-						screen += "<tr><td>"+r.result[i].servicio.fecha_servicio+"</td><td>"+r.result[i].servicio.hora_salida+"</td><td>"+r.result[i].servicio.tipo+"</td><td>"+r.result[i].servicio.subtipo+"</td><td>"+r.result[i].servicio.estado+"</td><td>"+r.result[i].servicio.cant_pasajeros+"</td><td>"+r.result[i].servicio.barco+"</td><td>"+(r.result[i].tripulacion.length>0? mk_tooltip(r.result[i].tripulacion):'<span class="glyphicon glyphicon-minus" aria-hidden="true"></span>')+"</td><td><span class=\"glyphicon glyphicon-pause\" aria-hidden=\"true\" onClick='serv_stop()'></span>&nbsp;<span class=\"glyphicon glyphicon-edit\" aria-hidden=\"true\" onClick='serv_edit()'></span></td></tr>";
+						screen += "<tr><td>"+r.result[i].servicio.fecha_servicio+"</td><td>"+r.result[i].servicio.hora_salida+"</td><td>"+r.result[i].servicio.tipo+"</td><td>"+r.result[i].servicio.subtipo+"</td><td>"+r.result[i].servicio.estado+"</td><td>"+r.result[i].servicio.cant_pasajeros+"</td><td>"+r.result[i].servicio.barco+"</td><td>"+(r.result[i].tripulacion.length>0? "<a href=\"#\" title=\'Ver Tripulación\'><span class=\"glyphicon glyphicon-user\" aria-hidden=\"true\" onClick='show_tripl("+i+")'></span></a>" :'<span class="glyphicon glyphicon-minus" aria-hidden="true"></span>')+"</td><td><a href=\"#\" title=\'Suspender Servicio\'><span class=\"glyphicon glyphicon-pause\" aria-hidden=\"true\" onClick='serv_stop()'></a></span>&nbsp;&nbsp;&nbsp;<a href=\"#\" title=\'Editar Servicio\'><span class=\"glyphicon glyphicon-edit\" aria-hidden=\"true\" onClick='serv_edit()'></a></span></td></tr>";
 
 					}
 					$('#tbl_servicios').html(screen);
