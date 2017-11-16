@@ -1,6 +1,6 @@
 <?php
 if ( ! defined('BASEPATH')) exit('No direct script access allowed');
-class Tickets extends CI_Controller {
+class Operaciones extends CI_Controller {
 
   public function __construct() {
     parent::__construct();
@@ -15,48 +15,27 @@ class Tickets extends CI_Controller {
   public function index() {
     $user = $this -> session -> userdata('logged_in');
     if (is_array($user)) {
+      
+    // ****** NAVBAR ********
       $userActs = $this -> app_model -> get_activities($user['userId']);
       $acts = explode(',',$userActs['acciones_id']);
-    // ****** GET SERVICIOS DISPONIBLES put it into var
-      //$fechaHora = date('H:i');
-      $fecha = '11/11/2017';
-      $servicios = [];
-      $horarios = $this -> app_model -> get_hora_servicios_disponibles($fecha);
-      $tipos = $this -> app_model -> get_tipos_servicios();
-      foreach ($horarios as $h) {
-        foreach ($tipos as $t) {
-          $s = $this->app_model ->get_servicios_disponibles($fecha,$h['hora_salida'],$t['tipo']);
-          if($s)
-            $servicios[]= $s;
-        }
-      }
-      
+    
       $user_data = $this -> app_model -> get_user_data($user['userId']);
-        $var=array('data'=>$servicios,'user'=>$user['userId'],'horarios'=>$horarios,'tipos'=>$tipos);
+      $header = ['Fecha','Hora Salida','Tipo','Subtipo','Estado','Cant Pasaj','Barco','Tripul.','Acc.'];
+      $var=array('data'=>'','header'=>$header,'user'=>$user['userId']);
+        
         $this -> load -> view('header-responsive');
         $this -> load -> view('navbar',array('acts'=>$acts,'username'=>$user_data['usuario']));
-        $this -> load -> view('tickets_view',$var);
+        $this -> load -> view('operaciones_view',$var);
     } else {
       redirect('login', 'refresh');
     }
   }
 
-
-/*
-cantTickets:"3"
-formaDePago:"EFECTIVO"
-hora_salida:"10:00"
-nroTransacTarjeta:""
-servicios_id:"1"
-tarifa:"180.00"
-histServiciosId:
-fecha_servicio:
-
-*/
-  public function make_tkt(){
+  public function listado_servicios_dia(){
     $data = $this->input->post();
-    $result = $this -> app_model -> insert_tikets($data); 
+    $result = $this -> app_model -> get_servicios($data['fecha']); 
     echo json_encode(array('result'=>$result));
-  }
 
+  }
 }

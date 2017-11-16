@@ -36,7 +36,7 @@ class VerifyLogin extends CI_Controller {
     $username = $this->input->post('usuario',TRUE);
     if(preg_match('/[^a-z_\-0-9]/i', $username))
     {
-	$this->form_validation->set_message('check_database', 'User Name/Password not valid');
+	$this->form_validation->set_message('check_database', 'Usuario/Password no valido');
 	return false;
     }
 

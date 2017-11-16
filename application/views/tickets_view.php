@@ -1,3 +1,7 @@
+<script type="text/javascript"> 
+$.blockUI({ message: null,
+			baseZ: 10000  }); 
+</script>
 <div class="bs-component">
 	<div class="container-fluid" id='mainContainer'>
 		<div class="list-group">
@@ -8,8 +12,6 @@
 				
 				$p ='';
 				foreach ($data as $s) {
-					 //echo('<pre/>');
-					 //print_r($s);
 					$p .="<a href='#' class='list-group-item'><div class='col-md-6'><h4>Salida:&nbsp;
 					{$s[0]['hora_salida']}Hs &nbsp;Paseo:&nbsp; {$s[0]['tipo']} </h4></div>";
 					foreach ($s as $st) {
@@ -58,7 +60,7 @@
 			                </div>
 			                <div class="form-group hidden"  id="fgNroTransacTarjeta">
 			                	<label class="control-label" for="nroTransacTarjeta">Numero Transacción</label>
-			                  	<input class="form-control" id="nroTransacTarjeta" onchange="checkIdTransacTarjeta()"  type="text" placeholder=" ingresar Nro de operación de trajeta" >
+			                  	<input class="form-control" id="nroTransacTarjeta" onchange="checkIdTransacTarjeta()" onblur="checkIdTransacTarjeta()"  type="text" placeholder=" ingresar Nro de operación de trajeta" >
 			                </div>  
 
 						</div>
@@ -67,7 +69,7 @@
 				<div class="modal-footer">
 					<div class="col-md-6" >
 						<h4 class="modal-title" id="totImporte"></h4>
-						<big><strong><span id="modalFooterMsg" class="label label-success glyphicon glyphicon-ok hidden"><span id="modalFooterMsgtxt" > Imprimiendo Ticket...</span> </span></strong></big>	
+						<big><strong><span id="modalFooterMsg"><span id="modalFooterMsgtxt" class="centered"></span> </span></strong></big>	
 					</div>
 					<div class="col-md-6">
 						<button type="button " class="btn btn-default " data-dismiss="modal">Cancelar</button>
@@ -83,7 +85,9 @@
 		// Top context
 		window.tcx = {'selectedService':'','userId':<?php echo json_encode($user); ?>};
 
-		console.log('load tikets',tcx)
+		console.log('loaded',<?php echo json_encode($horarios); ?>)
+		console.log('loaded',<?php echo json_encode($tipos); ?>)
+		 $.unblockUI(); 
 	});
 </script>
 </html>

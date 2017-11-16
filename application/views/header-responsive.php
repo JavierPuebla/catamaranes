@@ -14,41 +14,66 @@
     <!-- Custom core CSS -->
     <link rel="stylesheet" type="text/css" href="<?php  base_url()?>css/JP.css" />
     <!-- Bootstrap core CSS -->
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet"> -->
+
+    <!-- Bootstrap core LOCAL -->
+    <link href="<?php base_url() ?>dependencies/bootstrap-3.3.7/bootstrap-3.3.7-min.css" rel="stylesheet">
+
+
+
     <!-- Bootstrap theme -->
-    <link href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.7/yeti/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap datepicker css 
-    <link href="<?php  //base_url() ?>dependencies/datepicker-1.5.1-dist/css/bootstrap-datepicker.standalone.css" rel="stylesheet">-->
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.7/yeti/bootstrap.min.css" rel="stylesheet"> -->
+
+    <!-- Bootstrap theme LOCAL -->
+    <link href="<?php base_url() ?>dependencies/bootstrap-3.3.7/bootswatch-yeti.css" rel="stylesheet">
+
+
+
+    <!-- <link href="<?php  //base_url() ?>dependencies/datepicker-1.5.1-dist/css/bootstrap-datepicker.standalone.css" rel="stylesheet"> -->
     <!-- Bootstrap slider css 
     <link href="<?php  //base_url() ?>dependencies/slider/css/slider.css" rel="stylesheet">-->
     <!-- donut chart style -->
-    <link href="<?php  base_url() ?>css/donut3d.css" rel="stylesheet">
+    <!-- <link href="<?php  base_url() ?>css/donut3d.css" rel="stylesheet"> -->
 
    <!--Load JQUERY from Google's network -->
-  <script type="text/javascript"  src="http://code.jquery.com/jquery-latest.min.js"></script>
+  <!-- <script type="text/javascript"  src="http://code.jquery.com/jquery-latest.min.js"></script> -->
 
   
-  <!-- <script type="text/javascript"  src="<?php //base_url() ?>dependencies/jquery-2.1.3.min"></script> -->
+  <script type="text/javascript"  src="<?php base_url() ?>dependencies/jquery-2.1.3.min.js"></script>
 
    <!--Load Bootstrap JS -->
-  <script type="text/javascript"  src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  <!-- <script type="text/javascript"  src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script> -->
 
+  <!-- Load bootstrap JS LOCAL -->
+   <script type="text/javascript"  src="<?php  base_url() ?>dependencies/bootstrap-v3.3.7.js"></script>
   
   <script type="text/javascript" src="<?php base_url() ?>js/app_functions.js"></script>
-  <script type="text/javascript" src="<?php base_url() ?>js/ui_coder.js"></script>
+  <!-- <script type="text/javascript" src="<?php base_url() ?>js/ui_coder.js"></script> -->
 
    <!-- Bootstrap datepicker js -->
-   <script type="text/javascript"  src="<?php  base_url() ?>dependencies/datepicker-1.5.1-dist/js/bootstrap-datepicker.min.js"></script>
+   <!-- <script type="text/javascript"  src="<?php  base_url() ?>dependencies/datepicker-1.5.1-dist/js/bootstrap-datepicker.min.js"></script> -->
+
+<link href="<?php  base_url() ?>dependencies/bootstrap-datepicker/datepicker.css" rel="stylesheet" media="all">
+<script src="<?php  base_url() ?>dependencies/bootstrap-datepicker/moment.js"></script>
+<script src="<?php  base_url() ?>dependencies/bootstrap-datepicker/locale-es.js"></script>
+<script src="<?php  base_url() ?>dependencies/bootstrap-datepicker/datepicker.js"></script>
+<script src="<?php  base_url() ?>dependencies/bootstrap-confirmation.js"></script>
+
 
   <!-- Bootstrap slider js -->
   <script type="text/javascript"  src="<?php  base_url() ?>dependencies/slider/js/bootstrap-slider.js"></script>
 
-  <!-- Bootstrap slider js -->
+
+  <!-- Bootstrap d3 min -->
   <script type="text/javascript"  src="<?php  base_url() ?>dependencies/d3/d3.min.js"></script>
+  <!-- d3 charts  -->
   <script type="text/javascript"  src="<?php  base_url() ?>dependencies/d3/charts/donut3D.js"></script>
 
-  <!-- Add fancyBox main JS and CSS files -->
-	<script type="text/javascript" src="<?php base_url() ?>dependencies/fancyBox/source/jquery.fancybox.js?v=2.1.5"></script>
-	<link rel="stylesheet" type="text/css" href="<?php base_url() ?>dependencies/fancyBox/source/jquery.fancybox.css?v=2.1.5" media="screen" />
+  <!-- Add block ui loader and block window plugin -->
+	<script type="text/javascript" src="<?php base_url() ?>dependencies/blockUI_plugin.js"></script>
+	
+
+
+
 
 </head>

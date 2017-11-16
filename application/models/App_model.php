@@ -4,56 +4,110 @@ class app_model extends CI_Model {
 		$this -> load -> database();
 	}
 
-function get_servicios_disponibles($hora,$tipo){
-	$q= "SELECT hs.id,hs.fecha_servicio,hs.hora_salida,hs.servicios_id, s.tipo,s.subtipo,s.tarifa,b.nombre,b.capacidad FROM `cat_historial_servicios` hs LEFT OUTER JOIN cat_servicios s on hs.servicios_id = s.id LEFT OUTER JOIN cat_barcos b on hs.barcos_id = b.id WHERE hs.hora_salida = '{$hora}' AND s.tipo = '{$tipo}' AND hs.estado LIKE 'D' ORDER BY s.tipo ASC";
-	$x = $this->db->query($q);
-	return ($x)?$x -> result_array() : false;
-}
+	function get_tkts_by_hsid($hsid,$srvid){
+		$q = "SELECT c.*,(SELECT SUM(c.importe_neto))as total , COUNT(*) as cantkts,s.tipo,s.subtipo FROM cat_comprobantes c LEFT OUTER JOIN cat_servicios s on s.id = '{$srvid}' WHERE c.hist_servicio_id = '{$hsid}'";
+		$x = $this->db->query($q);
+		return ($x)?$x -> row_array() : false;
+	}
 
-function get_hora_servicios_disponibles(){
-	$q="SELECT DISTINCT hora_salida FROM `cat_historial_servicios` ORDER BY hora_salida";
-	$x = $this->db->query($q);
-	return ($x)?$x -> result_array() : false;
-}
+	function get_hist_servicios_ids($fechin,$fechout){
+		$q = "SELECT id,fecha_servicio,servicios_id,hora_salida FROM `cat_historial_servicios` WHERE fecha_servicio >= '{$fechin}' AND fecha_servicio <= '{$fechout}' ORDER BY `Id` ASC";
+		$x = $this->db->query($q);
+		return ($x)?$x -> result_array() : false;
+	}
 
-function get_tipos_servicios(){
-	$q="SELECT DISTINCT tipo FROM `cat_servicios`";
-	$x = $this->db->query($q);
-	return ($x)?$x -> result_array() : false;
-}
+	function get_servicios($fecha){
+			$res = [];
+			$q= "SELECT hs.id,hs.fecha_servicio,hs.hora_salida,hs.servicios_id,hs.estado,hs.cant_pasajeros, s.tipo,s.subtipo,b.nombre as barco FROM `cat_historial_servicios` hs LEFT OUTER JOIN cat_servicios s on hs.servicios_id = s.id LEFT OUTER JOIN cat_barcos b on hs.barcos_id = b.id WHERE hs.fecha_servicio = '{$fecha}' ORDER BY hs.hora_salida ASC";
+			$x = $this->db->query($q);
+			$hserv = $x -> result_array();
+			if(!empty($hserv)){
+				foreach ($hserv as $hs) {
+					$trp = $this->get_tripulacion($hs['id']);
+					$res[]=['servicio'=>$hs,'tripulacion'=>$trp];
+				}
+				return $res;
+			}
+			return false;
+	}
 
-function get_subtipos_servicios(){
-	$q="SELECT DISTINCT subtipo  FROM `cat_servicios`";
-	$x = $this->db->query($q);
-	return ($x)?$x -> result_array() : false;
-}
-
-function get_activities($user_id){
-	$q="SELECT acciones_id from `actividades` WHERE usuarios_id = {$user_id}";
-	$x = $this->db->query($q);
-	return ($x)?$x -> row_array() : false;
-}
-
-function get_acciones($id){
-	$q="SELECT * from `acciones` WHERE acciones_id = {$id}";
-	$x = $this->db->query($q);
-	return ($x)?$x -> row_array() : false;
-}
+	function get_tripulacion($hsid){
+		$q="SELECT p.id,p.nombre,p.apellido,p.actividad FROM `cat_asignaciones_personal` ap LEFT OUTER JOIN cat_personal p on p.id = ap.personal_id WHERE ap.historial_servicios_id = '{$hsid}' ";
+		$x = $this->db->query($q);
+		return (!empty($x))?$x -> result_array() : null;
+	}	
 
 
-function update($table,$data,$ikey,$id){
+		function get_servicios_disponibles($fecha,$hora,$tipo){
+			$q= "SELECT hs.id,hs.fecha_servicio,hs.hora_salida,hs.servicios_id, s.tipo,s.subtipo,s.tarifa,b.nombre,b.capacidad FROM `cat_historial_servicios` hs LEFT OUTER JOIN cat_servicios s on hs.servicios_id = s.id LEFT OUTER JOIN cat_barcos b on hs.barcos_id = b.id WHERE hs.fecha_servicio = '{$fecha}' AND hs.hora_salida = '{$hora}' AND s.tipo = '{$tipo}' AND hs.estado LIKE 'D' ORDER BY s.tipo ASC";
+			$x = $this->db->query($q);
+			return ($x)?$x -> result_array() : false;
+		}
 
-	$this->db->where($ikey, $id);
-	return $this->db->update($table, $data);
-}
+	function get_hora_servicios_disponibles($fecha){
+		$q="SELECT DISTINCT hora_salida FROM `cat_historial_servicios` WHERE fecha_servicio = '{$fecha}' ORDER BY hora_salida";
+		$x = $this->db->query($q);
+		return ($x)?$x -> result_array() : false;
+	}
 
-function insert($table,$data){
+	function get_tipos_servicios(){
+		$q="SELECT DISTINCT tipo FROM `cat_servicios`";
+		$x = $this->db->query($q);
+		return ($x)?$x -> result_array() : false;
+	}
 
+	function get_subtipos_servicios(){
+		$q="SELECT DISTINCT subtipo  FROM `cat_servicios`";
+		$x = $this->db->query($q);
+		return ($x)?$x -> result_array() : false;
+	}
+
+	function get_activities($user_id){
+		$q="SELECT acciones_id from `actividades` WHERE usuarios_id = {$user_id}";
+		$x = $this->db->query($q);
+		return ($x)?$x -> row_array() : false;
+	}
+
+	function get_acciones($id){
+		$q="SELECT * from `acciones` WHERE acciones_id = {$id}";
+		$x = $this->db->query($q);
+		return ($x)?$x -> row_array() : false;
+	}
+
+
+	function update($table,$data,$ikey,$id){
+
+		$this->db->where($ikey, $id);
+		return $this->db->update($table, $data);
+	}
+
+	function insert($table,$data){
 		return ($this->db->insert($table,$data)>0) ? $this->db->insert_id() :false;
+	}
 
-}
 
-
+	function insert_tikets($data){
+		$cantTkts = intval($data['cantTickets']);
+		$this->db->trans_start();
+		for ($i=0; $i < $cantTkts; $i++) { 
+			$table ='cat_comprobantes';
+			$datos = [
+				'fecha'=> $data['fecha_servicio'],
+				'tipo' =>'TIKET',
+				'numero' =>'',
+				'importe_neto' => $data['tarifa'],
+				'importe_iva' =>'',
+				'rnr_id' =>'NR',
+				'hist_servicio_id' =>$data['histServiciosId'],
+				'personal_id' => $data['userId'],
+				'puntodeventa_id' =>'', 
+				'reservas_id' =>''
+			];  
+			$this -> db -> insert($table,$datos); 
+		}	
+		$this->db->trans_complete();
+		return $this->db->trans_status();
+	}
 
 
 
@@ -66,63 +120,63 @@ function insert($table,$data){
 
 function get_new_order_number(){
 		//  OBTENGO EL NUEVO NUMERO DE ORDEN DEL ULTIMO REGISTRO EN LA TABLA +1
-		$mqy= "SELECT order_number FROM parts_pedidos ORDER BY pedido_id DESC LIMIT 1";
-		$p2=$this->db->query($mqy);
-		$res = $p2->row();
-		if ($res) {
-			$ord_num =  $res->order_number +1;
-		  	return $ord_num;
-		}else{
-			return false;
-		}
+	$mqy= "SELECT order_number FROM parts_pedidos ORDER BY pedido_id DESC LIMIT 1";
+	$p2=$this->db->query($mqy);
+	$res = $p2->row();
+	if ($res) {
+		$ord_num =  $res->order_number +1;
+		return $ord_num;
+	}else{
+		return false;
 	}
+}
 
 
 	// encuentra un item guardado previamente en la tabla pedidos para ponerle numero de orden cuando se envia el pedido de compra
-	function find_saved_item($pedido_id){
-		$q= "SELECT `pedido_id`,`order_number`,`item_id`,`item_name`,`qty`,`price` FROM `parts_pedidos` WHERE `pedido_id` LIKE '{$pedido_id}';";
-		$query = $this -> db ->query($q);
-		return ($query)?$query -> result_array():false;
-	}
+function find_saved_item($pedido_id){
+	$q= "SELECT `pedido_id`,`order_number`,`item_id`,`item_name`,`qty`,`price` FROM `parts_pedidos` WHERE `pedido_id` LIKE '{$pedido_id}';";
+	$query = $this -> db ->query($q);
+	return ($query)?$query -> result_array():false;
+}
 
-	function clean_saved_cart($user_id){
-		$q = "DELETE FROM `parts_pedidos` WHERE `client_id` LIKE '{$user_id}' AND `state` = 0 ;";
-		$query = $this -> db ->query($q);
-	}
+function clean_saved_cart($user_id){
+	$q = "DELETE FROM `parts_pedidos` WHERE `client_id` LIKE '{$user_id}' AND `state` = 0 ;";
+	$query = $this -> db ->query($q);
+}
 
-	function delete_item_incart($pedido_id){
-		$q = "DELETE FROM `parts_pedidos` WHERE `pedido_id` LIKE '{$pedido_id}';";
-		$query = $this -> db ->query($q);
-	}
+function delete_item_incart($pedido_id){
+	$q = "DELETE FROM `parts_pedidos` WHERE `pedido_id` LIKE '{$pedido_id}';";
+	$query = $this -> db ->query($q);
+}
 	// encuentra los items guardados para sumarlos al carro de compras
-	function get_saved_cart($user_id){
-		$q = "SELECT `pedido_id`,`PTO_id`,`name`,`qty`,`unit_price` FROM `parts_pedidos` WHERE `client_id` LIKE '{$user_id}' AND `state` = 0 ";
-		$query = $this -> db ->query($q);
-		return ($query)?$query -> result_array():false;
-	}
+function get_saved_cart($user_id){
+	$q = "SELECT `pedido_id`,`PTO_id`,`name`,`qty`,`unit_price` FROM `parts_pedidos` WHERE `client_id` LIKE '{$user_id}' AND `state` = 0 ";
+	$query = $this -> db ->query($q);
+	return ($query)?$query -> result_array():false;
+}
 
-	function get_item_to_guest_cart($pto_id){
-		$q = "SELECT * FROM  `A_bsobj` WHERE `PTO_id` = '{$pto_id}'";
-		$query = $this -> db ->query($q);
-		if($query->num_rows() > 0){
-			return $query -> row_array();
-		}else{return false;}
-	}
+function get_item_to_guest_cart($pto_id){
+	$q = "SELECT * FROM  `A_bsobj` WHERE `PTO_id` = '{$pto_id}'";
+	$query = $this -> db ->query($q);
+	if($query->num_rows() > 0){
+		return $query -> row_array();
+	}else{return false;}
+}
 
 	// es llamado por una funcion de javascript para construir un select de destribuidores con pais
 	// no esta la tabla hay que redefinir el rol de los importadores de forma mas amplia para todos los modulos
-	public function get_importadores(){
-		$q="SELECT * FROM `importadores` JOIN pais where pais.idpais = importadores.id_pais";
-		$query = $this -> db ->query($q);
-		return $query -> result_array();
+public function get_importadores(){
+	$q="SELECT * FROM `importadores` JOIN pais where pais.idpais = importadores.id_pais";
+	$query = $this -> db ->query($q);
+	return $query -> result_array();
 
-	}
+}
 
-	public function parcial_part_number($n){
-		$query = "SELECT DISTINCT `B_engines`.sector, `A_bsobj`.`PTO_id`,`A_bsobj`.`name`,`B_engines`.potencia, `B_engines`.`id` FROM `A_bsobj` INNER JOIN `B_engines` ON `A_bsobj`.`id`= `B_engines`.`bsobj_id`  WHERE `A_bsobj`.`PTO_id` LIKE '%{$n}%'";
-		$res = $this -> db -> query($query);
-		return $res -> result_array();
-	}
+public function parcial_part_number($n){
+	$query = "SELECT DISTINCT `B_engines`.sector, `A_bsobj`.`PTO_id`,`A_bsobj`.`name`,`B_engines`.potencia, `B_engines`.`id` FROM `A_bsobj` INNER JOIN `B_engines` ON `A_bsobj`.`id`= `B_engines`.`bsobj_id`  WHERE `A_bsobj`.`PTO_id` LIKE '%{$n}%'";
+	$res = $this -> db -> query($query);
+	return $res -> result_array();
+}
 	/*
 	public function get_model_by_partnumber($pn){
 		$q = "SELECT DISTINCT `part_id`,`model` FROM  `partes_V2` WHERE `part_number` LIKE '".$pn."'";
@@ -171,7 +225,7 @@ function get_new_order_number(){
 			$q = "SELECT `B_potencias`.`strokes`,`B_engines`.`potencia`,`B_engines`.`sector`,`B_engines`.`refnum`,`B_engines`.`image_pos_x`,`B_engines`.`image_pos_y`, `B_engines`.`bsobj_id`, `A_bsobj`.PTO_id, `A_bsobj`.name,  `A_pcles`.`value`  FROM `B_engines` INNER JOIN `A_bsobj` ON  `A_bsobj`.`id` = `B_engines`.`bsobj_id` INNER JOIN `B_potencias` ON  `B_engines`.`id_potencia_marca` = `B_potencias`.`id_potencia_marca`   INNER JOIN `A_pcles` ON `A_bsobj`.`id`= `A_pcles`.`id_bsobj` WHERE `B_engines`.`id_potencia_marca` LIKE '{$id_pot}' AND  `B_engines`.`sector` LIKE '{$sec}' AND `A_pcles`.`label` = 'unit_price' GROUP BY `B_engines`.`bsobj_id`  ORDER BY CONVERT(`refnum`,UNSIGNED INTEGER)";
 		}else{
 
-				$q = "SELECT `B_potencias`.`strokes`,`B_engines`.`potencia`,`B_engines`.`sector`,`B_engines`.`refnum`,`B_engines`.`image_pos_x`,`B_engines`.`image_pos_y`, `B_engines`.`bsobj_id`, `A_bsobj`.PTO_id, `A_bsobj`.name  FROM `B_engines` INNER JOIN `A_bsobj` ON  `A_bsobj`.`id` = `B_engines`.`bsobj_id` INNER JOIN `B_potencias` ON  `B_engines`.`id_potencia_marca` = `B_potencias`.`id_potencia_marca` WHERE `B_engines`.`id_potencia_marca` LIKE '{$id_pot}' AND  `B_engines`.`sector` LIKE '{$sec}' GROUP BY `B_engines`.`bsobj_id`  ORDER BY CONVERT(`refnum`,UNSIGNED INTEGER)";
+			$q = "SELECT `B_potencias`.`strokes`,`B_engines`.`potencia`,`B_engines`.`sector`,`B_engines`.`refnum`,`B_engines`.`image_pos_x`,`B_engines`.`image_pos_y`, `B_engines`.`bsobj_id`, `A_bsobj`.PTO_id, `A_bsobj`.name  FROM `B_engines` INNER JOIN `A_bsobj` ON  `A_bsobj`.`id` = `B_engines`.`bsobj_id` INNER JOIN `B_potencias` ON  `B_engines`.`id_potencia_marca` = `B_potencias`.`id_potencia_marca` WHERE `B_engines`.`id_potencia_marca` LIKE '{$id_pot}' AND  `B_engines`.`sector` LIKE '{$sec}' GROUP BY `B_engines`.`bsobj_id`  ORDER BY CONVERT(`refnum`,UNSIGNED INTEGER)";
 		}
 		$query = $this -> db ->query($q);
 		return $query -> result_array();
@@ -275,10 +329,10 @@ function get_new_order_number(){
 
 */
 	// no estoy usando esto?? ****
-public function get_tipodeusuario($userid) {
+	public function get_tipodeusuario($userid) {
 		$query = $this -> db -> get_where('B_usuarios', array('idusuario' => $userid));
 		return $query -> row_array();
-}
+	}
 
 
 	public function get_user_data($userid){
@@ -349,44 +403,44 @@ public function get_tipodeusuario($userid) {
 	 */
 
 
-	public function get_sector_by_potencia_id($pot){
+	 public function get_sector_by_potencia_id($pot){
 
-		$sl_query = "SELECT DISTINCT `sector` FROM `B_engines` WHERE  `id_potencia_marca` =  '{$pot}' ";
-		$q = $this -> db -> query($sl_query);
-		return $q -> result_array();
+	 	$sl_query = "SELECT DISTINCT `sector` FROM `B_engines` WHERE  `id_potencia_marca` =  '{$pot}' ";
+	 	$q = $this -> db -> query($sl_query);
+	 	return $q -> result_array();
 
-	}
+	 }
 
-	public function get_potencias($strokes){
+	 public function get_potencias($strokes){
 
 		//select distinct name,id_potencia_marca from B_potencias where marca like 'POWERTEC' or marca like 'TITAN' order by order_number asc
-		$query = "SELECT `name`,`id_potencia_marca` FROM `B_potencias` WHERE  `marca` NOT LIKE 'YAMAHA' AND `strokes` = '{$strokes}' GROUP BY `name` ORDER BY `order_number` ASC ";
-		$q = $this -> db -> query($query);
-		return $q -> result_array();
+	 	$query = "SELECT `name`,`id_potencia_marca` FROM `B_potencias` WHERE  `marca` NOT LIKE 'YAMAHA' AND `strokes` = '{$strokes}' GROUP BY `name` ORDER BY `order_number` ASC ";
+	 	$q = $this -> db -> query($query);
+	 	return $q -> result_array();
 
-	}
-
-
-	public function get_sectores(){
-		$query = "SELECT DISTINCT `sector` FROM `B_engines`";
-		$q = $this -> db -> query($query);
-		return $q -> result_array();
-	}
+	 }
 
 
-	public function get_importers(){
-		$query = "SELECT * FROM `B_usuarios` WHERE `tipousuario` LIKE '%importador%' ORDER BY `idpais` ASC ";
-		$q = $this -> db -> query($query);
-		return $q -> result_array();
-	}
+	 public function get_sectores(){
+	 	$query = "SELECT DISTINCT `sector` FROM `B_engines`";
+	 	$q = $this -> db -> query($query);
+	 	return $q -> result_array();
+	 }
 
-	public function get_orders($owner,$state,$mode){
 
-		$query = array('all'=>"SELECT * FROM `parts_pedidos` WHERE `client_id` LIKE '{$owner}' AND `state` LIKE {$state} ORDER BY `order_number` ASC ",
-						'group'=>"SELECT `order_number` FROM `parts_pedidos` WHERE `client_id` LIKE '{$owner}' AND `state` LIKE {$state} GROUP BY `order_number` ASC ");
-		$q = $this -> db -> query($query[$mode]);
-		return $q -> result_array();
-	}
+	 public function get_importers(){
+	 	$query = "SELECT * FROM `B_usuarios` WHERE `tipousuario` LIKE '%importador%' ORDER BY `idpais` ASC ";
+	 	$q = $this -> db -> query($query);
+	 	return $q -> result_array();
+	 }
+
+	 public function get_orders($owner,$state,$mode){
+
+	 	$query = array('all'=>"SELECT * FROM `parts_pedidos` WHERE `client_id` LIKE '{$owner}' AND `state` LIKE {$state} ORDER BY `order_number` ASC ",
+	 		'group'=>"SELECT `order_number` FROM `parts_pedidos` WHERE `client_id` LIKE '{$owner}' AND `state` LIKE {$state} GROUP BY `order_number` ASC ");
+	 	$q = $this -> db -> query($query[$mode]);
+	 	return $q -> result_array();
+	 }
 
 	// ******************
 	// busca DISTINCT en columna para completar selectores de partes, $selected es la seleccion actual y $sl_number es el numero de orden de selector

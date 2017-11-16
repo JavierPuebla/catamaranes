@@ -8,55 +8,93 @@ function emitirTks(){
 	 	'hora_salida':window.tcx.selectedService.hora,
 	 	'tarifa':window.tcx.selectedService.tarifa,
 	 	'formaDePago':$("#formaDePago option:selected").val(),
-	 	'nroTransacTarjeta':$("#nroTransacTarjeta").val()
+	 	'nroTransacTarjeta':$("#nroTransacTarjeta").val(),
+	 	'histServiciosId':window.tcx.selectedService.hsId,
+	 	'fecha_servicio':window.tcx.selectedService.fecha_servicio,
+	 	'userId':window.tcx.userId
 	}
 	 	
 	 	console.log('sending data',data);
 	 //loader('show');
+	 $.blockUI({ message: null, baseZ: 10000  }); 
+
 			return $.ajax({
 				type : "POST",
 				url : "tickets/make_tkt",
 				data : data,
 				dataType : "json",
 				success : function(r) {
-					//loader('hide');
+					$.unblockUI(); 
 					console.log('recieved',r)
-					//window[r.action](r);
+					
+					if(r.result === false){
+						$('#totImporte').html('');
+						$('#modalFooterMsg').removeClass("label label-success glyphicon glyphicon-ok hidden")
+						$('#modalFooterMsg').addClass("label label-warning glyphicon glyphicon-remove hidden")
+						$('#modalFooterMsgtxt').html('<big>Fallo la emision del ticket!</big>');					
+						$('#modalFooterMsg').removeClass('hidden')
+						setTimeout(function() {
+							$('#modalFooterMsg').addClass('hidden');
+							$("#cantidadTks").val('1');
+							$("#totImporte").html("Total a Cobrar $: "+ (parseInt(window.tcx.selectedService.tarifa) * $("#cantidadTks").val() ) );
+						},2500);
+					}else{
+					// respuesta ok de ajax
+						$('#totImporte').html('');
+						$('#modalFooterMsg').removeClass("label label-warning glyphicon glyphicon-remove hidden")
+						$('#modalFooterMsg').addClass("label label-success glyphicon glyphicon-ok hidden")
+						$('#modalFooterMsgtxt').html('<big>Imprimiendo Ticket...</big>');					
+						$('#modalFooterMsg').removeClass('hidden')
+						setTimeout(function() {$('#myModal').modal('hide')},2000);
+					}
 				},
 				error : function(xhr, ajaxOptions, thrownError) {
+					$.unblockUI();
 					console.log('err:',xhr)
-					//myAlertLoader('failed',thrownError);
+						$('#totImporte').html('');
+						$('#modalFooterMsg').removeClass("label label-success glyphicon glyphicon-ok hidden")
+						$('#modalFooterMsg').addClass("label label-warning glyphicon glyphicon-remove hidden")
+						$('#modalFooterMsgtxt').html(xhr);					
+						$('#modalFooterMsg').removeClass('hidden')
+						setTimeout(function() {
+							$('#modalFooterMsg').addClass('hidden');
+							$("#cantidadTks").val('1');
+							$("#totImporte").html("Total a Cobrar $: "+ (parseInt(window.tcx.selectedService.tarifa) * $("#cantidadTks").val() ) );
+						},2500);
 				}
 			});
 
-	// respuesta ok de ajax
-	$('#modalFooterMsg').removeClass('hidden')
-
-	setTimeout(function() {$('#myModal').modal('hide')},2500);
+	
 }
 
 // select_servicio('10:00','1-Hora','REGULAR','180.00','Río-Jet-1')
 function select_servicio(h,tp,sbtp,brco,srvid,trf,hsId,srvDate) {
   	window.tcx.selectedService = {'hora':h,'servicios_id':srvid,'tarifa':trf,'hsId':hsId,'fecha_servicio':srvDate};
+  	// fix tipo y subtipo estudiantil que se repite en descripcion del servicio.
   	var titSbtp = (sbtp !='ESTUDIANTIL')?sbtp:'';
   	$('#descripServicio').html('Salida:&nbsp;'+h+"Hs&nbsp;&nbsp;&nbsp;Paseo: "+tp+' '+titSbtp+'&nbsp;&nbsp;Barco: '+brco );
-  	$("#totImporte").html("Total a Cobrar $: "+ (parseInt(window.tcx.selectedService.tarifa) * $("#cantidadTks").val() ) );
   	$('#modalFooterMsg').addClass('hidden');
 	$("#formaDePago option[value='EFECTIVO']").prop('selected', true);
 	$("#nroTransacTarjeta").val('');
 	$("#fgNroTransacTarjeta").addClass("hidden");
 	$("#cantidadTks").val('1');
+	$("#totImporte").html("Total a Cobrar $: "+ (parseInt(window.tcx.selectedService.tarifa) * $("#cantidadTks").val() ) );
 	$('#myModal').modal('show'); 
 }
 
 function checkIdTransacTarjeta(){
+	console.log("wwwww");
 	if($("#nroTransacTarjeta").val() != ''){
 		$("#btnEmitirTks").removeClass("disabled");
 		$("#fgNroTransacTarjeta").removeClass("has-error");
+	}else{
+		$("#btnEmitirTks").addClass("disabled");
+		$("#fgNroTransacTarjeta").addClass("has-error");
 	}
 }
 
 function checkFormaDePago(e){
+	
 	if($("#formaDePago option:selected").val() === "TARJETA"){
 		$("#nroTransacTarjeta").val('')
 		$("#fgNroTransacTarjeta").removeClass("hidden");
@@ -86,12 +124,68 @@ function checkCantidad(e){
 	}
 }
 
-function nueva_func(){
-	//testing push al repo
-	//testing push to repo 2
-	//algo nuevo
-	// un nuevo agregado para nueva func
+
+function serv_stop(){
+	console.log('serv stop')
 }
+
+function serv_edit(){
+	console.log('serv edit')
+}
+
+
+//data-toggle="tooltip" data-placement="top" title="" data-original-title="Tooltip on top"
+// ''
+
+function mk_tooltip(arrTrp){
+	var txtTrp = "";
+	for (var i = 0; i < arrTrp.length; i++) {
+		txtTrp += arrTrp[i].nombre+" "+arrTrp[i].apellido+", "+arrTrp[i].actividad+'\n';
+	}
+	var scrn = "<span class=\"glyphicon glyphicon-user\" aria-hidden=\"true\" data-toggle=\"tooltip\" data-placement=\"top\" title='' data-original-title='"+txtTrp+"'></span>";
+	return scrn;
+}
+
+function getServicios(){
+	 
+	console.log(' servicios',$('#dpk_servicios').find("input").val());
+	data = {
+		'fecha':$('#dpk_servicios').find("input").val()
+	}
+	$.blockUI({ message: null, baseZ: 10000  }); 
+			return $.ajax({
+				type : "POST",
+				url : "operaciones/listado_servicios_dia",
+				data : data,
+				dataType : "json",
+				success : function(r) {
+					$.unblockUI(); 
+					console.log('recieved',r.result.length)
+					
+					
+					if(r.result === false){
+						
+					}else{
+					// respuesta ok de ajax
+					//"+r.result[i]['servicios_id']+"
+					var screen = '';
+					for (var i = 0; i < r.result.length; i++) {
+						screen += "<tr><td>"+r.result[i].servicio.fecha_servicio+"</td><td>"+r.result[i].servicio.hora_salida+"</td><td>"+r.result[i].servicio.tipo+"</td><td>"+r.result[i].servicio.subtipo+"</td><td>"+r.result[i].servicio.estado+"</td><td>"+r.result[i].servicio.cant_pasajeros+"</td><td>"+r.result[i].servicio.barco+"</td><td>"+(r.result[i].tripulacion.length>0? mk_tooltip(r.result[i].tripulacion):'<span class="glyphicon glyphicon-minus" aria-hidden="true"></span>')+"</td><td><span class=\"glyphicon glyphicon-pause\" aria-hidden=\"true\" onClick='serv_stop()'></span>&nbsp;<span class=\"glyphicon glyphicon-edit\" aria-hidden=\"true\" onClick='serv_edit()'></span></td></tr>";
+
+					}
+					$('#tbl_servicios').html(screen);
+					}
+				},
+				error : function(xhr, ajaxOptions, thrownError) {
+					$.unblockUI();
+					console.log('err:',xhr)
+						
+				}
+			});
+}
+
+
+
 
 /**************
 ///TODO VIEJO

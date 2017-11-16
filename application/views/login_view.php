@@ -6,17 +6,19 @@
     <meta name="description" content="basic_app">
     <meta name="author" content="bigbot.io">
 
-    <link rel="icon" href="../../favicon.ico">
+    <link rel="icon" href="favicon.png">
 
-    <title>Basic_App</title>
+    <title>Catamaranes App V 0.1</title>
 
     <!-- Bootstrap core CSS -->
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <!-- <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet"> -->
 
     <!-- Custom styles for this template -->
     <link href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.7/yeti/bootstrap.min.css" rel="stylesheet">
 
-
+    <!-- Custom core CSS -->
+    <link rel="stylesheet" type="text/css" href="<?php  base_url()?>css/JP.css" />
+    
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!--[if lt IE 9]>
       <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
@@ -33,8 +35,8 @@
         }
       ?>
 
-      <form class="form-signin" method="post" accept-charset="utf-8" action="verifylogin">
-        <h2 class="form-signin-heading text-center"></h2>
+      <form class="jp-form-signin" method="post" accept-charset="utf-8" action="verifylogin">
+        <h2 class="jp-form-signin-heading text-center"></h2>
         <p><label for="username" class="sr-only">Usuario</label>
         <input type="text" id="usuario" name="usuario" class="form-control" value="admin" required="" autofocus=""></p>
         <p><label for="inputPassword" class="sr-only">Clave</label>
