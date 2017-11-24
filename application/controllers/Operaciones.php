@@ -21,8 +21,7 @@ class Operaciones extends CI_Controller {
       $acts = explode(',',$userActs['acciones_id']);
     
       $user_data = $this -> app_model -> get_user_data($user['userId']);
-      $header = ['Fecha','Hora Salida','Tipo','Subtipo','Estado','Cant Pasaj','Barco','Tripul.','Acc.'];
-      $var=array('data'=>'','header'=>$header,'user'=>$user['userId']);
+      $var=array('data'=>'','user'=>$user['userId']);
         
         $this -> load -> view('header-responsive');
         $this -> load -> view('navbar',array('acts'=>$acts,'username'=>$user_data['usuario']));
@@ -35,7 +34,8 @@ class Operaciones extends CI_Controller {
   public function listado_servicios_dia(){
     $data = $this->input->post();
     $result = $this -> app_model -> get_servicios($data['fecha']); 
-    echo json_encode(array('result'=>$result));
+    $header = ['Fecha','Hora Salida','Tipo','Subtipo','Estado','Cant Pasaj','Barco','Tripul.','Acc.'];
+    echo json_encode(array('header'=>$header, 'result'=>$result));
 
   }
 }

@@ -19,7 +19,7 @@ class Tickets extends CI_Controller {
       $acts = explode(',',$userActs['acciones_id']);
     // ****** GET SERVICIOS DISPONIBLES put it into var
       //$fechaHora = date('H:i');
-      $fecha = '11/11/2017';
+      $fecha = '10/11/2017';
       $servicios = [];
       $horarios = $this -> app_model -> get_hora_servicios_disponibles($fecha);
       $tipos = $this -> app_model -> get_tipos_servicios();

@@ -83,7 +83,6 @@ function select_servicio(h,tp,sbtp,brco,srvid,trf,hsId,srvDate) {
 }
 
 function checkIdTransacTarjeta(){
-	console.log("wwwww");
 	if($("#nroTransacTarjeta").val() != ''){
 		$("#btnEmitirTks").removeClass("disabled");
 		$("#fgNroTransacTarjeta").removeClass("has-error");
@@ -94,7 +93,6 @@ function checkIdTransacTarjeta(){
 }
 
 function checkFormaDePago(e){
-	
 	if($("#formaDePago option:selected").val() === "TARJETA"){
 		$("#nroTransacTarjeta").val('')
 		$("#fgNroTransacTarjeta").removeClass("hidden");
@@ -109,13 +107,10 @@ function checkFormaDePago(e){
 
 
 function checkCantidad(e){
-	console.log($("#"+e.id).val());
 	var cd = parseInt($("#cantdiponible").val())
-	console.log(' disp:',(parseInt($("#"+e.id).val()) > cd))
 	if(parseInt($("#"+e.id).val()) > cd){
 		$("#fgCantTks").addClass("has-error");
-		$("#lblCantTks").html("Error - Cantidad no disponible");
-		$("#btnEmitirTks").addClass("disabled");
+		$("#lblCantTks").html("Error - Cantidad no disponible");		$("#btnEmitirTks").addClass("disabled");
 	}else{
 		$("#fgCantTks").removeClass("has-error");
 		$("#lblCantTks").html("Cantidad Seleccionada");
@@ -133,9 +128,6 @@ function serv_edit(){
 	console.log('serv edit')
 }
 
-
-//data-toggle="tooltip" data-placement="top" title="" data-original-title="Tooltip on top"
-// ''
 
 function show_tripl(idx){
 	var arrTrp = window.tcx.data[idx].tripulacion;
@@ -168,12 +160,18 @@ function show_tripl(idx){
 	$('#myModalOperTitle').html(srvtit);
 	$('#myModalOperBody').html(scrn);			
 	$('#myModalOper').modal('show');
+}
+
+function myAlert(container,type,tit,msg){
+	var scrn = "<div class=\"alert alert-dismissible alert-"+type+"\">\
+  <button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button>\
+  <h4>"+tit+"</h4><p>"+msg+"</p></div>";
+  $(container).html(scrn);
+  setTimeout(function(){$(container).html('')},3000);
 
 }
 
 function getServicios(){
-	 
-	console.log(' servicios',$('#dpk_servicios').find("input").val());
 	data = {
 		'fecha':$('#dpk_servicios').find("input").val()
 	}
@@ -184,25 +182,31 @@ function getServicios(){
 				data : data,
 				dataType : "json",
 				success : function(r) {
+					//r.result = false;
 					$.unblockUI(); 
-					console.log('recieved',r.result)
+					// console.log('recieved',r.result)
 					
 					
 					if(r.result === false){
-						
+						myAlert("#main_container","warning","Error!","No hay Servicios para el dia seleccionado.");
 					}else{
-					// respuesta ok de ajax
-					window.tcx.data = r.result
-					var screen = '';
-					for (var i = 0; i < r.result.length; i++) {
-						screen += "<tr><td>"+r.result[i].servicio.fecha_servicio+"</td><td>"+r.result[i].servicio.hora_salida+"</td><td>"+r.result[i].servicio.tipo+"</td><td>"+r.result[i].servicio.subtipo+"</td><td>"+r.result[i].servicio.estado+"</td><td>"+r.result[i].servicio.cant_pasajeros+"</td><td>"+r.result[i].servicio.barco+"</td><td>"+(r.result[i].tripulacion.length>0? "<a href=\"#\" title=\'Ver Tripulación\'><span class=\"glyphicon glyphicon-user\" aria-hidden=\"true\" onClick='show_tripl("+i+")'></span></a>" :'<span class="glyphicon glyphicon-minus" aria-hidden="true"></span>')+"</td><td><a href=\"#\" title=\'Suspender Servicio\'><span class=\"glyphicon glyphicon-pause\" aria-hidden=\"true\" onClick='serv_stop()'></a></span>&nbsp;&nbsp;&nbsp;<a href=\"#\" title=\'Editar Servicio\'><span class=\"glyphicon glyphicon-edit\" aria-hidden=\"true\" onClick='serv_edit()'></a></span></td></tr>";
-
-					}
-					$('#tbl_servicios').html(screen);
+						// respuesta ok de ajax
+						window.tcx.data = r.result
+						var screen = '<table class=\"table table-responsive table-striped table-hover\"><thead><tr>';
+						for (var i = 0; i < r.header.length; i++) {
+							screen += "<th class='text-center'>"+r.header[i]+"</th>";
+						}
+						screen += "</tr></thead><tbody>";
+						for (var i = 0; i < r.result.length; i++) {
+							screen += "<tr><td>"+r.result[i].servicio.fecha_servicio+"</td><td>"+r.result[i].servicio.hora_salida+"</td><td>"+r.result[i].servicio.tipo+"</td><td>"+r.result[i].servicio.subtipo+"</td><td>"+r.result[i].servicio.estado+"</td><td>"+r.result[i].servicio.cant_pasajeros+"</td><td>"+r.result[i].servicio.barco+"</td><td>"+(r.result[i].tripulacion.length>0? "<a href=\"#\" title=\'Ver Tripulación\'><span class=\"glyphicon glyphicon-user\" aria-hidden=\"true\" onClick='show_tripl("+i+")'></span></a>" :'<span class="glyphicon glyphicon-minus" aria-hidden="true"></span>')+"</td><td><a href=\"#\" title=\'Suspender Servicio\'><span class=\"glyphicon glyphicon-pause\" aria-hidden=\"true\" onClick='serv_stop("+i+")'></a></span>&nbsp;&nbsp;&nbsp;<a href=\"#\" title=\'Editar Servicio\'><span class=\"glyphicon glyphicon-edit\" aria-hidden=\"true\" onClick='serv_edit("+i+")'></a></span></td></tr>";
+						}
+						screen +="</tbody></table>";
+						$('#main_container').html(screen);
 					}
 				},
 				error : function(xhr, ajaxOptions, thrownError) {
 					$.unblockUI();
+					myAlert("danger","Error","Error de comunicación...");
 					console.log('err:',xhr)
 						
 				}
