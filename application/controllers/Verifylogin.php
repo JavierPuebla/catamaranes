@@ -13,9 +13,9 @@ class VerifyLogin extends CI_Controller {
     //This method will have the credentials validation
     $this->load->library('form_validation');
 
-    $this->form_validation->set_rules('usuario', 'User Name','trim|required|min_length[5]|max_length[20]');
+    $this->form_validation->set_rules('usr_usuario', 'User Name','trim|required|min_length[5]|max_length[20]');
 
-    $this->form_validation->set_rules('clave', 'Password', 'trim|required|callback_check_database');
+    $this->form_validation->set_rules('clave_usuario', 'Password', 'trim|required|callback_check_database');
 
     if($this->form_validation->run() == FALSE)
     {
@@ -33,7 +33,7 @@ class VerifyLogin extends CI_Controller {
   function check_database($password)
   {
     //Field validation succeeded.  Validate against database
-    $username = $this->input->post('usuario',TRUE);
+    $username = $this->input->post('usr_usuario',TRUE);
     if(preg_match('/[^a-z_\-0-9]/i', $username))
     {
 	$this->form_validation->set_message('check_database', 'Usuario/Password no valido');
@@ -48,10 +48,10 @@ class VerifyLogin extends CI_Controller {
       foreach($result as $row)
       {
         $sess_array = array(
-          'userId' => $row->usuarios_id,
-          'userName' => $row->usuario,
-          'userAcces'=> $row->permisos,
-          'userType'=> $row->tipo
+          'userId' => $row->id_usuario,
+          'userName' => $row->usr_usuario,
+          'userAcces'=> $row->permisos_usuario,
+          'userType'=> $row->tipo_usuario
         );
         $this->session->set_userdata('logged_in', $sess_array);
       }

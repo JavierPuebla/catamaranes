@@ -1,6 +1,6 @@
 <?php
 if ( ! defined('BASEPATH')) exit('No direct script access allowed');
-class Operaciones extends CI_Controller {
+class Reservas extends CI_Controller {
 
   public function __construct() {
     parent::__construct();
@@ -21,21 +21,32 @@ class Operaciones extends CI_Controller {
       $acts = explode(',',$userActs['acciones_id']);
     
       $user_data = $this -> app_model -> get_user_data($user['userId']);
-      $var=array('data'=>'','user'=>$user['userId']);
+      $hoy = Date("d/m/Y");
+      $var=array('data'=>'','fecha'=> $hoy,'user'=>$user['userId']);
         
         $this -> load -> view('header-responsive');
         $this -> load -> view('navbar',array('acts'=>$acts,'username'=>$user_data['usr_usuario']));
-        $this -> load -> view('operaciones_view',$var);
+        $this -> load -> view('reservas_view',$var);
     } else {
       redirect('login', 'refresh');
     }
   }
 
-  public function listado_servicios_dia(){
-    $data = $this->input->post();
-    $result = $this -> app_model -> get_servicios($data['fecha']); 
-    $header = ['Fecha','Hora Salida','Tipo','Subtipo','Estado','Cant Pasaj','Barco','Tripul.','Acc.'];
-    echo json_encode(array('header'=>$header, 'result'=>$result));
+  
 
+  public function list_reservas_dia(){
+    $data = $this->input->post();
+    $datefix_ymd = substr($data['fecha'],strrpos($data['fecha'],'/')+1).'/'.substr($data['fecha'],strpos($data['fecha'],'/')+1,2).'/'.substr($data['fecha'],0,strpos($data['fecha'],'/'));
+    
+    
+    $result = $this -> app_model -> get_reservas_bydate($datefix_ymd,$data['scope_all']); 
+    $header = ['fecha', 'Hora Salida','Tipo','Subtipo','Cant Pax','Seña','Saldo','Barco','Operador','Cliente','Observac','Acc.'];
+    echo json_encode(array('header'=>$header,'result'=>$result));
+
+  }
+
+  public function autocomplete_clientes(){
+    $res = Array('label'=>"tha label ",'value'=> 999);
+    echo json_encode($res);
   }
 }

@@ -12,6 +12,13 @@ table.floatThead-table {
     border-bottom: none;
     background-color: #fff;
 }
+ul.ui-autocomplete {
+    z-index: 10000;
+    background: #eee  ;
+    border:solid;
+    border-width: 0.01em;
+    border-color: #bbbbbb;
+}
 
 .centered {
 	display:inline-flex;

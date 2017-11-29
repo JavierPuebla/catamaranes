@@ -20,7 +20,7 @@ class Main extends CI_Controller {
         //$this->app_model->getUserSetup()
         $var=array('controller'=>'init','user'=>$user_data);
         $this -> load -> view('header-responsive');
-        $this -> load -> view('navbar',array('acts'=>$acts,'username'=>$user_data['usuario']));
+        $this -> load -> view('navbar',array('acts'=>$acts,'username'=>$user_data['usr_usuario']));
         $this -> load -> view('main_view',$var);
         //$this -> load -> view($user['userType'].'_view',$var);
       //}else{

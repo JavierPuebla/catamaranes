@@ -15,7 +15,7 @@ $.blockUI({ message: null,
 					$p .="<a href='#' class='list-group-item'><div class='col-md-6'><h4>Salida:&nbsp;
 					{$s[0]['hora_salida']}Hs &nbsp;Paseo:&nbsp; {$s[0]['tipo']} </h4></div>";
 					foreach ($s as $st) {
-						$p .="<button class='btn btn-primary' style='margin-right:20px;' onclick=select_servicio('{$st['hora_salida']}','".str_replace(" ", "-", $st['tipo'])."','".str_replace(" ", "-", $st['subtipo'])."','".str_replace(" ", "-", $st['nombre'])."','".$st['servicios_id']."','".$st['tarifa']."','".$st['id']."','".$st['fecha_servicio']."')>{$st['subtipo']}</button>";
+						$p .="<button class='btn btn-primary' style='margin-right:20px;' onclick=select_servicio('{$st['hora_salida']}','".str_replace(" ", "-", $st['tipo'])."','".str_replace(" ", "-", $st['subtipo'])."','".str_replace(" ", "-", $st['nombre_barco'])."','".$st['servicios_id']."','".$st['tarifa']."','".$st['id']."','".$st['fecha_servicio']."')>{$st['subtipo']}</button>";
 					}
 					$p .="</a>";	
 				};

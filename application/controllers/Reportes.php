@@ -33,7 +33,7 @@ class Reportes extends CI_Controller {
         $header = ['Fecha','Servicio',' Hora','Cantidad Tickets','Total $'];
         $var=array('data'=>$tikets,'header'=>$header,'user'=>$user['userId']);
         $this -> load -> view('header-responsive');
-        $this -> load -> view('navbar',array('acts'=>$acts,'username'=>$user_data['usuario']));
+        $this -> load -> view('navbar',array('acts'=>$acts,'username'=>$user_data['usr_usuario']));
         $this -> load -> view('reportes_view',$var);
     } else {
       redirect('login', 'refresh');

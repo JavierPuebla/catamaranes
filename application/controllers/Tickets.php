@@ -34,7 +34,7 @@ class Tickets extends CI_Controller {
       $user_data = $this -> app_model -> get_user_data($user['userId']);
         $var=array('data'=>$servicios,'user'=>$user['userId'],'horarios'=>$horarios,'tipos'=>$tipos);
         $this -> load -> view('header-responsive');
-        $this -> load -> view('navbar',array('acts'=>$acts,'username'=>$user_data['usuario']));
+        $this -> load -> view('navbar',array('acts'=>$acts,'username'=>$user_data['usr_usuario']));
         $this -> load -> view('tickets_view',$var);
     } else {
       redirect('login', 'refresh');

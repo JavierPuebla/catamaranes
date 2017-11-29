@@ -38,9 +38,9 @@
       <form class="jp-form-signin" method="post" accept-charset="utf-8" action="verifylogin">
         <h2 class="jp-form-signin-heading text-center"></h2>
         <p><label for="username" class="sr-only">Usuario</label>
-        <input type="text" id="usuario" name="usuario" class="form-control" value="admin" required="" autofocus=""></p>
+        <input type="text" id="usr_usuario" name="usr_usuario" class="form-control" value="admin" required="" autofocus=""></p>
         <p><label for="inputPassword" class="sr-only">Clave</label>
-        <input type="password" id="clave" name="clave" class="form-control" value="123" required=""></p>
+        <input type="password" id="clave_usuario" name="clave_usuario" class="form-control" value="123" required=""></p>
         <button class="btn btn-lg btn-primary btn-block" type="submit">Entrar</button>
       </form>
 

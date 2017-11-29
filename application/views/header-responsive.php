@@ -48,7 +48,7 @@
    <script type="text/javascript"  src="<?php  base_url() ?>dependencies/bootstrap-v3.3.7.js"></script>
   
   <script type="text/javascript" src="<?php base_url() ?>js/app_functions.js"></script>
-  <!-- <script type="text/javascript" src="<?php base_url() ?>js/ui_coder.js"></script> -->
+ 
 
    <!-- Bootstrap datepicker js -->
    <!-- <script type="text/javascript"  src="<?php  base_url() ?>dependencies/datepicker-1.5.1-dist/js/bootstrap-datepicker.min.js"></script> -->
@@ -73,7 +73,9 @@
 	<script type="text/javascript" src="<?php base_url() ?>dependencies/blockUI_plugin.js"></script>
 	
 
-
+<!--Load JQUERY Autocomplete  -->
+  <script type="text/javascript" src="<?php base_url() ?>dependencies/jquery-ui.min.js"></script>
+  <link href="<?php base_url() ?>dependencies/jquery-ui.min.css" rel="stylesheet">
 
 
 </head>
