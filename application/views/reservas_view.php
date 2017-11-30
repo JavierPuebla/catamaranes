@@ -26,11 +26,13 @@
 						
 					</div>
 				</div>
+		<hr>
 		</div>
+
 		<!-- <div class="row"> -->
 			<div class="panel panel-default">
 				<div class="panel-heading">
-					<h3 class="panel-title">Listado De Reservas a partir del  <?php echo $fecha ?> </h3>
+					<h3 class="panel-title">Listado De Reservas </h3>
 				</div>
 				<div class="panel-body" id="main_container"></div>
 			</div>
@@ -106,7 +108,7 @@
 			                </div>
 			                <div class="form-group col-md-4" >
 			                  <label class="control-label" for="inpMontoTotal" id="lblMontoTotal">Saldo</label>
-			                  <input class="form-control" id="inpMontoTotal" onchange="checkCantPaxReservas(this)" type="number" value=0 min="1">
+			                  <input class="form-control" id="inpMontoTotal" type="number" disabled value=0 min="0">
 			                </div>
 							<div class="form-group col-md-4" id="fgCliente" >
 								<label class="control-label" for="imptNomCli">Nombre del Contratante</label>
@@ -150,8 +152,7 @@
 </div>
 <script type="text/javascript">
 		$( window ).load(function() {
-
-
+		getTarifas();	
 		$('#reservasAutocmpl').autocomplete({
 		    source:  "reservas/autocomplete_clientes",
 			minLength: 2,
@@ -168,7 +169,6 @@
 		console.log('loaded',<?php echo json_encode($fecha); ?>)
 		var fecha = <?php echo json_encode($fecha); ?>;
 		getReservas(fecha,'true');
-		$.unblockUI(); 
 	});
 </script>
 </html>

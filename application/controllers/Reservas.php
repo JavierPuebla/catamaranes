@@ -44,6 +44,12 @@ class Reservas extends CI_Controller {
     echo json_encode(array('header'=>$header,'result'=>$result));
 
   }
+  
+  public function get_tarifas(){
+    $result= $this->app_model->get_tarifas();
+    echo json_encode(array('tarifas'=>$result));
+
+  }
 
   public function autocomplete_clientes(){
     $res = Array('label'=>"tha label ",'value'=> 999);
