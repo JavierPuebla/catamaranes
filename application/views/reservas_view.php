@@ -45,7 +45,7 @@
 		<form>
 			<div class="modal-content">
 				<div class="modal-header">
-					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+					<a  class="close" data-dismiss="modal" aria-hidden="true">&times;</a>
 					<h3 class="modal-title" id="myModalReservasTitle">Nueva Reserva</h3>
 				</div>
 				<div class="modal-body" id="myModalReservasBody">
@@ -83,7 +83,7 @@
 			                </div>
 			                <div class="form-group col-md-4">
 			                    <label class="control-label" for="selectTipoPaseo" id="lblTipoPaseo">Tipo de Paseo:</label>
-			                  	<select class="form-control" id="selectTipoPaseo">
+			                  	<select class="form-control" id="selectTipoPaseo" onchange="checkCantPaxReservas()">
 			                        <option value="1">1 Hora  - Regular</option>
 			                        <option value="2">2 Horas - Regular</option>
 			                        <option value="3">Estudiantil</option>
@@ -100,11 +100,11 @@
 						<div class="panel-body">
 							<div class="form-group col-md-4" id="fgCantPax" >
 			                  <label class="control-label" for="inpCantPax" id="lblCantPax">Cantidad pasajeros</label>
-			                  <input class="form-control" id="inpCantPax" onchange="checkCantPaxReservas(this)" type="number" value=0 min="0">
+			                  <input class="form-control" id="inpCantPax" onchange="checkCantPaxReservas()" type="number" value=0 min="0">
 			                </div>
 			                <div class="form-group col-md-4">
 			                  <label class="control-label" for="inpMontoPagado" id="lblMontoPagado">Seña recibida</label>
-			                  <input class="form-control" id="inpMontoPagado" type="number" value=0 min="0">
+			                  <input class="form-control" id="inpMontoPagado" type="number" value=0 min="0" onchange="checkCantPaxReservas()">
 			                </div>
 			                <div class="form-group col-md-4" >
 			                  <label class="control-label" for="inpMontoTotal" id="lblMontoTotal">Saldo</label>
@@ -142,8 +142,8 @@
 						<big><strong><span id="modalFooterMsg"><span id="modalFooterMsgtxt" class="centered"></span> </span></strong></big>	
 					</div>
 					<div class="col-md-6">
-						<button type="button " class="btn btn-primary " data-dismiss="modal">Ok</button>
-						<!-- <button type="button" id="btn-ok" type="submit" class="btn btn-primary">OK</button>	 -->
+						<!-- <button type="button " class="btn btn-primary " data-dismiss="modal">Ok</button> -->
+						<button type="button" id="btn-ok" onclick="saveReserva" class="btn btn-primary">Guardar</button>	
 					</div>
 				</div>
 			</div>
@@ -152,21 +152,30 @@
 </div>
 <script type="text/javascript">
 		$( window ).load(function() {
-		getTarifas();	
+		// my namespace
+		window.tcx = {};
+		//**************************
+		
+		// **************  autocomplete de clientes 
 		$('#reservasAutocmpl').autocomplete({
 		    source:  "reservas/autocomplete_clientes",
 			minLength: 2,
-			response: function( event, ui ) {console.log(ui)},
+			response: function( event, ui ) {console.log('xx',ui)},
 			select: function(event, ui)
     		{
-	      		
-	     	 //$("#id_nomenclador").val(ui.item.id);
-	      	//$("#nomenclador_descripcion").html(ui.item.descripcion);
+	      		console.log('atcp ',ui);	
+	     		$("#imptEmailCli").val(ui.item.email_cliente);
+	      		$("#imptTelCli").val(ui.item.telefono_contacto_cliente);
 	    	}
 		});
-		// Top context
-		window.tcx = {};
+	
+
+
+		// ***************************
 		console.log('loaded',<?php echo json_encode($fecha); ?>)
+		
+		// ************ init data from server
+		getTarifas();	
 		var fecha = <?php echo json_encode($fecha); ?>;
 		getReservas(fecha,'true');
 	});

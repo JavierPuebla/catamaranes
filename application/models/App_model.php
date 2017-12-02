@@ -38,11 +38,13 @@ class app_model extends CI_Model {
 		return (!empty($x))?$x -> result_array() : null;
 	}	
 
+	
 
-	function get_servicios_disponibles($fecha,$hora,$tipo){
-			$q= "SELECT hs.id,hs.fecha_servicio,hs.hora_salida,hs.servicios_id, s.tipo,s.subtipo,s.tarifa,b.nombre_barco,b.capacidad_barco FROM `cat_historial_servicios` hs LEFT OUTER JOIN cat_servicios s on hs.servicios_id = s.id LEFT OUTER JOIN cat_barcos b on hs.barcos_id = b.id_barco WHERE hs.fecha_servicio = '{$fecha}' AND hs.hora_salida = '{$hora}' AND s.tipo = '{$tipo}' AND hs.estado LIKE 'D' ORDER BY s.tipo ASC";
+
+	function get_servicios_disponibles($fecha,$hora,$tipo,$subtipo){
+			$q= "SELECT hs.id,hs.fecha_servicio,hs.hora_salida, s.tipo,s.subtipo,s.tarifa,b.nombre_barco,b.capacidad_barco FROM `cat_historial_servicios` hs LEFT OUTER JOIN cat_servicios s on hs.codigo_tipo_servicios = s.codigo_tipo LEFT OUTER JOIN cat_barcos b on hs.barcos_id = b.id_barco WHERE hs.fecha_servicio = '{$fecha}' AND hs.hora_salida = '{$hora}' AND s.tipo = '{$tipo}' AND s.subtipo = '{$subtipo}' AND hs.estado LIKE 'D' ORDER BY s.tipo ASC";
 			$x = $this->db->query($q);
-			return ($x)?$x -> result_array() : false;
+			return ($x)?$x -> row() : false;
 	}
 
 	function get_hora_servicios_disponibles($fecha){
@@ -126,6 +128,12 @@ class app_model extends CI_Model {
 			return ($x)?$x -> result_array() : false;
 	}
 
+	function atcp_cli($t){
+
+		$q= "SELECT razon_social_cliente as label ,id_cliente,nombre_contacto_cliente,telefono_contacto_cliente,razon_social_cliente,email_cliente FROM `cat_clientes` WHERE nombre_contacto_cliente LIKE '%{$t}%' OR razon_social_cliente LIKE '%{$t}%'";
+		$x = $this->db->query($q);
+		return ($x)?$x -> result_array() : false;
+	}
 
 //*************** funciones viejas  ********************
 
@@ -345,7 +353,7 @@ public function parcial_part_number($n){
 
 
 	public function get_user_data($userid){
-		$query = $this -> db -> get_where('Usuarios', array('id_usuario' => $userid));
+		$query = $this -> db -> get_where('usuarios', array('id_usuario' => $userid));
 		return $query -> row_array();
 
 	}

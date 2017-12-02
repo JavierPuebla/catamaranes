@@ -3,7 +3,7 @@ $.blockUI({ message: null,
 			baseZ: 10000  }); 
 </script>
 <div class="bs-component">
-	<div class="container jp-centered col-md-12 col-sm-12 " id='mainContainer'>
+	<div class="container" id='mainContainer'>
 		<!-- <div class="row  "> -->
 			<table class="table table-bordered table-responsive table-striped table-hover">
 			<thead>

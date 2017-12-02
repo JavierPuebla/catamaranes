@@ -212,41 +212,29 @@ function getServicios(){
 }
 
 function getTarifas(){
-	$.blockUI({ message: null, baseZ: 10000  }); 
+	//$.blockUI({ message: null, baseZ: 10000  }); 
 	return $.ajax({
 		type : "POST",
 		url : "reservas/get_tarifas",
 		// data : data,
 		dataType : "json",
 		success : function(r) {
-				//r.result = false;
-				$.unblockUI(); 
-				// console.log('recieved',r.result)
-				if(r.result === false){
+				//console.log('rr',r.tarifas);
+				if(r.tarifas === false){
+					console.log('error en la carga de tarifas:',r.tarifas)
 					// myAlert("#main_container","warning","Error!","No hay Servicios para el dia seleccionado.");
 				}else{
 					// respuesta ok de ajax
-					window.tcx.data = r.result
-					console.log('servicios',r.result);
-					var screen = '<table class=\"table table-responsive table-striped table-hover\"><thead><tr>';
-					for (var i = 0; i < r.header.length; i++) {
-						screen += "<th class='text-center'>"+r.header[i]+"</th>";
-					}
-					screen += "</tr></thead><tbody>";
-					for (var i = 0; i < r.result.length; i++) {
-						screen += "<tr><td>"+r.result[i].servicio.fecha_servicio+"</td><td>"+r.result[i].servicio.hora_salida+"</td><td>"+r.result[i].servicio.tipo+"</td><td>"+r.result[i].servicio.subtipo+"</td><td>"+r.result[i].servicio.estado+"</td><td>"+r.result[i].servicio.cant_pasajeros+"</td><td>"+r.result[i].servicio.barco+"</td><td>"+(r.result[i].tripulacion.length>0? "<a href=\"#\" title=\'Ver Tripulación\'><span class=\"glyphicon glyphicon-user\" aria-hidden=\"true\" onClick='show_tripl("+i+")'></span></a>" :'<span class="glyphicon glyphicon-minus" aria-hidden="true"></span>')+"</td><td><a href=\"#\" title=\'Suspender Servicio\'><span class=\"glyphicon glyphicon-pause\" aria-hidden=\"true\" onClick='serv_stop("+i+")'></a></span>&nbsp;&nbsp;&nbsp;<a href=\"#\" title=\'Editar Servicio\'><span class=\"glyphicon glyphicon-edit\" aria-hidden=\"true\" onClick='serv_edit("+i+")'></a></span></td></tr>";
-					}
-					screen +="</tbody></table>";
-					$('#main_container').html(screen);
+					window.tcx.tarifas = r.tarifas
 				}
 			},
 			error : function(xhr, ajaxOptions, thrownError) {
-				$.unblockUI();
-				myAlert("danger","Error","Error de comunicación...");
-				console.log('err:',xhr)
+				console.log('error en la carga de tarifas:',xhr)
 			}
 		});
 }
+
+
 
 function getReservas(fecha=null,scope_all='false'){
 	data = {'fecha':fecha,'scope_all':scope_all};	
@@ -320,13 +308,19 @@ function reservaEdit(index){
 
 }
 
-function checkCantPaxReservas(i){
+function checkCantPaxReservas(){
 
-	console.log('chk',i);
-	//inpMontoTotal
+	 
+	var result = $.grep(window.tcx.tarifas, function(e){ console.log(e,$("#selectTipoPaseo").val());return e.id == $("#selectTipoPaseo").val()});
+	var tot = (parseInt($("#inpCantPax").val()) * result[0].tarifa)- parseFloat($("#inpMontoPagado").val())
+	$("#inpMontoTotal").val(parseFloat(tot).toFixed(2));
+	//console.log('result',result[0].tarifa)
+	
 }
 
-
+function saveReserva(){
+	console.log('reserva save')
+}
 
 
 /**************

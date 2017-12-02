@@ -3,23 +3,42 @@ $.blockUI({ message: null,
 			baseZ: 10000  }); 
 </script>
 <div class="bs-component">
-	<div class="container-fluid" id='mainContainer'>
+	<div class="container" id='mainContainer'>
 		<div class="list-group">
 			<h5 href="#" class="list-group-item active">
 				Servicios Disponibles  
 			</h5>
+
 			<?php 
-				
+				// foreach ($data as $servicio) {
+				// 	//print_r($servicio);
+				// 	foreach ($servicio as $hora) {
+				// 		if(count($hora)>0)
+				// 			foreach ($hora as $tipo) {
+				// 				if(count($tipo)>0)
+								
+				// 				echo 'hora'.json_encode($tipo)."<br/>";
+				// 			}
+				// 			echo "fin hora <br/>";
+						
+				// 	}
+					
+				// }
 				$p ='';
-				foreach ($data as $s) {
-					$p .="<a href='#' class='list-group-item'><div class='col-md-6'><h4>Salida:&nbsp;
-					{$s[0]['hora_salida']}Hs &nbsp;Paseo:&nbsp; {$s[0]['tipo']} </h4></div>";
-					foreach ($s as $st) {
-						$p .="<button class='btn btn-primary' style='margin-right:20px;' onclick=select_servicio('{$st['hora_salida']}','".str_replace(" ", "-", $st['tipo'])."','".str_replace(" ", "-", $st['subtipo'])."','".str_replace(" ", "-", $st['nombre_barco'])."','".$st['servicios_id']."','".$st['tarifa']."','".$st['id']."','".$st['fecha_servicio']."')>{$st['subtipo']}</button>";
-					}
-					$p .="</a>";	
-				};
-				echo $p;
+				foreach ($data as $servicio) {
+					foreach ($servicio as $hora){
+						$p .="<a href='#' class='list-group-item'><div class='col-md-6'><h4>Salida:&nbsp;
+							{$hora[0]->hora_salida}Hs &nbsp;Paseo:&nbsp; {$hora[0]->tipo} </h4></div>";
+						foreach ($hora as $h) {
+							
+							$p .="<button class='btn btn-primary' style='margin-right:20px;' onclick=select_servicio('{$h->hora_salida}','".str_replace(" ", "-", $h->tipo )."','".str_replace(" ", "-", $h->subtipo)."','".str_replace(" ", "-", $h->nombre_barco)."','".$h->tarifa."','".$h->id."','".$h->fecha_servicio."')>{$h->subtipo}</button>";
+						}
+						
+						
+					}		
+					 $p .="</a>";
+				 };
+				 echo $p;
  			?>
 
 		</div>				
@@ -84,9 +103,9 @@ $.blockUI({ message: null,
 	$( window ).load(function() {
 		// Top context
 		window.tcx = {'selectedService':'','userId':<?php echo json_encode($user); ?>};
-
-		console.log('loaded',<?php echo json_encode($horarios); ?>)
-		console.log('loaded',<?php echo json_encode($tipos); ?>)
+		
+		console.log('loaded',<?php echo json_encode($data); ?>)
+		
 		 $.unblockUI(); 
 	});
 </script>

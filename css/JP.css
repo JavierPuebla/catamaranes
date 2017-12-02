@@ -14,7 +14,7 @@ table.floatThead-table {
 }
 ul.ui-autocomplete {
     z-index: 10000;
-    background: #eee  ;
+    background: #dfdfdf  ;
     border:solid;
     border-width: 0.01em;
     border-color: #bbbbbb;

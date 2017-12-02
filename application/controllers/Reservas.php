@@ -52,7 +52,9 @@ class Reservas extends CI_Controller {
   }
 
   public function autocomplete_clientes(){
-    $res = Array('label'=>"tha label ",'value'=> 999);
-    echo json_encode($res);
+    parse_str($_SERVER['QUERY_STRING'], $_GET); 
+    $r = $this->app_model->atcp_cli($_GET['term']);
+    //$res = Array('label'=>$r['razon_social_cliente'],'value'=> $r);
+    echo json_encode($r);
   }
 }

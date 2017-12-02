@@ -21,7 +21,7 @@ class Tickets extends CI_Controller {
     // ****** GET SERVICIOS DISPONIBLES put it into var
       //$fechaHora = date('H:i');
       $fecha = '10/11/2017';
-      $servicios = $this->get_servs_by_usertype($fecha,$user_data['tipo_usuario']);
+      // $servicios = $this->get_servs_by_usertype($fecha,$user_data['tipo_usuario']);
         $var=array('data'=>$servicios,'user'=>$user['userId']);
         $this -> load -> view('header-responsive');
         $this -> load -> view('navbar',array('acts'=>$acts,'username'=>$user_data['usr_usuario']));
@@ -52,7 +52,7 @@ fecha_servicio:
   function get_servs_by_usertype($fecha,$utp){
       $horarios = $this -> app_model -> get_hora_servicios_disponibles($fecha);
       $tipos = $this -> app_model -> get_tipos_servicios();
-      $subtipos = $this -> app_model -> get_subtipos_servicios();
+      //$subtipos = $this -> app_model -> get_subtipos_servicios();
       switch ($utp) {
         case 'boleteria':
           $subtipos = array(array('subtipo'=>"REGULAR"),array('subtipo'=>"JUBILADO"));
@@ -69,13 +69,11 @@ fecha_servicio:
         foreach ($tipos as $t) {
           $st=[];
           foreach ($subtipos as $subt) {
-            //$stest[] = 
-            //if($stest[count($stest)] != null)
-            $xt = $this->app_model ->get_servicios_disponibles($fecha,$h['hora_salida'],$t['tipo'],$subt['subtipo']);
-            if(is_object($xt))
-              $st[] = $xt;
+            $x = $this->app_model ->get_servicios_disponibles($fecha,$h['hora_salida'],$t['tipo'],$subt['subtipo']);
+            if($x != 'null')
+              st[]=$x;
           }
-          if($st)
+          if($st[0])
             $tipo[]= $st;  
         }
         if($tipo[0])
