@@ -19,7 +19,7 @@ class app_model extends CI_Model {
 
 	function get_servicios($fecha){
 			$res = [];
-			$q= "SELECT hs.id,hs.fecha_servicio,hs.hora_salida,hs.servicios_id,hs.estado,hs.cant_pasajeros, s.tipo,s.subtipo,b.nombre_barco as barco FROM `cat_historial_servicios` hs LEFT OUTER JOIN cat_servicios s on hs.servicios_id = s.id LEFT OUTER JOIN cat_barcos b on hs.barcos_id = b.id_barco WHERE hs.fecha_servicio = '{$fecha}' ORDER BY hs.hora_salida ASC";
+			$q= "SELECT hs.id,hs.fecha_servicio,hs.hora_salida,s.subtipo,hs.estado,hs.cant_pasajeros, s.tipo,b.nombre_barco as barco FROM `cat_historial_servicios` hs LEFT OUTER  	JOIN cat_servicios s on hs.codigo_tipo_servicios = s.codigo_tipo LEFT OUTER JOIN cat_barcos b on hs.barcos_id = b.id_barco WHERE hs.fecha_servicio = '{$fecha}'GROUP BY hs.id ORDER BY hs.hora_salida ASC";
 			$x = $this->db->query($q);
 			$hserv = $x -> result_array();
 			if(!empty($hserv)){
@@ -39,7 +39,11 @@ class app_model extends CI_Model {
 	}	
 
 	
-
+	function check_serv_exists($f){
+		$q= "SELECT * FROM `cat_historial_servicios` WHERE fecha_servicio = '{$f}' ";
+			$x = $this->db->query($q);
+			return ($x)?$x -> row_array() : false;
+	}
 
 	function get_servicios_disponibles($fecha,$hora,$tipo,$subtipo){
 			$q= "SELECT hs.id,hs.fecha_servicio,hs.hora_salida, s.tipo,s.subtipo,s.tarifa,b.nombre_barco,b.capacidad_barco FROM `cat_historial_servicios` hs LEFT OUTER JOIN cat_servicios s on hs.codigo_tipo_servicios = s.codigo_tipo LEFT OUTER JOIN cat_barcos b on hs.barcos_id = b.id_barco WHERE hs.fecha_servicio = '{$fecha}' AND hs.hora_salida = '{$hora}' AND s.tipo = '{$tipo}' AND s.subtipo = '{$subtipo}' AND hs.estado LIKE 'D' ORDER BY s.tipo ASC";
@@ -89,6 +93,19 @@ class app_model extends CI_Model {
 	}
 
 
+	function anular_tkt($ids_arr){
+		$tr=array(); 
+		foreach ($ids_arr as $id) {
+			$this->db->where('id',$id);
+			$this->db->update('cat_comprobantes',array(' estado_comprobantes'=>0));
+			$t = $this->db->affected_rows();
+			if($t == 0){
+				$tr[]=$id;
+			}
+		}
+		if(count($tr)>0){return array('status'=>false,'data'=>$tr);}else{return array('status'=>true);};
+	}
+
 	function insert_tikets($data){
 		$cantTkts = intval($data['cantTickets']);
 		$this->db->trans_start();
@@ -100,15 +117,22 @@ class app_model extends CI_Model {
 				'numero' =>'',
 				'importe_neto' => $data['tarifa'],
 				'importe_iva' =>'',
-				'rnr_id' =>'NR',
+				'rnr_id' =>$data['chk_sel'],
 				'hist_servicio_id' =>$data['histServiciosId'],
 				'personal_id' => $data['userId'],
 				'puntodeventa_id' =>'', 
 				'reservas_id' =>''
 			];  
-			$this -> db -> insert($table,$datos); 
+			$hs_data = $this ->get_cant_pasajeros($data['histServiciosId']);
+			$last_cantpax = intval($hs_data['cant_pasajeros'])+1;
+			$test = $this -> update('cat_historial_servicios',array('cant_pasajeros'=>$last_cantpax),'id',$data['histServiciosId']);
+			
+			$this -> db -> insert($table,$datos);
+			$result_arr[]=$this->db->insert_id(); 
 		}	
 		$this->db->trans_complete();
+		if($this->db->trans_status())
+			return $result_arr;
 		return $this->db->trans_status();
 	}
 
@@ -350,7 +374,11 @@ public function parcial_part_number($n){
 
 */
 
+	public function get_cant_pasajeros($hs_id){
+		$query = $this -> db -> get_where('cat_historial_servicios', array('id' => $hs_id));
+		return $query -> row_array();
 
+	}
 
 	public function get_user_data($userid){
 		$query = $this -> db -> get_where('usuarios', array('id_usuario' => $userid));

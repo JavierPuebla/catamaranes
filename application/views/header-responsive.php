@@ -33,7 +33,7 @@
     <!-- Bootstrap slider css 
     <link href="<?php  //base_url() ?>dependencies/slider/css/slider.css" rel="stylesheet">-->
     <!-- donut chart style -->
-    <!-- <link href="<?php  base_url() ?>css/donut3d.css" rel="stylesheet"> -->
+    <!-- <link href="<?php // base_url() ?>css/donut3d.css" rel="stylesheet"> -->
 
    <!--Load JQUERY from Google's network -->
   <!-- <script type="text/javascript"  src="http://code.jquery.com/jquery-latest.min.js"></script> -->
@@ -47,6 +47,8 @@
   <!-- Load bootstrap JS LOCAL -->
    <script type="text/javascript"  src="<?php  base_url() ?>dependencies/bootstrap-v3.3.7.js"></script>
   
+  
+   <!-- my functions -->
   <script type="text/javascript" src="<?php base_url() ?>js/app_functions.js"></script>
  
 
@@ -65,9 +67,9 @@
 
 
   <!-- Bootstrap d3 min -->
-  <script type="text/javascript"  src="<?php  base_url() ?>dependencies/d3/d3.min.js"></script>
+  <!-- <script type="text/javascript"  src="<?php  //base_url() ?>dependencies/d3/d3.min.js"></script> -->
   <!-- d3 charts  -->
-  <script type="text/javascript"  src="<?php  base_url() ?>dependencies/d3/charts/donut3D.js"></script>
+  <!-- <script type="text/javascript"  src="<?php  //base_url() ?>dependencies/d3/charts/donut3D.js"></script> -->
 
   <!-- Add block ui loader and block window plugin -->
 	<script type="text/javascript" src="<?php base_url() ?>dependencies/blockUI_plugin.js"></script>

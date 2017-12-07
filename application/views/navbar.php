@@ -8,7 +8,7 @@
 				<span class="icon-bar"></span>
 			</button>
 			<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-2">
-				<ul class="nav navbar-nav">
+				<ul class="nav navbar-nav" id="navbar">
 					<li><a href="#"><span class="sr-only">(current)</span></a></li>
 					<?php 
 					foreach ($acts as $v) {

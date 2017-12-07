@@ -1,45 +1,142 @@
 
-
-function emitirTks(){
+function tktCantConfirm(c){
 	
-	data = {
-		'cantTickets':$('#cantidadTks').val(),
-	 	'servicios_id': window.tcx.selectedService.servicios_id,
-	 	'hora_salida':window.tcx.selectedService.hora,
-	 	'tarifa':window.tcx.selectedService.tarifa,
-	 	'formaDePago':$("#formaDePago option:selected").val(),
-	 	'nroTransacTarjeta':$("#nroTransacTarjeta").val(),
-	 	'histServiciosId':window.tcx.selectedService.hsId,
-	 	'fecha_servicio':window.tcx.selectedService.fecha_servicio,
-	 	'userId':window.tcx.userId
+	var curr_selection  = $("#cantTkts").val() +c;
+
+console.log('curr_selection',curr_selection)
+	// switch (curr_selection){
+	// 	case "1_1h":
+	// 		window.location.replace("https://www.mercadopago.com/mla/checkout/start?pref_id=272234392-de1c76d2-4d41-4189-97b5-1a1f687e4948");
+	// 	break;
+	// 	case "2_1h":
+	// 	window.location.replace("https://www.mercadopago.com/mla/checkout/start?pref_id=272234392-9aaa147a-afb1-4872-bbb3-4d831240fcf9");
+	// 	break;
+	// 	case "3_1h":
+	// 	window.location.replace("https://www.mercadopago.com/mla/checkout/start?pref_id=272234392-42e94e61-00c2-4373-bdd3-17eefabc9a37");
+	// 	break;
+
+	// }
+
+
+
+
+
+
+}
+
+
+
+function PrintTkt()
+{
+    var mywindow = window.open('', 'PRINT', 'height=400,width=600');
+
+    mywindow.document.write('<html><head><title>' + document.title  + '</title>');
+    mywindow.document.write('</head><body >');
+    mywindow.document.write('<h1>' + document.title  + '</h1>');
+    mywindow.document.write(document.getElementById("toprint").innerHTML);
+    mywindow.document.write('</body></html>');
+
+    mywindow.document.close(); // necessary for IE >= 10
+    mywindow.focus(); // necessary for IE >= 10*/
+
+    mywindow.print();
+    mywindow.close();
+
+    return true;
+}
+
+
+function anularTicket(conf){
+	if(window.tcx.lastInsertedTkts == null){
+		myAlert("#mesages","warning","No hay ticket para anular");
+	}else if(conf == false){
+		$('#myModalAnularTicket').modal('show');
+	}
+	if(conf){
+		$('#myModalAnularTicket').modal('hide');
+		
+		console.log('anulando tickets',window.tcx.lastInsertedTkts );
+			data = {
+		'tkts':window.tcx.lastInsertedTkts,
 	}
 	 	
-	 	console.log('sending data',data);
+	 // console.log('sending data',data);
 	 //loader('show');
 	 $.blockUI({ message: null, baseZ: 10000  }); 
 
 			return $.ajax({
 				type : "POST",
-				url : "tickets/make_tkt",
+				url : "tickets/anular_tkt",
 				data : data,
 				dataType : "json",
 				success : function(r) {
 					$.unblockUI(); 
-					console.log('recieved',r)
-					
-					if(r.result === false){
+					console.log('anular recieved',r)
+					//console.log('rec',r.result.length)
+					if(r.status == false){
+						myAlert("#mesages","danger","Error!","No se puede anular el ticket solicitado");	
+					}else{
+					// respuesta ok de ajax
+						myAlert("#mesages","success","Ticket anulado");
+					}
+				},
+				error : function(xhr, ajaxOptions, thrownError) {
+					$.unblockUI();
+					console.log('err:',xhr)
+					myAlert("#mesages","danger","Error!","No se puede conectar con el servidor");	
+				}
+			});
+
+		window.tcx.lastInsertedTkts = null;
+
+	}
+	
+	
+}
+
+function emitirTks(){
+	
+	data = {
+		'cantTickets':$('#cantidadTks').val(),
+		'hora_salida':window.tcx.selectedService.hora,
+		'tarifa':window.tcx.selectedService.tarifa,
+		'chk_sel':($("#formaDePago option:selected").val() == "TARJETA" ||	 $("#chk_selected").prop('checked')?1:0),
+		'formaDePago':$("#formaDePago option:selected").val(),
+		'nroTransacTarjeta':$("#nroTransacTarjeta").val(),
+		'histServiciosId':window.tcx.selectedService.hsId,
+		'fecha_servicio':window.tcx.selectedService.fecha_servicio,
+		'userId': window.tcx.user.id
+	}
+	
+	 // console.log('sending data',data);
+	 //loader('show');
+	 $.blockUI({ message: null, baseZ: 10000  }); 
+
+	 return $.ajax({
+	 	type : "POST",
+	 	url : "tickets/make_tkt",
+	 	data : data,
+	 	dataType : "json",
+	 	success : function(r) {
+	 		$.unblockUI(); 
+					//console.log('recieved',typeof r.result)
+					//console.log('rec',r.result.length)
+					if(r.result.length == 0){
 						$('#totImporte').html('');
 						$('#modalFooterMsg').removeClass("label label-success glyphicon glyphicon-ok hidden")
-						$('#modalFooterMsg').addClass("label label-warning glyphicon glyphicon-remove hidden")
-						$('#modalFooterMsgtxt').html('<big>Fallo la emision del ticket!</big>');					
+						$('#modalFooterMsg').addClass("label label-danger glyphicon glyphicon-remove hidden")
+						$('#modalFooterMsgtxt').html('<big>Fallo la emision del ticket! Reintentar</big>');					
 						$('#modalFooterMsg').removeClass('hidden')
 						setTimeout(function() {
 							$('#modalFooterMsg').addClass('hidden');
 							$("#cantidadTks").val('1');
 							$("#totImporte").html("Total a Cobrar $: "+ (parseInt(window.tcx.selectedService.tarifa) * $("#cantidadTks").val() ) );
-						},2500);
+						},5500);
 					}else{
 					// respuesta ok de ajax
+						//******* inpresion de tickets falta terminar
+						//PrintTkt();
+						window.tcx.lastInsertedTkts = r.result;
 						$('#totImporte').html('');
 						$('#modalFooterMsg').removeClass("label label-warning glyphicon glyphicon-remove hidden")
 						$('#modalFooterMsg').addClass("label label-success glyphicon glyphicon-ok hidden")
@@ -51,27 +148,65 @@ function emitirTks(){
 				error : function(xhr, ajaxOptions, thrownError) {
 					$.unblockUI();
 					console.log('err:',xhr)
-						$('#totImporte').html('');
-						$('#modalFooterMsg').removeClass("label label-success glyphicon glyphicon-ok hidden")
-						$('#modalFooterMsg').addClass("label label-warning glyphicon glyphicon-remove hidden")
-						$('#modalFooterMsgtxt').html(xhr);					
-						$('#modalFooterMsg').removeClass('hidden')
-						setTimeout(function() {
-							$('#modalFooterMsg').addClass('hidden');
-							$("#cantidadTks").val('1');
-							$("#totImporte").html("Total a Cobrar $: "+ (parseInt(window.tcx.selectedService.tarifa) * $("#cantidadTks").val() ) );
-						},2500);
+					$('#totImporte').html('');
+					$('#modalFooterMsg').removeClass("label label-success glyphicon glyphicon-ok hidden")
+					$('#modalFooterMsg').addClass("label label-warning glyphicon glyphicon-remove hidden")
+					$('#modalFooterMsgtxt').html("No se puede acceder al servidor...");					
+					$('#modalFooterMsg').removeClass('hidden')
+					setTimeout(function() {
+						$('#modalFooterMsg').addClass('hidden');
+						$("#cantidadTks").val('1');
+						$("#totImporte").html("Total a Cobrar $: "+ (parseInt(window.tcx.selectedService.tarifa) * $("#cantidadTks").val() ) );
+					},2500);
 				}
 			});
 
-	
+	 
 }
 
-// select_servicio('10:00','1-Hora','REGULAR','180.00','Río-Jet-1')
-function select_servicio(h,tp,sbtp,brco,srvid,trf,hsId,srvDate) {
-  	window.tcx.selectedService = {'hora':h,'servicios_id':srvid,'tarifa':trf,'hsId':hsId,'fecha_servicio':srvDate};
+
+// function create_dia_servicios_regulares(){
+// 	data = {
+// 		'nada':'nada'
+// 	}
+	
+// 	 // console.log('sending data',data);
+// 	 //loader('show');
+// 	 $.blockUI({ message: null, baseZ: 10000  }); 
+
+// 	 return $.ajax({
+// 	 	type : "POST",
+// 	 	url : "operaciones/create_dia_servicios_regulares",
+// 	 	data : data,
+// 	 	dataType : "json",
+// 	 	success : function(r) {
+// 	 		$.unblockUI(); 
+// 					//console.log('recieved',typeof r.result)
+// 					//console.log('rec',r.result.length)
+// 					if(r.result != 'ok'){
+// 						myAlert("#mesages","danger","Error!","No se puede crear servicios");	
+// 					}else{
+// 					// respuesta ok de ajax
+// 						myAlert("#mesages","success","Servicios del dia creados");
+						
+// 					}
+// 				},
+// 				error : function(xhr, ajaxOptions, thrownError) {
+// 					$.unblockUI();
+// 					console.log('err:',xhr)
+// 					myAlert("#mesages","danger","Error!","error de Ajax");
+// 				}
+// 			});
+
+	 
+// }
+
+function select_servicio(h,tp,sbtp,brco,trf,hsId,srvDate) {
+  	window.tcx.selectedService = {'hora':h,'tarifa':trf,'hsId':hsId,'fecha_servicio':srvDate};
+  	//console.log("selected", window.tcx.selectedService);
   	// fix tipo y subtipo estudiantil que se repite en descripcion del servicio.
   	var titSbtp = (sbtp !='ESTUDIANTIL')?sbtp:'';
+  	$("#chk_selected").prop('checked',false);
   	$('#descripServicio').html('Salida:&nbsp;'+h+"Hs&nbsp;&nbsp;&nbsp;Paseo: "+tp+' '+titSbtp+'&nbsp;&nbsp;Barco: '+brco );
   	$('#modalFooterMsg').addClass('hidden');
 	$("#formaDePago option[value='EFECTIVO']").prop('selected', true);
@@ -107,16 +242,19 @@ function checkFormaDePago(e){
 
 
 function checkCantidad(e){
-	var cd = parseInt($("#cantdiponible").val())
-	if(parseInt($("#"+e.id).val()) > cd){
-		$("#fgCantTks").addClass("has-error");
-		$("#lblCantTks").html("Error - Cantidad no disponible");		$("#btnEmitirTks").addClass("disabled");
-	}else{
-		$("#fgCantTks").removeClass("has-error");
-		$("#lblCantTks").html("Cantidad Seleccionada");
-		$("#btnEmitirTks").removeClass("disabled");
-		$("#totImporte").html("Total a Cobrar $: "+ (parseInt(window.tcx.selectedService.tarifa) * $("#"+e.id).val() ) );
-	}
+	// ******* No estamos implementando chequeo de plazas disponibles en la primera etapa 
+	// var cd = parseInt($("#cantdiponible").val())
+	// if(parseInt($("#"+e.id).val()) > cd){
+	// 	$("#fgCantTks").addClass("has-error");
+	// 	$("#lblCantTks").html("Error - Cantidad no disponible");		$("#btnEmitirTks").addClass("disabled");
+	// }else{
+	// 	$("#fgCantTks").removeClass("has-error");
+	// 	$("#lblCantTks").html("Cantidad Seleccionada");
+	// 	$("#btnEmitirTks").removeClass("disabled");
+	// 	$("#totImporte").html("Total a Cobrar $: "+ (parseInt(window.tcx.selectedService.tarifa) * $("#"+e.id).val() ) );
+	// }
+	// ******  TOTAL DEL IMPORTE
+	$("#totImporte").html("Total a Cobrar $: "+ (parseInt(window.tcx.selectedService.tarifa) * $("#"+e.id).val() ) );
 }
 
 

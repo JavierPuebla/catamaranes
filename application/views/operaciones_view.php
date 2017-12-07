@@ -21,6 +21,8 @@
 						</div>
 						<button type="button" class="btn btn-primary" onclick="getServicios()" >Buscar</button>
 						<button type="button" class="btn btn-success text-right" onclick="setNewServicios()" >Crear Nuevo</button>
+						
+						<!-- create_dia_servicios_regulares -->
 					</div>
 				</h3>
 			</div>
@@ -59,7 +61,7 @@
 
 		// Top context
 		window.tcx = {};
-		// console.log('loaded',<?php echo json_encode($data); ?>)
+		// console.log('loaded',<?php //echo json_encode($data); ?>)
 		$.unblockUI(); 
 	});
 </script>

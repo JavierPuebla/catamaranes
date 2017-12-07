@@ -15,13 +15,13 @@ class Operaciones extends CI_Controller {
   public function index() {
     $user = $this -> session -> userdata('logged_in');
     if (is_array($user)) {
-      
     // ****** NAVBAR ********
       $userActs = $this -> app_model -> get_activities($user['userId']);
       $acts = explode(',',$userActs['acciones_id']);
     
       $user_data = $this -> app_model -> get_user_data($user['userId']);
-      $var=array('data'=>'','user'=>$user['userId']);
+        
+      $var=array('data'=>'','user'=>array('id'=>$user_data['id_usuario'],'tipo'=>$user_data['tipo_usuario']));
         
         $this -> load -> view('header-responsive');
         $this -> load -> view('navbar',array('acts'=>$acts,'username'=>$user_data['usr_usuario']));
@@ -33,9 +33,12 @@ class Operaciones extends CI_Controller {
 
   public function listado_servicios_dia(){
     $data = $this->input->post();
-    $result = $this -> app_model -> get_servicios($data['fecha']); 
+    $datefix_ymd = substr($data['fecha'],strrpos($data['fecha'],'/')+1).'/'.substr($data['fecha'],strpos($data['fecha'],'/')+1,2).'/'.substr($data['fecha'],0,strpos($data['fecha'],'/'));
+    
+    $result = $this -> app_model -> get_servicios($datefix_ymd); 
     $header = ['Fecha','Hora Salida','Tipo','Subtipo','Estado','Cant Pasaj','Barco','Tripul.','Acc.'];
     echo json_encode(array('header'=>$header, 'result'=>$result));
 
   }
+
 }
