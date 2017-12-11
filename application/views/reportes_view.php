@@ -26,7 +26,9 @@ $.blockUI({ message: null,
 					foreach ($data as $itm) {
 						$totTikets += $itm['servicio']['cantkts'];
 						$totImporte += $itm['servicio']['total'];
-						$it .="<tr><td>{$itm['servicio']['fecha']}</td><td>{$itm['servicio']['tipo']}&nbsp;{$itm['servicio']['subtipo']}</td><td>{$itm['hora']}</td><td class='text-right'>{$itm['servicio']['cantkts']}</td><td class='text-right'>".number_format($itm['servicio']['total'],2)."</td></tr>";		
+						$f = new DateTime($itm['servicio']['fecha']);
+						$fecha = $f ->format("d/m/Y");
+						$it .="<tr><td>{$fecha}</td><td>{$itm['servicio']['tipo']}&nbsp;{$itm['servicio']['subtipo']}</td><td>{$itm['hora']}</td><td class='text-right'>{$itm['servicio']['cantkts']}</td><td class='text-right'>".number_format($itm['servicio']['total'],2)."</td></tr>";		
 					}
 					$it .="<tr class='active bordered'><th colspan='3'>TOTALES</th><th class='text-right'>{$totTikets}</th><th class='text-right'>".number_format($totImporte,2)."</th></tr>";
 					echo $it;

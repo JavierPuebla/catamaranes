@@ -24,8 +24,8 @@ class Reportes extends CI_Controller {
     // ****** GET REPORTES DATA SEGUN USUARIO 
      
       
-      $fechin = "10/11/2017";
-      $fechout = "11/11/2017";
+      $fechin = "2017-11-01";
+      $fechout = "2017-12-30";
       $tikets = $this->get_tikets_report($fechin, $fechout);
       
     // ****** PUT REPORTES DATA EN VAR   
@@ -57,7 +57,7 @@ fecha_servicio:
     $arr_tktsdia = [];
     $arr_ids = $this -> app_model -> get_hist_servicios_ids($fin,$fout);
     foreach ($arr_ids as $hsid) {
-      $t = ['hora'=>$hsid['hora_salida'],'servicio'=>$this -> app_model -> get_tkts_by_hsid($hsid['id'],$hsid['servicios_id'])]; 
+      $t = ['hora'=>$hsid['hora_salida'],'servicio'=>$this -> app_model -> get_tkts_by_hsid($hsid['id'])]; 
       if($t['servicio']['id']!= null)
         $arr_tktsdia[] = $t;
     }

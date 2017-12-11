@@ -5,14 +5,14 @@ class app_model extends CI_Model {
 		$this -> load -> database();
 	}
 
-	function get_tkts_by_hsid($hsid,$srvid){
-		$q = "SELECT c.*,(SELECT SUM(c.importe_neto))as total , COUNT(*) as cantkts,s.tipo,s.subtipo FROM cat_comprobantes c LEFT OUTER JOIN cat_servicios s on s.id = '{$srvid}' WHERE c.hist_servicio_id = '{$hsid}'";
+	function get_tkts_by_hsid($hsid){
+		$q = "SELECT c.*,(SELECT SUM(c.importe_neto))as total , COUNT(*) as cantkts,s.tipo,s.subtipo FROM cat_comprobantes c LEFT OUTER JOIN cat_servicios s on s.id = c.servicios_id WHERE c.hist_servicio_id = '{$hsid}'";
 		$x = $this->db->query($q);
 		return ($x)?$x -> row_array() : false;
 	}
 
 	function get_hist_servicios_ids($fechin,$fechout){
-		$q = "SELECT id,fecha_servicio,servicios_id,hora_salida FROM `cat_historial_servicios` WHERE fecha_servicio >= '{$fechin}' AND fecha_servicio <= '{$fechout}' ORDER BY `Id` ASC";
+		$q = "SELECT id,fecha_servicio,codigo_tipo_servicios,hora_salida FROM `cat_historial_servicios` WHERE fecha_servicio >= '{$fechin}' AND fecha_servicio <= '{$fechout}' ORDER BY `Id` ASC";
 		$x = $this->db->query($q);
 		return ($x)?$x -> result_array() : false;
 	}
@@ -46,7 +46,7 @@ class app_model extends CI_Model {
 	}
 
 	function get_servicios_disponibles($fecha,$hora,$tipo,$subtipo){
-			$q= "SELECT hs.id,hs.fecha_servicio,hs.hora_salida, s.tipo,s.subtipo,s.tarifa,b.nombre_barco,b.capacidad_barco FROM `cat_historial_servicios` hs LEFT OUTER JOIN cat_servicios s on hs.codigo_tipo_servicios = s.codigo_tipo LEFT OUTER JOIN cat_barcos b on hs.barcos_id = b.id_barco WHERE hs.fecha_servicio = '{$fecha}' AND hs.hora_salida = '{$hora}' AND s.tipo = '{$tipo}' AND s.subtipo = '{$subtipo}' AND hs.estado LIKE 'D' ORDER BY s.tipo ASC";
+			$q= "SELECT hs.id,hs.fecha_servicio,hs.hora_salida, s.tipo,s.subtipo,s.tarifa,s.id servicios_id,b.nombre_barco,b.capacidad_barco FROM `cat_historial_servicios` hs LEFT OUTER JOIN cat_servicios s on hs.codigo_tipo_servicios = s.codigo_tipo LEFT OUTER JOIN cat_barcos b on hs.barcos_id = b.id_barco WHERE hs.fecha_servicio = '{$fecha}' AND hs.hora_salida = '{$hora}' AND s.tipo = '{$tipo}' AND s.subtipo = '{$subtipo}' AND hs.estado LIKE 'D' ORDER BY s.tipo ASC";
 			$x = $this->db->query($q);
 			return ($x)?$x -> row() : false;
 	}
@@ -118,7 +118,10 @@ class app_model extends CI_Model {
 				'importe_neto' => $data['tarifa'],
 				'importe_iva' =>'',
 				'rnr_id' =>$data['chk_sel'],
+				'servicios_id'=>$data['servicios_id'],
 				'hist_servicio_id' =>$data['histServiciosId'],
+				'forma_pago'=>$data['formaDePago'],
+				'nro_transac_tarjeta'=>$data['nroTransacTarjeta'],
 				'personal_id' => $data['userId'],
 				'puntodeventa_id' =>'', 
 				'reservas_id' =>''

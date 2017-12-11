@@ -18,7 +18,7 @@ $.blockUI({ message: null,
 							{$hora[0]->hora_salida}Hs &nbsp;Paseo:&nbsp; {$hora[0]->tipo} </h4></div>";
 						foreach ($hora as $h) {
 							
-							$p .="<button class='btn btn-primary' style='margin-right:20px;' onclick=select_servicio('{$h->hora_salida}','".str_replace(" ", "-", $h->tipo )."','".str_replace(" ", "-", $h->subtipo)."','".str_replace(" ", "-", $h->nombre_barco)."','".$h->tarifa."','".$h->id."','".$h->fecha_servicio."')>{$h->subtipo}</button>";
+							$p .="<button class='btn btn-primary' style='margin-right:20px;' onclick=select_servicio('{$h->hora_salida}','".str_replace(" ", "-", $h->tipo )."','".str_replace(" ", "-", $h->subtipo)."','".str_replace(" ", "-", $h->nombre_barco)."','".$h->tarifa."','".$h->id."','".$h->fecha_servicio."','".$h->servicios_id."')>{$h->subtipo}</button>";
 						}
 						
 						
@@ -126,7 +126,7 @@ $.blockUI({ message: null,
 	$( window ).load(function() {
 		// Top context
 		window.tcx = {'selectedService':'','user':<?php echo json_encode($user); ?>,'lastInsertedTkts':null};
-		console.log('init',window.tcx.user.tipo);
+		console.log('init',window.tcx.user);
 		if(window.tcx.user.tipo == 'boleteria'){
 			$("#navbar").append("<li><a href='#' onclick='anularTicket(false)'>Anular Ticket</a></li>"); 
 		}
