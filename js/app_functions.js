@@ -1,4 +1,49 @@
-
+function getTkts(filter){
+	data = {
+		'fecIn':$('#dpk_tkts_desde_'+filter).find("input").val(),
+		'fecOut':$('#dpk_tkts_hasta_'+filter).find("input").val(),
+		'filter':filter
+	}
+	$.blockUI({ message: null, baseZ: 10000  }); 
+	return $.ajax({
+		type : "POST",
+		url : "reportes/get_tkts",
+		data : data,
+		dataType : "json",
+		success : function(r) {
+				//r.result = false;
+				$.unblockUI(); 
+				// console.log('recieved',r.result)
+				if(r.result === false){
+					myAlert("#main_container","warning","Error!","No hay Tickets para el dia seleccionado.");
+				}else{
+					// respuesta ok de ajax
+					window.tcx.data = r.result
+					 console.log('tikets',r.result);
+					var screen = '<table class=\"table table-responsive table-striped table-hover\"><thead><tr>';
+					for (var i = 0; i < r.header.length; i++) {
+						screen += "<th>"+r.header[i]+"</th>";
+					}
+					screen += "</tr></thead><tbody>";
+					var totImporte = 0.00;
+					var totTikets = 0;
+					for (var i = 0; i < r.result.length; i++) {
+						screen += "<tr><td>"+moment(r.result[i].servicio.fecha).format("DD/MM/YYYY")+"</td><td>"+r.result[i].servicio.tipo+" - "+r.result[i].servicio.subtipo+"</td><td>"+r.result[i].hora+"</td><td>"+r.result[i].servicio.cantkts+"</td><td>"+r.result[i].servicio.total+"</td></tr>";
+						totImporte += parseFloat(r.result[i].servicio.total);
+						totTikets +=parseInt(r.result[i].servicio.cantkts);
+					}
+					screen += "<tr class='active bordered'><th class='text-center' colspan='3'>TOTALES</th><th>"+totTikets+"</th><th>"+totImporte.toFixed(2)+"</th></tr>";
+					screen +="</tbody></table>";
+					$('#main_container_'+filter).html(screen);
+				}
+			},
+			error : function(xhr, ajaxOptions, thrownError) {
+				$.unblockUI();
+				myAlert("danger","Error","Error de comunicación...");
+				console.log('err:',xhr)
+			}
+		});
+}
 
 function anularTicket(conf){
  	if(window.tcx.lastInsertedTkts == null){
@@ -36,12 +81,11 @@ function anularTicket(conf){
  }
  
 
-
-
 function emitirTks(){
 	
 	data = {
 		'cantTickets':$('#cantidadTks').val(),
+		'tipo_comp':"TIKET",
 		'servicios_id': window.tcx.selectedService.servicios_id,
 		'hora_salida':window.tcx.selectedService.hora,
 		'tarifa':window.tcx.selectedService.tarifa,
@@ -49,8 +93,9 @@ function emitirTks(){
 		'formaDePago':$("#formaDePago option:selected").val(),
 		'nroTransacTarjeta':$("#nroTransacTarjeta").val(),
 		'histServiciosId':window.tcx.selectedService.hsId,
-		'fecha_servicio':window.tcx.selectedService.fecha_servicio,
-		'userId':window.tcx.user.id
+		'fecha':window.tcx.selectedService.fecha_servicio,
+		'user_id':window.tcx.user.id,
+		'clientes_id':''
 	}
 
 	//console.log('sending data',data);
@@ -105,7 +150,7 @@ function emitirTks(){
 	});
 }
 
-// select_servicio('10:00','1-Hora','REGULAR','180.00','Río-Jet-1')
+
 function select_servicio(h,tp,sbtp,brco,trf,hsId,srvDate,srvid) {
   	
   	window.tcx.selectedService = {'hora':h,'servicios_id':srvid,'tarifa':trf,'hsId':hsId,'fecha_servicio':srvDate};
@@ -176,7 +221,7 @@ function show_tripl(idx){
 	var header = Object.keys(arrTrp[0]);
 	var htit = "";
 	for (var i = 0; i < header.length; i++) {
-		console.log(header[i])
+		// console.log(header[i])
 		htit += "<th>"+header[i]+"</th>";
 	}
 	var txtTrp = "";
@@ -203,14 +248,6 @@ function show_tripl(idx){
 	$('#myModalOper').modal('show');
 }
 
-function myAlert(container,type,tit='',msg=''){
-	var scrn = "<div class=\"alert alert-dismissible alert-"+type+"\">\
-  <button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button>\
-  <h4>"+tit+"</h4><p>"+msg+"</p></div>";
-  $(container).html(scrn);
-  setTimeout(function(){$(container).html('')},3000);
-
-}
 
 function getServicios(){
 	data = {
@@ -231,14 +268,14 @@ function getServicios(){
 				}else{
 					// respuesta ok de ajax
 					window.tcx.data = r.result
-					console.log('servicios',r.result);
+					// console.log('servicios',r.result);
 					var screen = '<table class=\"table table-responsive table-striped table-hover\"><thead><tr>';
 					for (var i = 0; i < r.header.length; i++) {
 						screen += "<th class='text-center'>"+r.header[i]+"</th>";
 					}
 					screen += "</tr></thead><tbody>";
 					for (var i = 0; i < r.result.length; i++) {
-						screen += "<tr><td>"+r.result[i].servicio.fecha_servicio+"</td><td>"+r.result[i].servicio.hora_salida+"</td><td>"+r.result[i].servicio.tipo+"</td><td>"+r.result[i].servicio.subtipo+"</td><td>"+r.result[i].servicio.estado+"</td><td>"+r.result[i].servicio.cant_pasajeros+"</td><td>"+r.result[i].servicio.barco+"</td><td>"+(r.result[i].tripulacion.length>0? "<a href=\"#\" title=\'Ver Tripulación\'><span class=\"glyphicon glyphicon-user\" aria-hidden=\"true\" onClick='show_tripl("+i+")'></span></a>" :'<span class="glyphicon glyphicon-minus" aria-hidden="true"></span>')+"</td><td><a href=\"#\" title=\'Suspender Servicio\'><span class=\"glyphicon glyphicon-pause\" aria-hidden=\"true\" onClick='serv_stop("+i+")'></a></span>&nbsp;&nbsp;&nbsp;<a href=\"#\" title=\'Editar Servicio\'><span class=\"glyphicon glyphicon-edit\" aria-hidden=\"true\" onClick='serv_edit("+i+")'></a></span></td></tr>";
+						screen += "<tr><td>"+moment(r.result[i].servicio.fecha_servicio).format("DD/MM/YYYY")+"</td><td>"+r.result[i].servicio.hora_salida+"</td><td>"+r.result[i].servicio.tipo+"</td><td>"+r.result[i].servicio.subtipo+"</td><td>"+r.result[i].servicio.estado+"</td><td>"+r.result[i].servicio.cant_pasajeros+"</td><td>"+r.result[i].servicio.barco+"</td><td>"+(r.result[i].tripulacion.length>0? "<a href=\"#\" title=\'Ver Tripulación\'><span class=\"glyphicon glyphicon-user\" aria-hidden=\"true\" onClick='show_tripl("+i+")'></span></a>" :'<span class="glyphicon glyphicon-minus" aria-hidden="true"></span>')+"</td><td><a href=\"#\" title=\'Suspender Servicio\'><span class=\"glyphicon glyphicon-pause\" aria-hidden=\"true\" onClick='serv_stop("+i+")'></a></span>&nbsp;&nbsp;&nbsp;<a href=\"#\" title=\'Editar Servicio\'><span class=\"glyphicon glyphicon-edit\" aria-hidden=\"true\" onClick='serv_edit("+i+")'></a></span></td></tr>";
 					}
 					screen +="</tbody></table>";
 					$('#main_container').html(screen);
@@ -363,6 +400,17 @@ function saveReserva(){
 	console.log('reserva save')
 }
 
+
+
+
+function myAlert(container,type,tit='',msg=''){
+	var scrn = "<div class=\"alert alert-dismissible alert-"+type+"\">\
+  <button type=\"button\" class=\"close\" data-dismiss=\"alert\">&times;</button>\
+  <h4>"+tit+"</h4><p>"+msg+"</p></div>";
+  $(container).html(scrn);
+  setTimeout(function(){$(container).html('')},3000);
+
+}
 
 /**************
 ///TODO VIEJO

@@ -24,11 +24,12 @@ class Reportes extends CI_Controller {
     // ****** GET REPORTES DATA SEGUN USUARIO 
      
       
-      $fechin = "2017-11-01";
-      $fechout = "2017-12-30";
-      $tikets = $this->get_tikets_report($fechin, $fechout);
+      $fechin = date("Y-m-d");
+      $fechout =date("Y-m-d");
+      $filter = "";
+      $tikets = $this->get_tkts_by_date($fechin,$fechout,$filter);
       
-    // ****** PUT REPORTES DATA EN VAR   
+    // ****** REPORTES DATA EN VAR   
         $user_data = $this -> app_model -> get_user_data($user['userId']);
         $header = ['Fecha','Servicio',' Hora','Cantidad Tickets','Total $'];
         $var=array('data'=>$tikets,'header'=>$header,'user'=>$user['userId']);
@@ -52,16 +53,45 @@ histServiciosId:
 fecha_servicio:
 
 */
-  public function get_tikets_report($fin,$fout){
+  function get_tkts_by_date($fin,$fout,$filter){
     
     $arr_tktsdia = [];
     $arr_ids = $this -> app_model -> get_hist_servicios_ids($fin,$fout);
     foreach ($arr_ids as $hsid) {
-      $t = ['hora'=>$hsid['hora_salida'],'servicio'=>$this -> app_model -> get_tkts_by_hsid($hsid['id'])]; 
+      $t = ['hora'=>$hsid['hora_salida'],'servicio'=>$this -> app_model -> get_tkts_by_hsid($hsid['id'],$filter)]; 
       if($t['servicio']['id']!= null)
         $arr_tktsdia[] = $t;
     }
     return $arr_tktsdia;
   }
+
+  
+  function get_tkts(){
+    $fin=$this->input->post('fecIn');
+    $fout=$this->input->post('fecOut');
+    $filter=$this->input->post('filter');
+
+    switch ($filter) {
+      case 'venta_online':
+        $f = "AND c.forma_pago = 'MP' ";
+        break;
+      case 'all':
+        $f = "";
+        break;
+      
+      default:
+        $f = '';
+        break;
+    }
+    
+    $header = ['Fecha','Servicio',' Hora','Cantidad Tickets','Total $'];
+    $tikets = $this->get_tkts_by_date($this->fixdate_ymd($fin),$this->fixdate_ymd($fout),$f);
+    echo json_encode(array('result'=>$tikets,'header'=>$header));
+  }
+
+  function fixdate_ymd($dt){
+    return substr($dt,strrpos($dt,'/')+1).'/'.substr($dt,strpos($dt,'/')+1,2).'/'.substr($dt,0,strpos($dt,'/'));
+  }
+
 
 }

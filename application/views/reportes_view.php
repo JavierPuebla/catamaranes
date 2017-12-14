@@ -4,37 +4,114 @@ $.blockUI({ message: null,
 </script>
 <div class="bs-component">
 	<div class="container" id='mainContainer'>
+		<ul class="nav nav-tabs">
+		  <li id="init"><a href="#hoy" data-toggle="tab">Tickets Hoy</a></li>
+		  <li ><a href="#venta_online" data-toggle="tab">Venta Online</a></li>
+		  <li ><a href="#historico" data-toggle="tab">General</a></li>
+  
+		</ul>
+		<div id="myTabContent" class="tab-content">
+			<div class="tab-pane fade active in" id="hoy">
+		   	
+			   	<table class="table table-bordered table-responsive table-striped table-hover">
+						<thead>
+							<tr>
+								<?php 
+									$r = '';
+									foreach ($header as $h) {
+										$r .= "<th class='text-center'>{$h}</th>";
+									}
+									echo $r;
+								 ?>
+							</tr>
+						</thead>
+						<tbody>
+							
+							<?php 
+								$totTikets = 0;
+								$totImporte = 0;
+								$it='';
+								foreach ($data as $itm) {
+									$totTikets += $itm['servicio']['cantkts'];
+									$totImporte += $itm['servicio']['total'];
+									$f = new DateTime($itm['servicio']['fecha']);
+									$fecha = $f ->format("d/m/Y");
+									$it .="<tr><td>{$fecha}</td><td>{$itm['servicio']['tipo']}&nbsp;{$itm['servicio']['subtipo']}</td><td>{$itm['hora']}</td><td class='text-right'>{$itm['servicio']['cantkts']}</td><td class='text-right'>".number_format($itm['servicio']['total'],2)."</td></tr>";		
+								}
+								$it .="<tr class='active bordered'><th colspan='3'>TOTALES</th><th class='text-right'>{$totTikets}</th><th class='text-right'>".number_format($totImporte,2)."</th></tr>";
+								echo $it;
+							 ?>
+						</tbody>
+				</table> 
+		  	</div>
+			<div class="tab-pane fade" id="venta_online">
+		    	<div class="panel panel-default">
+					<div class="panel-heading">
+						<h3 class="panel-title">
+							<div class='form-inline '>
+								<div class="form-group">
+									<label for="dpk_tkts_desde_venta_online"><h4>Listado Venta Online desde:</h4></label>
+									<div class='input-group date' id='dpk_tkts_desde_venta_online'>
+										<input type='text' class="form-control" />
+										<span class="input-group-addon">
+											<span class="glyphicon glyphicon-calendar"></span>
+										</span>
+									</div>
+									<script type="text/javascript">$(function () { $('#dpk_tkts_desde_venta_online').datetimepicker({ locale: 'es', allowInputToggle: true, format: 'DD/MM/YYYY',showClear: true, showClose: true }); });</script>
+								</div>
+								<div class="form-group">
+									<label for="dpk_tkts_hasta_venta_online"><h4>&nbsp;Hasta:</h4></label>
+									<div class='input-group date' id='dpk_tkts_hasta_venta_online'>
+										<input type='text' class="form-control" />
+										<span class="input-group-addon">
+											<span class="glyphicon glyphicon-calendar"></span>
+										</span>
+									</div>
+									<script type="text/javascript">$(function () { $('#dpk_tkts_hasta_venta_online').datetimepicker({ locale: 'es', allowInputToggle: true, format: 'DD/MM/YYYY',showClear: true, showClose: true }); });</script>
+								</div>
+								<button type="button" class="btn btn-primary" onclick="getTkts('venta_online')" >Buscar</button>
+							</div>
+						</h3>
+					</div>
+					<div class="panel-body fixed-scrolable" id="main_container_venta_online" ></div>
+				</div>
+			</div>
+		  	<div class="tab-pane fade" id="historico">
+		    	<div class="panel panel-default">
+					<div class="panel-heading">
+						<h3 class="panel-title">
+							<div class='form-inline '>
+								<div class="form-group">
+									<label for="dpk_tkts_desde_all"><h4>Listado Tickets desde:</h4></label>
+									<div class='input-group date' id='dpk_tkts_desde_all'>
+										<input type='text' class="form-control" />
+										<span class="input-group-addon">
+											<span class="glyphicon glyphicon-calendar"></span>
+										</span>
+									</div>
+									<script type="text/javascript">$(function () { $('#dpk_tkts_desde_all').datetimepicker({ locale: 'es', allowInputToggle: true, format: 'DD/MM/YYYY',showClear: true, showClose: true }); });</script>
+								</div>
+								<div class="form-group">
+									<label for="dpk_tkts_hasta_all"><h4>&nbsp;Hasta:</h4></label>
+									<div class='input-group date' id='dpk_tkts_hasta_all'>
+										<input type='text' class="form-control" />
+										<span class="input-group-addon">
+											<span class="glyphicon glyphicon-calendar"></span>
+										</span>
+									</div>
+									<script type="text/javascript">$(function () { $('#dpk_tkts_hasta_all').datetimepicker({ locale: 'es', allowInputToggle: true, format: 'DD/MM/YYYY',showClear: true, showClose: true }); });</script>
+								</div>
+								<button type="button" class="btn btn-primary" onclick="getTkts('all')" >Buscar</button>
+							</div>
+						</h3>
+					</div>
+					<div class="panel-body fixed-scrolable" id="main_container_all"></div>
+				</div>
+		  	</div>
+		</div>
+
 		<!-- <div class="row  "> -->
-			<table class="table table-bordered table-responsive table-striped table-hover">
-			<thead>
-				<tr>
-					<?php 
-						$r = '';
-						foreach ($header as $h) {
-							$r .= "<th class='text-center'>{$h}</th>";
-						}
-						echo $r;
-					 ?>
-				</tr>
-			</thead>
-			<tbody>
-				
-				<?php 
-					$totTikets = 0;
-					$totImporte = 0;
-					$it='';
-					foreach ($data as $itm) {
-						$totTikets += $itm['servicio']['cantkts'];
-						$totImporte += $itm['servicio']['total'];
-						$f = new DateTime($itm['servicio']['fecha']);
-						$fecha = $f ->format("d/m/Y");
-						$it .="<tr><td>{$fecha}</td><td>{$itm['servicio']['tipo']}&nbsp;{$itm['servicio']['subtipo']}</td><td>{$itm['hora']}</td><td class='text-right'>{$itm['servicio']['cantkts']}</td><td class='text-right'>".number_format($itm['servicio']['total'],2)."</td></tr>";		
-					}
-					$it .="<tr class='active bordered'><th colspan='3'>TOTALES</th><th class='text-right'>{$totTikets}</th><th class='text-right'>".number_format($totImporte,2)."</th></tr>";
-					echo $it;
-				 ?>
-			</tbody>
-		</table> 		
+					
 		<!-- </div> -->
 	</div>
 </div>
@@ -76,9 +153,10 @@ $.blockUI({ message: null,
 <script type="text/javascript">
 	$( window ).load(function() {
 		// Top context
-		//window.tcx = {'selectedService':'','userId':<?php echo json_encode($user); ?>};
+		window.tcx = {'userId':<?php echo json_encode($user); ?>};
 
-		console.log('loaded',<?php echo json_encode($data); ?>)
+		//console.log('loaded',<?php //echo json_encode($data); ?>)
+		 $('#init').addClass('active');
 		 $.unblockUI(); 
 	});
 </script>

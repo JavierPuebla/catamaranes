@@ -1,8 +1,3 @@
-<script type="text/javascript"> 
-	$.blockUI({ message: null,
-		baseZ: 10000  }); 
-
-</script>
 <div class="bs-component">
 	<div class="container" id='mainContainer'>
 		<div class="panel panel-default">
@@ -62,7 +57,10 @@
 		// Top context
 		window.tcx = {};
 		// console.log('loaded',<?php //echo json_encode($data); ?>)
-		$.unblockUI(); 
+
+		$("#dpk_servicios").data("DateTimePicker").date(new Date());
+		getServicios();
+		
 	});
 </script>
 </html>

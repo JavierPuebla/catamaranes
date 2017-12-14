@@ -5,11 +5,12 @@ class app_model extends CI_Model {
 		$this -> load -> database();
 	}
 
-	function get_tkts_by_hsid($hsid){
-		$q = "SELECT c.*,(SELECT SUM(c.importe_neto))as total , COUNT(*) as cantkts,s.tipo,s.subtipo FROM cat_comprobantes c LEFT OUTER JOIN cat_servicios s on s.id = c.servicios_id WHERE c.hist_servicio_id = '{$hsid}'";
+	function get_tkts_by_hsid($hsid,$filter=''){
+		$q = "SELECT c.*,s.tipo,s.subtipo ,(SELECT SUM(c.importe_neto))as total , COUNT(*) as cantkts FROM cat_comprobantes c LEFT OUTER JOIN cat_servicios s on s.id = c.servicios_id WHERE c.hist_servicio_id = '{$hsid}' AND c.tipo LIKE 'TIKET' AND c.estado_comprobantes = '1' {$filter} ";
 		$x = $this->db->query($q);
 		return ($x)?$x -> row_array() : false;
 	}
+
 
 	function get_hist_servicios_ids($fechin,$fechout){
 		$q = "SELECT id,fecha_servicio,codigo_tipo_servicios,hora_salida FROM `cat_historial_servicios` WHERE fecha_servicio >= '{$fechin}' AND fecha_servicio <= '{$fechout}' ORDER BY `Id` ASC";
@@ -112,19 +113,16 @@ class app_model extends CI_Model {
 		for ($i=0; $i < $cantTkts; $i++) { 
 			$table ='cat_comprobantes';
 			$datos = [
-				'fecha'=> $data['fecha_servicio'],
-				'tipo' =>'TIKET',
-				'numero' =>'',
+				'fecha'=> $data['fecha'],
+				'tipo' => $data['tipo_comp'],
 				'importe_neto' => $data['tarifa'],
-				'importe_iva' =>'',
-				'rnr_id' =>$data['chk_sel'],
-				'servicios_id'=>$data['servicios_id'],
-				'hist_servicio_id' =>$data['histServiciosId'],
-				'forma_pago'=>$data['formaDePago'],
-				'nro_transac_tarjeta'=>$data['nroTransacTarjeta'],
-				'personal_id' => $data['userId'],
-				'puntodeventa_id' =>'', 
-				'reservas_id' =>''
+				'rnr_id' => $data['chk_sel'],
+				'servicios_id'=> $data['servicios_id'],
+				'hist_servicio_id' => $data['histServiciosId'],
+				'forma_pago'=> $data['formaDePago'],
+				'nro_transac_tarjeta'=> $data['nroTransacTarjeta'],
+				'usuarios_id' => $data['user_id'],
+				'clientes_id' => $data['clientes_id']
 			];  
 			$hs_data = $this ->get_cant_pasajeros($data['histServiciosId']);
 			$last_cantpax = intval($hs_data['cant_pasajeros'])+1;
@@ -155,12 +153,31 @@ class app_model extends CI_Model {
 			return ($x)?$x -> result_array() : false;
 	}
 
+	function get_tarifa_by_srvsid($sid){
+		$query = $this -> db -> get_where('cat_servicios', array('id' => $sid));
+		return ($query)?$query -> row()->tarifa : false;
+	}
+
+
+
+	// autocomplete de clientes
 	function atcp_cli($t){
 
 		$q= "SELECT razon_social_cliente as label ,id_cliente,nombre_contacto_cliente,telefono_contacto_cliente,razon_social_cliente,email_cliente FROM `cat_clientes` WHERE nombre_contacto_cliente LIKE '%{$t}%' OR razon_social_cliente LIKE '%{$t}%'";
 		$x = $this->db->query($q);
 		return ($x)?$x -> result_array() : false;
 	}
+
+	function get_cliente_by_email($em){
+		$query = $this -> db -> get_where('cat_clientes', array('email_cliente' => $em));
+		return ($query)?$query -> row() : false;
+	}
+
+	function get_cliente_by_id($id){
+		$query = $this -> db -> get_where('cat_clientes', array('id_cliente' => $id));
+		return ($query)?$query -> row() : false;
+	}
+
 
 //*************** funciones viejas  ********************
 

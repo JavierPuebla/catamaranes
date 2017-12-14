@@ -1,3 +1,10 @@
+.fixed-scrolable{
+  min-height: 450px;
+  max-height: 450px;
+  overflow-y: scroll;
+}
+
+
 .vertical-center {
   min-height: 100%;  /* Fallback for browsers do NOT support vh unit */
   min-height: 100vh; /* These two lines are counted as one :-)       */
@@ -69,6 +76,8 @@ ul.ui-autocomplete {
   border-top-left-radius: 0;
   border-top-right-radius: 0;
 }
+
+
 
 @media print {
     

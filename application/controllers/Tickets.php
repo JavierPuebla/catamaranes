@@ -97,11 +97,46 @@ class Tickets extends CI_Controller {
     $ids = $this->input->post('tkts');
     $r = $this->app_model->anular_tkt($ids);
     echo json_encode($r);
-   }
+  }
 
 
-   function reg_vnta_onl($id){
-    echo json_encode(array('result'=>$id));
-   }
+  function reg_vnta_onl(){
+    $data = $this->input->post();
+    //$myvars = 'nombre=' . $nombre . '&tel=' . $telefono. '&mail=' . $email . '&cant=' . $cantidad. '&tipo=1h';
+    $cli = $this->app_model->get_cliente_by_email($data['mail']);
+    if(!is_object($cli)){
+      $cl = array('usuarios_id'=>0, "nombre_contacto_cliente"=>$data['nombre'],'telefono_contacto_cliente'=>$data['tel'],'email_cliente'=>$data['mail'],'tipo_cliente'=>'website','fecha_alta_cliente'=>date("Y-m-d"));
+      $new_id = $this->app_model->insert('cat_clientes',$cl);
+      $cli = $this->app_model->get_cliente_by_id($new_id);
+    }
+    var_dump($cli);
+    // define tarifa segun tipo ****
+    switch ($data['tipo']) {
+          case '1h':
+            $tarifa = $this->app_model->get_tarifa_by_srvsid(1);
+            $srvs_id = 1;
+          break;
+          case '2h':
+            $tarifa = $this->app_model->get_tarifa_by_srvsid(11);
+            $srvs_id = 11;
+          break;
+    }    
+    $tkts = [
+        'cantTickets'=>$data['cant'],
+        'fecha'=> date("Y-m-d"),
+        'tipo_comp' =>'VTA-WEBSITE',
+        'tarifa' => $tarifa,
+        'chk_sel' =>'1',
+        'servicios_id'=>$srvs_id,
+        'histServiciosId' => '',
+        'formaDePago'=>'MP',
+        'nroTransacTarjeta'=> '',
+        'puntodeventa_id' =>'999',
+        'user_id'=>$cli->usuarios_id,
+        'clientes_id'=>$cli->id_cliente
+      ]; 
+    $result = $this -> app_model -> insert_tikets($tkts); 
+    echo json_encode(array('result'=>$result));
+  }
 
 }
