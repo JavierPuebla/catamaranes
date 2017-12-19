@@ -41,9 +41,10 @@ class Tickets extends CI_Controller {
               'cant_pasajeros'=>0
             );
     $stru['fecha_servicio']= Date("Y-m-d");
-    $horas_disponibles = array('09:00','10:00','11:00','12:00','14:00','15:00','16:00');
+    $horas_disponibles = $this->app_model->get_horarios();
     foreach ($horas_disponibles as $hd) {
-      $stru['hora_salida']=$hd;
+      $stru['hora_salida']=$hd['hora_salida'];
+      $stru['horarios_id']=$hd['id'];
       $this ->app_model->insert('cat_historial_servicios',$stru);  
     }
   }
@@ -56,7 +57,7 @@ class Tickets extends CI_Controller {
   }
 
   function get_servs_by_usertype($fecha,$utp){
-      $horarios = $this -> app_model -> get_hora_servicios_disponibles($fecha);
+      $horarios = $this -> app_model -> get_horarios();
       $tipos = $this -> app_model -> get_tipos_servicios();
       $subtipos = $this -> app_model -> get_subtipos_servicios();
       
@@ -78,7 +79,8 @@ class Tickets extends CI_Controller {
           foreach ($subtipos as $subt) {
             //$stest[] = 
             //if($stest[count($stest)] != null)
-            $xt = $this->app_model ->get_servicios_disponibles($fecha,$h['hora_salida'],$t['tipo'],$subt['subtipo']);
+            $xt = $this->app_model ->get_servicios_disponibles($fecha,$h['id'],$t['tipo'],$subt['subtipo']);
+            
             if(is_object($xt))
               $st[] = $xt;
           }

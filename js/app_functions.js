@@ -1,3 +1,5 @@
+
+// TIKETS ********
 function getTkts(filter){
 	data = {
 		'fecIn':$('#dpk_tkts_desde_'+filter).find("input").val(),
@@ -206,45 +208,75 @@ function checkCantidad(e){
 }
 
 
-function serv_stop(){
-	console.log('serv stop')
+
+//  OPERACIONES *******************
+
+function serv_edit(i){
+	window.tcx.crtindex = i;
+	var d = window.tcx.data[i].servicio;
+	// console.log('serv edit',d.id)
+	$('#myModalOperTitle').html('Modificando Servicio dia: <strong>'+ $('#dpk_servicios').find("input").val()+'</strong>');
+	$("#selectServicioHoraSalida").val(d.salida_id);
+	$("#selectTipoPaseo").val(d.codigo_tipo_servicios);
+	$("#selectBarco").val(d.id_barco);
+	$("#selectServicioEstado").val(d.estado);
+	$('#myModalTrpTitle').addClass('hidden');
+	$('#myModalTrpBody').addClass('hidden');	
+	$('#myModalOperBody').removeClass('hidden');
+	$('#myModalOperTitle').removeClass('hidden');
+	$('#myModalOper').modal('show'); 
 }
 
-function serv_edit(){
-	console.log('serv edit')
+function setNewServicios(){
+	window.tcx.crtindex = -1;
+	// var d = window.tcx.data[i].servicio;
+	// console.log('serv edit',d.id)
+	$('#myModalOperTitle').html('Modificando Servicio dia: <strong>'+ $('#dpk_servicios').find("input").val()+'</strong>');
+	// $("#selectServicioHoraSalida").val();
+	// $("#selectTipoPaseo").val(d.codigo_tipo_servicios);
+	// $("#selectBarco").val(d.id_barco);
+	// $("#selectServicioEstado").val(d.estado);
+	$('#myModalTrpTitle').addClass('hidden');
+	$('#myModalTrpBody').addClass('hidden');	
+	$('#myModalOperBody').removeClass('hidden');
+	$('#myModalOperTitle').removeClass('hidden');
+	$('#myModalOper').modal('show'); 
 }
-
 
 function show_tripl(idx){
 	var arrTrp = window.tcx.data[idx].tripulacion;
 	var objSrv = window.tcx.data[idx].servicio;
-	var header = Object.keys(arrTrp[0]);
+	var header = Object.keys(arrTrp[0][0]);
 	var htit = "";
 	for (var i = 0; i < header.length; i++) {
-		// console.log(header[i])
 		htit += "<th>"+header[i]+"</th>";
 	}
 	var txtTrp = "";
 	for (var y = 0; y < arrTrp.length; y++) {
 		txtTrp += "<tr>";
 		for (var x = 0; x < header.length; x++) {
-			txtTrp += "<td>"+arrTrp[y][header[x]]+"</td>";
+			txtTrp += "<td>"+arrTrp[y][0][header[x]]+"</td>";
 		}
 		txtTrp += "</tr>";
 	}
-	var srvtit = "<h5><strong> Servicio: "+objSrv.fecha_servicio+" - "+objSrv.hora_salida+"Hs - "+objSrv.tipo+" "+objSrv.subtipo+"&nbsp;"+objSrv.barco+"</strong></h5>";
+	var srvtit = "<h5> Servicio: "+moment(objSrv.fecha_servicio).format("DD/MM/YYYY")+" - "+objSrv.hora_salida+"Hs - "+objSrv.tipo+" "+objSrv.subtipo+"&nbsp;"+objSrv.barco+"</h5>";
 	var scrn = "<h5>Tripulación</h5>";
 	scrn += "<table class='table table-bordered table-responsive table-striped table-hover'>\
 			<thead><tr>"+htit+"</tr></thead>\
 			<tbody>"+txtTrp+"</tbody></table>";
 	
 	$('#myModalOper').on('hidden.bs.modal', function (e) {
-		$('#myModalOperTitle').html('');
-		$('#myModalOperBody').html('');			
+		$('#myModalTrpTitle').html('');
+		$('#myModalTrpBody').html('');
+					
 	})
 
-	$('#myModalOperTitle').html(srvtit);
-	$('#myModalOperBody').html(scrn);			
+	$('#myModalOperBody').addClass('hidden');
+	$('#myModalOperTitle').addClass('hidden');
+	$('#myModalTrpTitle').html(srvtit);
+	$('#myModalTrpBody').html(scrn);			
+	$('#myModalTrpTitle').removeClass('hidden');
+	$('#myModalTrpBody').removeClass('hidden');
 	$('#myModalOper').modal('show');
 }
 
@@ -262,20 +294,20 @@ function getServicios(){
 		success : function(r) {
 				//r.result = false;
 				$.unblockUI(); 
-				// console.log('recieved',r.result)
+				console.log('recieved',r.result)
 				if(r.result === false){
 					myAlert("#main_container","warning","Error!","No hay Servicios para el dia seleccionado.");
 				}else{
 					// respuesta ok de ajax
 					window.tcx.data = r.result
-					// console.log('servicios',r.result);
+					console.log('servicios',window.tcx.data);
 					var screen = '<table class=\"table table-responsive table-striped table-hover\"><thead><tr>';
 					for (var i = 0; i < r.header.length; i++) {
 						screen += "<th class='text-center'>"+r.header[i]+"</th>";
 					}
 					screen += "</tr></thead><tbody>";
 					for (var i = 0; i < r.result.length; i++) {
-						screen += "<tr><td>"+moment(r.result[i].servicio.fecha_servicio).format("DD/MM/YYYY")+"</td><td>"+r.result[i].servicio.hora_salida+"</td><td>"+r.result[i].servicio.tipo+"</td><td>"+r.result[i].servicio.subtipo+"</td><td>"+r.result[i].servicio.estado+"</td><td>"+r.result[i].servicio.cant_pasajeros+"</td><td>"+r.result[i].servicio.barco+"</td><td>"+(r.result[i].tripulacion.length>0? "<a href=\"#\" title=\'Ver Tripulación\'><span class=\"glyphicon glyphicon-user\" aria-hidden=\"true\" onClick='show_tripl("+i+")'></span></a>" :'<span class="glyphicon glyphicon-minus" aria-hidden="true"></span>')+"</td><td><a href=\"#\" title=\'Suspender Servicio\'><span class=\"glyphicon glyphicon-pause\" aria-hidden=\"true\" onClick='serv_stop("+i+")'></a></span>&nbsp;&nbsp;&nbsp;<a href=\"#\" title=\'Editar Servicio\'><span class=\"glyphicon glyphicon-edit\" aria-hidden=\"true\" onClick='serv_edit("+i+")'></a></span></td></tr>";
+						screen += "<tr><td>"+moment(r.result[i].servicio.fecha_servicio).format("DD/MM/YYYY")+"</td><td>"+r.result[i].servicio.hora_salida+"</td><td>"+r.result[i].servicio.tipo+"</td><td>"+r.result[i].servicio.subtipo+"</td><td>"+r.result[i].servicio.estado+"</td><td>"+r.result[i].servicio.cant_pasajeros+"</td><td>"+r.result[i].servicio.barco+"</td><td>"+(r.result[i].tripulacion.length>0? "<a href=\"#\" title=\'Ver Tripulación\'><span class=\"glyphicon glyphicon-user\" aria-hidden=\"true\" onClick='show_tripl("+i+")'></span></a>" :'<span class="glyphicon glyphicon-minus" aria-hidden="true"></span>')+"</td><td><a href=\"#\" title=\'Editar Servicio\'><span class=\"glyphicon glyphicon-edit\" aria-hidden=\"true\" onClick='serv_edit("+i+")'></a></span></td></tr>";
 					}
 					screen +="</tbody></table>";
 					$('#main_container').html(screen);
@@ -288,6 +320,82 @@ function getServicios(){
 			}
 		});
 }
+
+
+
+function guardaServ(){
+	if(window.tcx.crtindex === -1){
+		data = {
+		'fecha_servicio':$('#dpk_servicios').find("input").val(),
+		'horarios_id': $("#selectServicioHoraSalida").val(),
+		'codigo_tipo_servicios': $("#selectTipoPaseo").val(),
+		'estado': $("#selectServicioEstado").val(),
+		'barcos_id': $("#selectBarco").val(),
+		'tripulacion':$("#selectTrpl").val().join(", ")
+		};
+		var method = "create";
+	}else{
+		data = {
+		'id':window.tcx.data[window.tcx.crtindex].servicio.id,
+		'horarios_id': $("#selectServicioHoraSalida").val(),
+		'codigo_tipo_servicios': $("#selectTipoPaseo").val(),
+		'estado': $("#selectServicioEstado").val(),
+		'barcos_id': $("#selectBarco").val(),
+		'tripulacion':$("#selectTrpl").val().join(", ")
+		};
+		var method = "update";
+	}
+	
+
+	//console.log('sending data',data);
+	// show loading ....
+	$.blockUI({ message: null, baseZ: 10000  }); 
+
+	return $.ajax({
+	 	type : "POST",
+	 	url : "operaciones/"+method,
+	 	data : data,
+	 	dataType : "json",
+	 	success : function(r) {
+	 		$.unblockUI(); 
+	 		 console.log('recieved',r)
+	 		if(r.result === false){
+	 			$('#totImporte').html('');
+	 			$('#modalFooterMsg').removeClass("label label-success glyphicon glyphicon-ok hidden")
+	 			$('#modalFooterMsg').addClass("label label-warning glyphicon glyphicon-remove hidden")
+	 			$('#modalFooterMsgtxt').html('<big>Error de comunicación...</big>');					
+	 			$('#modalFooterMsg').removeClass('hidden')
+	 			setTimeout(function() {
+	 				$('#modalFooterMsg').addClass('hidden');
+	 			},2500);
+	 		}else{
+					// respuesta ok de ajax
+					$('#modalFooterMsg').removeClass("label label-warning glyphicon glyphicon-remove hidden")
+					$('#modalFooterMsg').addClass("label label-success glyphicon glyphicon-ok hidden")
+					$('#modalFooterMsgtxt').html('<big>Guardando...</big>');					
+					$('#modalFooterMsg').removeClass('hidden')
+					setTimeout(function() {
+						$('#modalFooterMsg').addClass('hidden');
+						$('#myModalOper').modal('hide')},2000);
+						getServicios();
+				}
+		},
+		error : function(xhr, ajaxOptions, thrownError) {
+				$.unblockUI();
+				console.log('err:',xhr)
+				$('#modalFooterMsg').removeClass("label label-success glyphicon glyphicon-ok hidden")
+				$('#modalFooterMsg').addClass("label label-warning glyphicon glyphicon-remove hidden")
+				$('#modalFooterMsgtxt').html('Error de comunicación');					
+				$('#modalFooterMsg').removeClass('hidden')
+				setTimeout(function() {
+					$('#modalFooterMsg').addClass('hidden');
+				},2500);
+		}
+	});
+}
+
+
+// RESERVAS ************
 
 function getTarifas(){
 	//$.blockUI({ message: null, baseZ: 10000  }); 
@@ -401,7 +509,7 @@ function saveReserva(){
 }
 
 
-
+// GENERALES ************
 
 function myAlert(container,type,tit='',msg=''){
 	var scrn = "<div class=\"alert alert-dismissible alert-"+type+"\">\

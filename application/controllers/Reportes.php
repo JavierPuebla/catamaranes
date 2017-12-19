@@ -58,7 +58,7 @@ fecha_servicio:
     $arr_tktsdia = [];
     $arr_ids = $this -> app_model -> get_hist_servicios_ids($fin,$fout);
     foreach ($arr_ids as $hsid) {
-      $t = ['hora'=>$hsid['hora_salida'],'servicio'=>$this -> app_model -> get_tkts_by_hsid($hsid['id'],$filter)]; 
+      $t = ['hora'=>$hsid['hora_salida'],'servicio'=>$this -> app_model -> get_tkts_by_hsid($hsid['Id'],$filter)]; 
       if($t['servicio']['id']!= null)
         $arr_tktsdia[] = $t;
     }

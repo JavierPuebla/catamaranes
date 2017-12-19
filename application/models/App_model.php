@@ -11,52 +11,68 @@ class app_model extends CI_Model {
 		return ($x)?$x -> row_array() : false;
 	}
 
+	function get_dpdown_data($tbl,$fields,$modif){
+		$q = "SELECT $fields FROM $tbl $modif ";
+		$x = $this->db->query($q);
+		return $x -> result_array();
+	}
 
 	function get_hist_servicios_ids($fechin,$fechout){
-		$q = "SELECT id,fecha_servicio,codigo_tipo_servicios,hora_salida FROM `cat_historial_servicios` WHERE fecha_servicio >= '{$fechin}' AND fecha_servicio <= '{$fechout}' ORDER BY `Id` ASC";
+		$q = "SELECT hs.Id,hs.fecha_servicio,hs.codigo_tipo_servicios,hr.hora_salida hora_salida FROM `cat_historial_servicios` hs LEFT OUTER JOIN cat_horarios hr on hr.id = hs.horarios_id WHERE hs.fecha_servicio >= '{$fechin}' AND hs.fecha_servicio <= '{$fechout}' ORDER BY `Id` ASC";
 		$x = $this->db->query($q);
 		return ($x)?$x -> result_array() : false;
 	}
 
 	function get_servicios($fecha){
 			$res = [];
-			$q= "SELECT hs.id,hs.fecha_servicio,hs.hora_salida,s.subtipo,hs.estado,hs.cant_pasajeros, s.tipo,b.nombre_barco as barco FROM `cat_historial_servicios` hs LEFT OUTER  	JOIN cat_servicios s on hs.codigo_tipo_servicios = s.codigo_tipo LEFT OUTER JOIN cat_barcos b on hs.barcos_id = b.id_barco WHERE hs.fecha_servicio = '{$fecha}'GROUP BY hs.id ORDER BY hs.hora_salida ASC";
+			$q= "SELECT hs.id,hs.fecha_servicio,hora.id as salida_id,hs.codigo_tipo_servicios, hora.hora_salida as hora_salida, s.subtipo, hs.estado, hs.cant_pasajeros,hs.tripulacion, s.tipo, s.id id_servicios, b.nombre_barco as barco, b.id_barco FROM `cat_historial_servicios` hs  LEFT OUTER JOIN cat_horarios hora on hora.id = hs.horarios_id LEFT OUTER JOIN cat_servicios s on hs.codigo_tipo_servicios = s.codigo_tipo LEFT OUTER JOIN cat_barcos b on hs.barcos_id = b.id_barco WHERE hs.fecha_servicio = '{$fecha}' GROUP BY hs.id ORDER BY hora_salida ASC";
 			$x = $this->db->query($q);
 			$hserv = $x -> result_array();
-			if(!empty($hserv)){
-				foreach ($hserv as $hs) {
-					$trp = $this->get_tripulacion($hs['id']);
-					$res[]=['servicio'=>$hs,'tripulacion'=>$trp];
+			$trp = [];
+			$staff = [];	
+			foreach ($hserv as $hs) {
+				if(!empty($hs['tripulacion'])){
+					$trp = explode(",", $hs['tripulacion']);
+					$staff = [];
+					foreach ($trp as $t) {
+						$staff[]=$this->get_tripulacion($t);
+					}
 				}
-				return $res;
+				$res[]=['servicio'=>$hs,'tripulacion'=>$staff];	
 			}
-			return false;
+			return $res;
 	}
 
-	function get_tripulacion($hsid){
-		$q="SELECT p.id,p.nombre,p.apellido,p.actividad FROM `cat_asignaciones_personal` ap LEFT OUTER JOIN cat_personal p on p.id = ap.personal_id WHERE ap.historial_servicios_id = '{$hsid}' ";
+	function get_tripulacion($id){
+		$q="SELECT id,nombre,apellido,actividad FROM `cat_personal` WHERE id= '{$id}' ";
 		$x = $this->db->query($q);
-		return (!empty($x))?$x -> result_array() : null;
+		return $x -> result_array();
 	}	
 
 	
+	function get_horarios(){
+		$q="SELECT * FROM `cat_horarios` WHERE disponible= 'S' ";
+		$x = $this->db->query($q);
+		return $x -> result_array();
+	}
+
 	function check_serv_exists($f){
 		$q= "SELECT * FROM `cat_historial_servicios` WHERE fecha_servicio = '{$f}' ";
 			$x = $this->db->query($q);
 			return ($x)?$x -> row_array() : false;
 	}
 
-	function get_servicios_disponibles($fecha,$hora,$tipo,$subtipo){
-			$q= "SELECT hs.id,hs.fecha_servicio,hs.hora_salida, s.tipo,s.subtipo,s.tarifa,s.id servicios_id,b.nombre_barco,b.capacidad_barco FROM `cat_historial_servicios` hs LEFT OUTER JOIN cat_servicios s on hs.codigo_tipo_servicios = s.codigo_tipo LEFT OUTER JOIN cat_barcos b on hs.barcos_id = b.id_barco WHERE hs.fecha_servicio = '{$fecha}' AND hs.hora_salida = '{$hora}' AND s.tipo = '{$tipo}' AND s.subtipo = '{$subtipo}' AND hs.estado LIKE 'D' ORDER BY s.tipo ASC";
+	function get_servicios_disponibles($fecha,$horarios_id,$tipo,$subtipo){
+			$q= "SELECT hs.id,hs.fecha_servicio,hora.hora_salida,hs.horarios_id, s.tipo,s.subtipo,s.tarifa,s.id servicios_id,b.nombre_barco,b.capacidad_barco FROM `cat_historial_servicios` hs LEFT OUTER JOIN cat_horarios hora on hora.id = hs.horarios_id LEFT OUTER JOIN cat_servicios s on hs.codigo_tipo_servicios = s.codigo_tipo LEFT OUTER JOIN cat_barcos b on hs.barcos_id = b.id_barco WHERE hs.fecha_servicio = '{$fecha}' AND hs.horarios_id = '{$horarios_id}' AND s.tipo = '{$tipo}' AND s.subtipo = '{$subtipo}' AND hs.estado LIKE 'D' ORDER BY s.tipo ASC";
 			$x = $this->db->query($q);
 			return ($x)?$x -> row() : false;
 	}
 
-	function get_hora_servicios_disponibles($fecha){
-		$q="SELECT DISTINCT hora_salida FROM `cat_historial_servicios` WHERE fecha_servicio = '{$fecha}' ORDER BY hora_salida";
-		$x = $this->db->query($q);
-		return ($x)?$x -> result_array() : false;
-	}
+	// function get_hora_servicios_disponibles($fecha){
+	// 	$q="SELECT DISTINCT hora_salida FROM `cat_historial_servicios` WHERE fecha_servicio = '{$fecha}' ORDER BY hora_salida";
+	// 	$x = $this->db->query($q);
+	// 	return ($x)?$x -> result_array() : false;
+	// }
 
 	function get_tipos_servicios(){
 		$q="SELECT DISTINCT tipo FROM `cat_servicios`";

@@ -31,24 +31,73 @@
 			<div class="modal-content">
 				<div class="modal-header">
 					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-					<h3 class="modal-title" id="myModalOperTitle"></h3>
+					<h4 class="modal-title" id="myModalOperTitle"></h4>
+					<h4 class="modal-title" id="myModalTrpTitle"></h4>
+
 				</div>
 				<div class="modal-body" id="myModalOperBody">
+					<div class="panel panel-default">
+						<div class="panel-body">
+							<div class="form-group col-md-3" id="fgHoraSalida" >
+			                  <label class="control-label" for="selectServicioHoraSalida" id="lblHoraSalida">Hora Salida:</label>
+			                 	<?php 
+			                    	$attr = "class='form-control' id='selectServicioHoraSalida' ";
+			                    	echo form_dropdown('serv_hora',$dpdown_hora,'',$attr) ;
+			                    	?>
+			                </div>
+			                <div class="form-group col-md-5">
+			                    <label class="control-label" for="selectTipoPaseo" id="lblTipoPaseo">Tipo de Paseo:</label>
+			                  		
+			                    <?php 
+			                    	$attr = "class='form-control' id='selectTipoPaseo' ";
+			                    	echo form_dropdown('tipo_serv',$tiposerv_dpdown_data,'',$attr) ;
+			                    ?>
+			                </div>
+			                <div class="form-group col-md-4">
+			                	<label class="control-label" for="selectServicioEstado" id="lblTipoPaseo">Estado:</label>
+			                	<select class="form-control" id="selectServicioEstado">
+			                        <option value="D">Disponible</option>
+			                        <option value="S">Suspendido</option>
+			                    </select>
+			                </div>	
+						</div>
+					</div>
+					<div class="panel panel-default">
+						<div class="panel-body">
+							<div class="form-group col-md-4" >
+								<label class="control-label" for="selectBarco" >Barco:</label>
+				                  	<?php 
+			                    	$attr = "class='form-control' id='selectBarco' ";
+			                    	echo form_dropdown('dpdown_barco',$dpdown_barco,'',$attr) ;
+			                    	?>
+				            </div>
+				            <div class="form-group col-md-8" >
+								<label class="control-label" for="selectTrpl" >Tripulación:</label>
+				                  	<?php 
+			                    	$attr = "class='form-control' id='selectTrpl' ";
+			                    	echo form_dropdown('mltSelect_trpl',$trpl,$trpl_keys,$attr) ;
+			                    	?>
+				            </div>
+						</div>
+					</div>
 				</div>
+				<div class="modal-body" id="myModalTrpBody"></div>
 				<div class="modal-footer">
 					<div class="col-md-6" >
 						<h4 class="modal-title" id="modalFooterTitle"></h4>
 						<big><strong><span id="modalFooterMsg"><span id="modalFooterMsgtxt" class="centered"></span> </span></strong></big>	
 					</div>
 					<div class="col-md-6">
-						<button type="button " class="btn btn-primary " data-dismiss="modal">Ok</button>
-						<!-- <button type="button" id="btn-ok" type="submit" class="btn btn-primary">OK</button>	 -->
+						<button type="button " class="btn btn-default " data-dismiss="modal">Cancelar</button>
+						<button type="button" id="btn-ok" onClick="guardaServ()" type="submit" class="btn btn-primary">Guardar</button>	
 					</div>
 				</div>
 			</div>
 		</form>
 	</div>
-</div>
+
+
+	</div>
 <script type="text/javascript">
 		$( window ).load(function() {
 
