@@ -231,7 +231,7 @@ function setNewServicios(){
 	window.tcx.crtindex = -1;
 	// var d = window.tcx.data[i].servicio;
 	// console.log('serv edit',d.id)
-	$('#myModalOperTitle').html('Modificando Servicio dia: <strong>'+ $('#dpk_servicios').find("input").val()+'</strong>');
+	$('#myModalOperTitle').html('Crear Servicio');
 	// $("#selectServicioHoraSalida").val();
 	// $("#selectTipoPaseo").val(d.codigo_tipo_servicios);
 	// $("#selectBarco").val(d.id_barco);

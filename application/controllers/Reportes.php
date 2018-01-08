@@ -26,7 +26,7 @@ class Reportes extends CI_Controller {
       
       $fechin = date("Y-m-d");
       $fechout =date("Y-m-d");
-      $filter = "";
+      $filter = "AND c.tipo LIKE 'TIKET' AND c.estado_comprobantes = '1'";
       $tikets = $this->get_tkts_by_date($fechin,$fechout,$filter);
       
     // ****** REPORTES DATA EN VAR   
@@ -56,12 +56,15 @@ fecha_servicio:
   function get_tkts_by_date($fin,$fout,$filter){
     
     $arr_tktsdia = [];
+
     $arr_ids = $this -> app_model -> get_hist_servicios_ids($fin,$fout);
     foreach ($arr_ids as $hsid) {
-      $t = ['hora'=>$hsid['hora_salida'],'servicio'=>$this -> app_model -> get_tkts_by_hsid($hsid['Id'],$filter)]; 
+      $t = ['hora'=>$hsid['hora_salida'],'servicio'=>$this -> app_model -> get_tkts_by_hsid($hsid['id'],$filter)]; 
       if($t['servicio']['id']!= null)
         $arr_tktsdia[] = $t;
     }
+    
+
     return $arr_tktsdia;
   }
 
@@ -70,20 +73,21 @@ fecha_servicio:
     $fin=$this->input->post('fecIn');
     $fout=$this->input->post('fecOut');
     $filter=$this->input->post('filter');
-
-    switch ($filter) {
+    $f='';
+     
+     switch ($filter) {
       case 'venta_online':
-        $f = "AND c.forma_pago = 'MP' ";
+        $f = "AND c.tipo LIKE 'VTA-WEBSITE' AND c.estado_comprobantes = '1'";
         break;
       case 'all':
-        $f = "";
+        $f = "AND c.tipo LIKE 'TIKET' AND c.estado_comprobantes = '1'";
         break;
       
       default:
-        $f = '';
+        $f = "AND c.tipo LIKE 'TIKET' AND c.estado_comprobantes = '1'";
         break;
     }
-    
+
     $header = ['Fecha','Servicio',' Hora','Cantidad Tickets','Total $'];
     $tikets = $this->get_tkts_by_date($this->fixdate_ymd($fin),$this->fixdate_ymd($fout),$f);
     echo json_encode(array('result'=>$tikets,'header'=>$header));

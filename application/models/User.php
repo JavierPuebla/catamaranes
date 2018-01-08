@@ -7,7 +7,7 @@ Class User extends CI_Model
 		//echo "pass:".$clave;
 
 		$this -> db -> select('*');
-		$this -> db -> from('Usuarios');
+		$this -> db -> from('usuarios');
 		$this -> db -> where("usr_usuario = " . "'" . $usuario . "'");
 		$this -> db -> where("clave_usuario = " . "'" . $clave . "'");
 		$this -> db -> limit(1);

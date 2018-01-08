@@ -35,15 +35,16 @@ class Tickets extends CI_Controller {
   function create_dia_servicios_regulares(){
     $stru = array(
               'fecha_servicio'=>'',
-              'hora_salida'=>'',
+              //'hora_salida'=>'',
               'codigo_tipo_servicios'=>1, 
               'estado'=> 'D',
               'cant_pasajeros'=>0
             );
     $stru['fecha_servicio']= Date("Y-m-d");
+
     $horas_disponibles = $this->app_model->get_horarios();
     foreach ($horas_disponibles as $hd) {
-      $stru['hora_salida']=$hd['hora_salida'];
+      //$stru['hora_salida']=$hd['hora_salida'];
       $stru['horarios_id']=$hd['id'];
       $this ->app_model->insert('cat_historial_servicios',$stru);  
     }
@@ -70,7 +71,7 @@ class Tickets extends CI_Controller {
           $subtipos = $this -> app_model -> get_subtipos_servicios();
           break;
       }
-     //print_r($subtipos);exit();
+     
       $servicios=[];
       foreach ($horarios as $h) {
         $tipo=[];
@@ -87,10 +88,10 @@ class Tickets extends CI_Controller {
           if($st)
             $tipo[]= $st;  
         }
-        if($tipo[0])
-        $servicios[] =$tipo;
-      } 
-      
+        //print_r($servicios);//exit();
+       //if($tipo[0])
+       $servicios[] = $tipo;
+      }
     return $servicios;
   }
 
@@ -107,11 +108,11 @@ class Tickets extends CI_Controller {
     //$myvars = 'nombre=' . $nombre . '&tel=' . $telefono. '&mail=' . $email . '&cant=' . $cantidad. '&tipo=1h';
     $cli = $this->app_model->get_cliente_by_email($data['mail']);
     if(!is_object($cli)){
-      $cl = array('usuarios_id'=>0, "nombre_contacto_cliente"=>$data['nombre'],'telefono_contacto_cliente'=>$data['tel'],'email_cliente'=>$data['mail'],'tipo_cliente'=>'website','fecha_alta_cliente'=>date("Y-m-d"));
+      $cl = array("nombre_contacto_cliente"=>$data['nombre'],'telefono_contacto_cliente'=>$data['tel'],'email_cliente'=>$data['mail'],'tipo_cliente'=>'website','fecha_alta_cliente'=>date("Y-m-d"));
       $new_id = $this->app_model->insert('cat_clientes',$cl);
       $cli = $this->app_model->get_cliente_by_id($new_id);
     }
-    var_dump($cli);
+    //var_dump($cli);
     // define tarifa segun tipo ****
     switch ($data['tipo']) {
           case '1h':
@@ -123,6 +124,13 @@ class Tickets extends CI_Controller {
             $srvs_id = 11;
           break;
     }    
+     $fecha = date('Y-m-d');
+     $hay_servicios = $this->app_model->check_serv_exists($fecha);
+      if(empty($hay_servicios))
+        $this -> create_dia_servicios_regulares();
+    
+    $venta_web_hs = $this -> app_model-> get_venta_ws_hs_id($fecha);
+    $histServiciosId = $venta_web_hs->id;
     $tkts = [
         'cantTickets'=>$data['cant'],
         'fecha'=> date("Y-m-d"),
@@ -130,11 +138,11 @@ class Tickets extends CI_Controller {
         'tarifa' => $tarifa,
         'chk_sel' =>'1',
         'servicios_id'=>$srvs_id,
-        'histServiciosId' => '',
+        'histServiciosId' => $histServiciosId,
         'formaDePago'=>'MP',
         'nroTransacTarjeta'=> '',
         'puntodeventa_id' =>'999',
-        'user_id'=>$cli->usuarios_id,
+        'user_id'=>null,
         'clientes_id'=>$cli->id_cliente
       ]; 
     $result = $this -> app_model -> insert_tikets($tkts); 

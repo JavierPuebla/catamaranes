@@ -143,7 +143,7 @@ $.blockUI({ message: null,
 					</div>
 					<div class="col-md-6">
 						<button type="button " class="btn btn-default " data-dismiss="modal">Cancelar</button>
-						<button type="button" id="btnEmitirTks" onclick="emitirTks()" type="submit" class="btn btn-primary">OK</button>	
+						<button type="button" id="btnEmitirTks" onclick="" type="submit" class="btn btn-primary">OK</button>	
 					</div>
 				</div>
 			</div>
