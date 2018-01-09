@@ -8,6 +8,7 @@ class Operaciones extends CI_Controller {
     $this -> load -> model('app_model');
     $this->load->helper('array');
     $this->load->helper('form');
+    $this->load->library('cmn_functs');
     // Establecer la zona horaria predeterminada a usar. Disponible desde PHP 5.1
     date_default_timezone_set('America/Argentina/Buenos_Aires');
 
@@ -22,10 +23,10 @@ class Operaciones extends CI_Controller {
     
       $user_data = $this -> app_model -> get_user_data($user['userId']);
       
-      $hora = $this ->mk_dpdown('cat_horarios',['id','hora_salida'],'WHERE disponible = \'S\' ORDER BY id ASC');  
-      $tps = $this ->mk_dpdown('cat_servicios',['codigo_tipo','tipo','subtipo'],'GROUP BY codigo_tipo ASC');  
-      $bco = $this ->mk_dpdown('cat_barcos',['id_barco','nombre_barco'],'WHERE estado_barco = \'D\'');  
-      $trpl = $this ->mk_dpdown('cat_personal',['id','nombre','apellido','actividad'],'');  
+      $hora = $this ->cmn_functs->mk_dpdown('cat_horarios',['id','hora_salida'],'WHERE disponible = \'S\' ORDER BY id ASC');  
+      $tps = $this ->cmn_functs->mk_dpdown('cat_servicios',['codigo_tipo','tipo','subtipo'],'GROUP BY codigo_tipo ASC');  
+      $bco = $this ->cmn_functs->mk_dpdown('cat_barcos',['id_barco','nombre_barco'],'WHERE estado_barco = \'D\'');  
+      $trpl = $this ->cmn_functs->mk_dpdown('cat_personal',['id','nombre','apellido','actividad'],'');  
       $trpl_keys =array_keys($trpl);
       $var=array('data'=>'',
                 'dpdown_hora'=>$hora,
@@ -67,22 +68,7 @@ class Operaciones extends CI_Controller {
 
   }
 
-  function mk_dpdown($tbl,$fields,$modif){
-    $d = $this ->app_model -> get_dpdown_data($tbl,implode(',',$fields),$modif);
-    $r=[];
-    foreach ($d as $value) {
-      $f ='';
-      for ($i=1; $i < count($fields); $i++) { 
-        $f .= $value[$fields[$i]]." ";  
-      }  
-      $r[$value[$fields[0]]] = $f; 
-    }
-    return $r;
-  }
-
-  function fixdate_ymd($dt){
-    return substr($dt,strrpos($dt,'/')+1).'/'.substr($dt,strpos($dt,'/')+1,2).'/'.substr($dt,0,strpos($dt,'/'));
-  }
+ 
 
 
 }

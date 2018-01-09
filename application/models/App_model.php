@@ -169,7 +169,8 @@ class app_model extends CI_Model {
 
 	function get_reservas_bydate($fecha,$scope_all){
 			$scp = ($scope_all === 'true')?'>=':"="; 
-			$q= "SELECT r.id_reserva,r.servicios_id,r.h_servicio_id,r.clientes_id,r.usuarios_id,r.puntodeventa_id,r.fecha_reserva,hs.hora_salida, s.tipo,s.subtipo,r.cant_pasajeros_reserva,r.monto_pagado_reserva,r.monto_total_reserva,s.tarifa,b.nombre_barco,u.usr_usuario,cl.razon_social_cliente,cl.email_cliente,cl.telefono_contacto_cliente,r.observaciones_reserva,r.estado_reserva,r.servicio_bar_reserva FROM cat_reservas r LEFT OUTER JOIN cat_servicios s ON r.servicios_id = s.id LEFT OUTER JOIN usuarios u ON r.usuarios_id = u.id_usuario LEFT OUTER JOIN cat_historial_servicios hs ON r.h_servicio_id = hs.id LEFT OUTER JOIN cat_clientes cl ON r.clientes_id = cl.id_cliente LEFT OUTER JOIN cat_barcos b ON b.id_barco = hs.barcos_id WHERE r.fecha_reserva {$scp} '{$fecha}' ORDER BY hs.hora_salida ASC";
+			
+			$q= "SELECT r.id_reserva,r.servicios_id,r.h_servicio_id,r.clientes_id,r.usuarios_id,r.puntodeventa_id,r.fecha_reserva,hr.hora_salida, s.tipo,s.subtipo,r.cant_pasajeros_reserva,r.monto_pagado_reserva,r.monto_total_reserva,s.tarifa,b.nombre_barco,u.usr_usuario,cl.razon_social_cliente,cl.email_cliente,cl.telefono_contacto_cliente,r.observaciones_reserva,r.estado_reserva,r.servicio_bar_reserva FROM cat_reservas r LEFT OUTER JOIN cat_servicios s ON r.servicios_id = s.id LEFT OUTER JOIN usuarios u ON r.usuarios_id = u.id_usuario LEFT OUTER JOIN cat_historial_servicios hs ON r.h_servicio_id = hs.id  LEFT OUTER JOIN cat_horarios hr ON hr.id = hs.horarios_id LEFT OUTER JOIN cat_clientes cl ON r.clientes_id = cl.id_cliente LEFT OUTER JOIN cat_barcos b ON b.id_barco = hs.barcos_id WHERE r.fecha_reserva {$scp} '{$fecha}' ORDER BY hr.hora_salida ASC";
 			$x = $this->db->query($q);
 			$r = $x -> result_array();
 			return (!empty($r))?$r : false;

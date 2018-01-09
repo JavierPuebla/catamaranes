@@ -7,6 +7,8 @@ class Reservas extends CI_Controller {
 
     $this -> load -> model('app_model');
     $this->load->helper('array');
+    $this->load->helper('form');
+    $this->load->library('cmn_functs');
     // Establecer la zona horaria predeterminada a usar. Disponible desde PHP 5.1
     date_default_timezone_set('America/Argentina/Buenos_Aires');
 
@@ -22,8 +24,16 @@ class Reservas extends CI_Controller {
     
       $user_data = $this -> app_model -> get_user_data($user['userId']);
       $hoy = Date("d/m/Y");
-      $var=array('data'=>'','fecha'=> $hoy,'user'=>$user['userId']);
-        
+      $hora = $this ->cmn_functs->mk_dpdown('cat_horarios',['id','hora_salida'],'WHERE disponible = \'S\' AND id > 0 ORDER BY id ASC');
+
+
+      $var=array(
+        'data'=>'',
+        'dpdown_hora'=>$hora,
+        'fecha'=> $hoy,
+        'user'=>$user['userId']
+      );
+
         $this -> load -> view('header-responsive');
         $this -> load -> view('navbar',array('acts'=>$acts,'username'=>$user_data['usr_usuario']));
         $this -> load -> view('reservas_view',$var);
