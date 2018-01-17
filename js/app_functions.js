@@ -21,7 +21,7 @@ function getTkts(filter){
 				}else{
 					// respuesta ok de ajax
 					window.tcx.data = r.result
-					 console.log('tikets',r.result);
+					 console.log('tikets',r);
 					var screen = '<table class=\"table table-responsive table-striped table-hover\"><thead><tr>';
 					for (var i = 0; i < r.header.length; i++) {
 						screen += "<th>"+r.header[i]+"</th>";
@@ -30,9 +30,9 @@ function getTkts(filter){
 					var totImporte = 0.00;
 					var totTikets = 0;
 					for (var i = 0; i < r.result.length; i++) {
-						screen += "<tr><td>"+moment(r.result[i].servicio.fecha).format("DD/MM/YYYY")+"</td><td>"+r.result[i].servicio.tipo+" - "+r.result[i].servicio.subtipo+"</td><td>"+r.result[i].hora+"</td><td>"+r.result[i].servicio.cantkts+"</td><td>"+r.result[i].servicio.total+"</td></tr>";
-						totImporte += parseFloat(r.result[i].servicio.total);
-						totTikets +=parseInt(r.result[i].servicio.cantkts);
+						screen += "<tr><td>"+moment(r.result[i].fecha).format("DD/MM/YYYY")+"</td><td>"+r.result[i].tipo+" - "+r.result[i].subtipo+"</td><td>"+r.result[i].hora_salida+"</td><td>"+r.result[i].cantkts+"</td><td>"+r.result[i].total+"</td></tr>";
+						totImporte += parseFloat(r.result[i].total);
+						totTikets +=parseInt(r.result[i].cantkts);
 					}
 					screen += "<tr class='active bordered'><th class='text-center' colspan='3'>TOTALES</th><th>"+totTikets+"</th><th>"+totImporte.toFixed(2)+"</th></tr>";
 					screen +="</tbody></table>";

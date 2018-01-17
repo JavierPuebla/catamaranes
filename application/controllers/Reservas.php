@@ -25,13 +25,15 @@ class Reservas extends CI_Controller {
       $user_data = $this -> app_model -> get_user_data($user['userId']);
       $hoy = Date("d/m/Y");
       $hora = $this ->cmn_functs->mk_dpdown('cat_horarios',['id','hora_salida'],'WHERE disponible = \'S\' AND id > 0 ORDER BY id ASC');
+      $tpserv = $this ->cmn_functs->mk_dpdown('cat_servicios',['codigo_tipo','tipo','subtipo'],'GROUP BY codigo_tipo ASC');
 
 
       $var=array(
-        'data'=>'',
-        'dpdown_hora'=>$hora,
+        'data'=> '',
+        'dpdown_hora'=> $hora,
+        'tpserv'=> $tpserv,
         'fecha'=> $hoy,
-        'user'=>$user['userId']
+        'user'=> $user['userId']
       );
 
         $this -> load -> view('header-responsive');
@@ -42,6 +44,13 @@ class Reservas extends CI_Controller {
     }
   }
 
+  public function create(){
+    $data = $this->input->post();
+    $data['fecha_reserva'] = $this->cmn_functs->fixdate_ymd($data['fecha_reserva']);
+    $hay_servicios = $this->app_model->check_serv_exists($data['fecha_reserva'],);
+    $result = $this -> app_model -> insert('cat_historial_servicios',$data); 
+    echo json_encode(array('result'=>$result));
+  }
   
 
   public function list_reservas_dia(){

@@ -112,25 +112,38 @@ class Tickets extends CI_Controller {
       $new_id = $this->app_model->insert('cat_clientes',$cl);
       $cli = $this->app_model->get_cliente_by_id($new_id);
     }
-    //var_dump($cli);
+    //var_dump($data);
     // define tarifa segun tipo ****
-    switch ($data['tipo']) {
-          case '1h':
-            $tarifa = $this->app_model->get_tarifa_by_srvsid(1);
+    switch ($data['tipo_servicio']) {
+          case 'Paseo 1 hora':
+            $tarifa_gen = $this->app_model->get_tarifa_by_srvsid(1);
+            $tarifa= intval($tarifa_gen) - 20;
             $srvs_id = 1;
+            $fecha = date('Y-m-d');
+            $hay_servicios = $this->app_model->check_serv_exists($fecha);
+            if(empty($hay_servicios))
+               $this -> create_dia_servicios_regulares();
+            $venta_web_hs = $this -> app_model-> get_venta_ws_hs_id($fecha);
+            $histServiciosId = $venta_web_hs->id;
           break;
-          case '2h':
-            $tarifa = $this->app_model->get_tarifa_by_srvsid(11);
-            $srvs_id = 11;
+          case 'Paseo 2 horas':
+            $tarifa_gen = $this->app_model->get_tarifa_by_srvsid(2);
+            $tarifa= intval($tarifa_gen) - 20;
+            $srvs_id = 2;
+            $fecha = date('Y-m-d');
+            $hay_servicios = $this->app_model->check_serv_exists($fecha);
+            if(empty($hay_servicios))
+               $this -> create_dia_servicios_regulares();
+            $venta_web_hs = $this -> app_model-> get_venta_ws_hs_id($fecha);
+            $histServiciosId = $venta_web_hs->id;
+          break;
+          case 'Vinos y Estrellas':
+            $tarifa = $this->app_model->get_tarifa_by_srvsid(13);
+            $srvs_id = 13;
+            $histServiciosId = 96;
           break;
     }    
-     $fecha = date('Y-m-d');
-     $hay_servicios = $this->app_model->check_serv_exists($fecha);
-      if(empty($hay_servicios))
-        $this -> create_dia_servicios_regulares();
-    
-    $venta_web_hs = $this -> app_model-> get_venta_ws_hs_id($fecha);
-    $histServiciosId = $venta_web_hs->id;
+     
     $tkts = [
         'cantTickets'=>$data['cant'],
         'fecha'=> date("Y-m-d"),
@@ -140,7 +153,8 @@ class Tickets extends CI_Controller {
         'servicios_id'=>$srvs_id,
         'histServiciosId' => $histServiciosId,
         'formaDePago'=>'MP',
-        'nroTransacTarjeta'=> '',
+        'status'=> $data['status'],
+        'id_transaccion' => $data['id_transaccion'],
         'puntodeventa_id' =>'999',
         'user_id'=>null,
         'clientes_id'=>$cli->id_cliente

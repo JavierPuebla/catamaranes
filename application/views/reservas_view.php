@@ -46,21 +46,21 @@
 			<div class="modal-content">
 				<div class="modal-header">
 					<a  class="close" data-dismiss="modal" aria-hidden="true">&times;</a>
-					<h3 class="modal-title" id="myModalReservasTitle">Nueva Reserva</h3>
+					<h3 class="modal-title" id="myModalReservasTitle"></h3>
 				</div>
 				<div class="modal-body" id="myModalReservasBody">
 					<div class="panel panel-default">
 						<div class="panel-body">
 							<div class="form-group col-md-4">
-								<label for="dpk_new_reserva">Fecha:</label>
-								<div class='input-group date' id='dpk_new_reserva'>
+								<label for="dpk_modal_reserva">Fecha:</label>
+								<div class='input-group date' id='dpk_modal_reserva'>
 									<input type='text' class="form-control" />
 									<span class="input-group-addon">
 									<span class="glyphicon glyphicon-calendar"></span>
 									</span>
 								</div>
 								<script type="text/javascript">$(function () { 
-									$('#dpk_new_reserva').datetimepicker({ minDate:new Date(),locale: 'es',allowInputToggle: true, format: 'DD/MM/YYYY',showClear: true, showClose: true }); });</script>
+									$('#dpk_modal_reserva').datetimepicker({ minDate:new Date(),locale: 'es',allowInputToggle: true, format: 'DD/MM/YYYY',showClear: true, showClose: true }); });</script>
 							</div>	
 							<div class="form-group col-md-4" id="fgHoraSalida" >
 			                  <label class="control-label" for="selectHoraSalida" id="lblHoraSalida">Hora Salida:</label>
@@ -71,14 +71,15 @@
 			                </div>
 			                <div class="form-group col-md-4">
 			                    <label class="control-label" for="selectTipoPaseo" id="lblTipoPaseo">Tipo de Paseo:</label>
-			                  	<select class="form-control" id="selectTipoPaseo" onchange="checkCantPaxReservas()">
-			                        <option value="1">1 Hora  - Regular</option>
-			                        <option value="2">2 Horas - Regular</option>
-			                        <option value="3">Estudiantil</option>
-			                    	<option value="7">1 Hora  - Privado</option>
-			                    	<option value="8">2 Horas - Privado</option>
-			                    	<option value="9">1 Hora  - A Medida</option>
-			                    	<option value="10">2 Horas - A Medida</option>
+			                  	<?php 
+			                    	$attr = "class='form-control' id='selectTipoPaseo' onchange=checkCantPaxReservas()";
+			                    	echo form_dropdown('tipo_serv',$tpserv,'',$attr) ;
+			                    	?>
+
+			                  	<select class="form-control" ">
+
+
+			                        
 			                    </select>
 			                </div>	
 						</div>

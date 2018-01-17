@@ -23,7 +23,7 @@ class Operaciones extends CI_Controller {
     
       $user_data = $this -> app_model -> get_user_data($user['userId']);
       
-      $hora = $this ->cmn_functs->mk_dpdown('cat_horarios',['id','hora_salida'],'WHERE disponible = \'S\' ORDER BY id ASC');  
+      $hora = $this ->cmn_functs->mk_dpdown('cat_horarios',['id','hora_salida'],'WHERE disponible = \'S\' AND id > 0 ORDER BY id ASC');  
       $tps = $this ->cmn_functs->mk_dpdown('cat_servicios',['codigo_tipo','tipo','subtipo'],'GROUP BY codigo_tipo ASC');  
       $bco = $this ->cmn_functs->mk_dpdown('cat_barcos',['id_barco','nombre_barco'],'WHERE estado_barco = \'D\'');  
       $trpl = $this ->cmn_functs->mk_dpdown('cat_personal',['id','nombre','apellido','actividad'],'');  
@@ -45,9 +45,10 @@ class Operaciones extends CI_Controller {
       redirect('login', 'refresh');
     }
   }
+  
   function create(){
     $data = $this->input->post();
-    $data['fecha_servicio'] = $this->fixdate_ymd($data['fecha_servicio']);
+    $data['fecha_servicio'] = $this->cmn_functs->fixdate_ymd($data['fecha_servicio']);
     $result = $this -> app_model -> insert('cat_historial_servicios',$data); 
     echo json_encode(array('result'=>$result));
   }
