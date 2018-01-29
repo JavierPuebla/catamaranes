@@ -101,7 +101,8 @@
 <script type="text/javascript">
 		$( window ).load(function() {
 
-
+		// padding para fixed-top navbar ********
+		$("body").attr({style: 'padding-top: 70px;'});	
 
 		// Top context
 		window.tcx = {};
@@ -109,6 +110,8 @@
 
 		$("#dpk_servicios").data("DateTimePicker").date(new Date());
 		getServicios();
+
+		
 		
 	});
 </script>

@@ -5,6 +5,7 @@
 }
 
 
+
 .vertical-center {
   min-height: 100%;  /* Fallback for browsers do NOT support vh unit */
   min-height: 100vh; /* These two lines are counted as one :-)       */
@@ -20,12 +21,19 @@ table.floatThead-table {
     background-color: #fff;
 }
 ul.ui-autocomplete {
-    z-index: 10000;
-    background: #dfdfdf  ;
+    position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2510 !important;
+  float: left;
+    background: #fff  ;
     border:solid;
     border-width: 0.01em;
-    border-color: #bbbbbb;
+    border-color: #2266cc;
+    
 }
+
+
 
 .centered {
 	display:inline-flex;

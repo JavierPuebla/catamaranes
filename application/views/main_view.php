@@ -2,7 +2,7 @@
 <div class="bs-component">
 
 	
-	<div class="container-fluid" id='mainContainer'>
+	<div class="container-fluid " id='mainContainer'>
 		
 	</div>
 </div>
@@ -27,6 +27,11 @@
 <!--END  modal window-->
 <script type="text/javascript">
 	$( window ).load(function() {
+
+		// padding para fixed-top navbar ********
+		$("body").attr({style: 'padding-top: 70px;'});
+
+		
 		console.log(<?php echo json_encode(array('controller'=>$controller,'user'=>$user)); ?>)
 		//Do(	<?php echo json_encode(array('controller'=>$controller,'user'=>$user)); ?>)
 	});

@@ -157,7 +157,10 @@ $.blockUI({ message: null,
 
 		//console.log('loaded',<?php //echo json_encode($data); ?>)
 		 $('#init').addClass('active');
-		 $.unblockUI(); 
+		 $.unblockUI();
+
+		// padding para fixed-top navbar ********
+		$("body").attr({style: 'padding-top: 70px;'});  
 	});
 </script>
 </html>

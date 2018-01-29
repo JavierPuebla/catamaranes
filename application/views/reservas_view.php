@@ -4,7 +4,7 @@
 
 </script>
 <div class="bs-component">
-	<div class="container">
+	<div class="container autoscroll">
 		<div class="row">
 			<div class="col-md-6">
 				<button type="button" class="btn btn-success" onclick="setNewReserva()" >Nueva Reserva</button>
@@ -15,7 +15,7 @@
 						<div class="form-group">
 							<label for="dpk_reservas"></label>
 							<div class='input-group date' id='dpk_reservas'>
-								<input type='text' class="form-control" />
+								<input type='text' class="form-control" placeholder="Selecciona una fecha" />
 								<span class="input-group-addon">
 									<span class="glyphicon glyphicon-calendar"></span>
 								</span>
@@ -39,10 +39,9 @@
 		<!-- </div> -->
 		
 	</div>
-
 	<div class="modal fade" id="myModalReservas">
 	<div class="modal-dialog modal-lg">
-		<form>
+		<form class="eventInsForm">
 			<div class="modal-content">
 				<div class="modal-header">
 					<a  class="close" data-dismiss="modal" aria-hidden="true">&times;</a>
@@ -53,8 +52,8 @@
 						<div class="panel-body">
 							<div class="form-group col-md-4">
 								<label for="dpk_modal_reserva">Fecha:</label>
-								<div class='input-group date' id='dpk_modal_reserva'>
-									<input type='text' class="form-control" />
+								<div class='input-group date' id='dpk_modal_reserva' >
+									<input type='text' class="form-control" placeholder="Selecciona una fecha" />
 									<span class="input-group-addon">
 									<span class="glyphicon glyphicon-calendar"></span>
 									</span>
@@ -75,12 +74,6 @@
 			                    	$attr = "class='form-control' id='selectTipoPaseo' onchange=checkCantPaxReservas()";
 			                    	echo form_dropdown('tipo_serv',$tpserv,'',$attr) ;
 			                    	?>
-
-			                  	<select class="form-control" ">
-
-
-			                        
-			                    </select>
 			                </div>	
 						</div>
 					</div>
@@ -89,11 +82,11 @@
 						<div class="panel-body">
 							<div class="form-group col-md-4" id="fgCantPax" >
 			                  <label class="control-label" for="inpCantPax" id="lblCantPax">Cantidad pasajeros</label>
-			                  <input class="form-control" id="inpCantPax" onchange="checkCantPaxReservas()" type="number" value=0 min="0">
+			                  <input class="form-control" id="inpCantPax" onchange="checkCantPaxReservas()" type="number" placeholder="ingresar cantidad pax" min="0">
 			                </div>
 			                <div class="form-group col-md-4">
-			                  <label class="control-label" for="inpMontoPagado" id="lblMontoPagado">Seña recibida</label>
-			                  <input class="form-control" id="inpMontoPagado" type="number" value=0 min="0" onchange="checkCantPaxReservas()">
+			                  <label class="control-label" for="inpMontoPagado" id="lblMontoPagado">Pagado </label>
+			                  <input class="form-control" id="inpMontoPagado" type="number" placeholder="ingresar monto en pesos" min="0" onchange="checkCantPaxReservas()">
 			                </div>
 			                <div class="form-group col-md-4" >
 			                  <label class="control-label" for="inpMontoTotal" id="lblMontoTotal">Saldo</label>
@@ -102,8 +95,9 @@
 							<div class="form-group col-md-4" id="fgCliente" >
 								<label class="control-label" for="imptNomCli">Nombre del Contratante</label>
 								<input class="form-control" type="text" name="reservasAutocmpl" id="reservasAutocmpl"/>
+								<input type="hidden" id="id_cliente" name="id_cliente">
 							</div>
-							<div class="form-group col-md-4" >
+							<div class="form-group col-md-4" id="fgEmailCli">
 								<label class="control-label" for="imptEmailCli">E mail:</label>
 								<input class="form-control" type="text" id=imptEmailCli />
 							</div>
@@ -120,10 +114,13 @@
 								<textarea class="form-control" type="textarea" maxlength="255" rows='4' id=imptDetalle ></textarea>	
 							</div>
 						</div>
+						<div class="form-group col-md-4"><br/>
+							<div class="custom-control custom-checkbox">
+	      						<input type="checkbox" class="custom-control-input" id="checkDeleteReserva" onchange="handlerDeleteReserva()">
+						      	<label class="custom-control-label" id='lblDeleteReserva' for="checkDeleteReserva">Eliminar esta reserva</label>
+						    </div>
+						</div>
 					</div>
-
-
-
 				</div>
 				<div class="modal-footer">
 					<div class="col-md-6" >
@@ -132,7 +129,7 @@
 					</div>
 					<div class="col-md-6">
 						<!-- <button type="button " class="btn btn-primary " data-dismiss="modal">Ok</button> -->
-						<button type="button" id="btn-ok" onclick="saveReserva" class="btn btn-primary">Guardar</button>	
+						<button type="button" id="reservas_btn_ok" onclick="saveReserva()" class="btn btn-primary">Guardar</button>	
 					</div>
 				</div>
 			</div>
@@ -141,6 +138,8 @@
 </div>
 <script type="text/javascript">
 		$( window ).load(function() {
+		// padding para fixed-top navbar ********
+		$("body").attr({style: 'padding-top: 70px;'});
 		// my namespace
 		window.tcx = {};
 		//**************************
@@ -149,23 +148,24 @@
 		$('#reservasAutocmpl').autocomplete({
 		    source:  "reservas/autocomplete_clientes",
 			minLength: 2,
-			response: function( event, ui ) {console.log('xx',ui)},
+			response: function( event, ui) {
+			},
 			select: function(event, ui)
     		{
-	      		console.log('atcp ',ui);	
-	     		$("#imptEmailCli").val(ui.item.email_cliente);
-	      		$("#imptTelCli").val(ui.item.telefono_contacto_cliente);
+	      		$("#imptEmailCli").val(ui.item.email);
+	      		$("#imptTelCli").val(ui.item.tel);
+	      		$("#id_cliente").val(ui.item.id_cliente);
 	    	}
 		});
+
 	
 
 
-		// ***************************
-		console.log('loaded',<?php echo json_encode($fecha); ?>)
-		
+		// **********************************
 		// ************ init data from server
 		getTarifas();	
 		var fecha = <?php echo json_encode($fecha); ?>;
+		window.tcx.user = <?php echo json_encode($user); ?>;
 		getReservas(fecha,'true');
 	});
 </script>

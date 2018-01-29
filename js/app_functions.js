@@ -217,7 +217,7 @@ function serv_edit(i){
 	// console.log('serv edit',d.id)
 	$('#myModalOperTitle').html('Modificando Servicio dia: <strong>'+ $('#dpk_servicios').find("input").val()+'</strong>');
 	$("#selectServicioHoraSalida").val(d.salida_id);
-	$("#selectTipoPaseo").val(d.codigo_tipo_servicios);
+	$("#selectTipoPaseo").val(d.cod_tipo_subtipo_servicios);
 	$("#selectBarco").val(d.id_barco);
 	$("#selectServicioEstado").val(d.estado);
 	$('#myModalTrpTitle').addClass('hidden');
@@ -233,7 +233,7 @@ function setNewServicios(){
 	// console.log('serv edit',d.id)
 	$('#myModalOperTitle').html('Crear Servicio');
 	// $("#selectServicioHoraSalida").val();
-	// $("#selectTipoPaseo").val(d.codigo_tipo_servicios);
+	// $("#selectTipoPaseo").val(d.cod_tipo_subtipo_servicios);
 	// $("#selectBarco").val(d.id_barco);
 	// $("#selectServicioEstado").val(d.estado);
 	$('#myModalTrpTitle').addClass('hidden');
@@ -328,7 +328,7 @@ function guardaServ(){
 		data = {
 		'fecha_servicio':$('#dpk_servicios').find("input").val(),
 		'horarios_id': $("#selectServicioHoraSalida").val(),
-		'codigo_tipo_servicios': $("#selectTipoPaseo").val(),
+		'cod_tipo_subtipo_servicios': $("#selectTipoPaseo").val(),
 		'estado': $("#selectServicioEstado").val(),
 		'barcos_id': $("#selectBarco").val(),
 		'tripulacion':$("#selectTrpl").val().join(", ")
@@ -338,7 +338,7 @@ function guardaServ(){
 		data = {
 		'id':window.tcx.data[window.tcx.crtindex].servicio.id,
 		'horarios_id': $("#selectServicioHoraSalida").val(),
-		'codigo_tipo_servicios': $("#selectTipoPaseo").val(),
+		'cod_tipo_subtipo_servicios': $("#selectTipoPaseo").val(),
 		'estado': $("#selectServicioEstado").val(),
 		'barcos_id': $("#selectBarco").val(),
 		'tripulacion':$("#selectTrpl").val().join(", ")
@@ -433,8 +433,8 @@ function getReservas(fecha=null,scope_all='false'){
 		success : function(r) {
 				//r.result = false;
 				$.unblockUI(); 
-				// console.log('recieved',r.result)
-				if(r.result === false){
+				 console.log('recieved',r)
+				if(r.result.length == 0 ){
 					myAlert("#main_container","warning","No hay Reservas para el dia seleccionado.","");
 				}else{
 					// respuesta ok de ajax
@@ -446,7 +446,7 @@ function getReservas(fecha=null,scope_all='false'){
 					}
 					screen += "</tr></thead><tbody>";
 					for (var i = 0; i < r.result.length; i++) {
-						screen += "<tr><td>"+moment(r.result[i].fecha_reserva).format("DD/MM/YYYY")+"</td><td>"+r.result[i].hora_salida+"</td><td>"+r.result[i].tipo+"</td><td>"+r.result[i].subtipo+"</td><td>"+r.result[i].cant_pasajeros_reserva+"</td><td>"+r.result[i].monto_pagado_reserva+"</td><td>"+(parseFloat(r.result[i].monto_total_reserva)-parseFloat(r.result[i].monto_pagado_reserva))+"</td><td>"+r.result[i].nombre_barco+"</td><td>"+r.result[i].usr_usuario+"</td><td>"+r.result[i].razon_social_cliente+"</td><td>"+r.result[i].observaciones_reserva+"</td><td><a href=\"#\" title=\'Suspender Reserva\'><span class=\"glyphicon glyphicon-pause\" aria-hidden=\"true\" onClick='reserva_stop("+i+")'></a></span>&nbsp;&nbsp;&nbsp;<a href=\"#\" title=\'Editar Reserva\'><span class=\"glyphicon glyphicon-edit\" aria-hidden=\"true\" onClick='reservaEdit("+i+")'></a></span></td></tr>";
+						screen += "<tr><td>"+moment(r.result[i].fecha_reserva).format("DD/MM/YYYY")+"</td><td>"+r.result[i].hora_salida+"</td><td>"+r.result[i].tipo+"</td><td>"+r.result[i].subtipo+"</td><td>"+r.result[i].cant_pasajeros_reserva+"</td><td>"+r.result[i].monto_pagado_reserva+"</td><td>"+(parseFloat(r.result[i].monto_total_reserva)-parseFloat(r.result[i].monto_pagado_reserva))+"</td><td>"+r.result[i].nombre_barco+"</td><td>"+r.result[i].usr_usuario+"</td><td>"+r.result[i].observaciones_reserva+"</td><td>&nbsp;&nbsp;&nbsp;<a href=\"#\" title=\'Editar Reserva\'><span class=\"glyphicon glyphicon-edit text-center\" aria-hidden=\"true\" onClick='reservaEdit("+i+")'></a></span></td></tr>";
 					}
 					screen +="</tbody></table>";
 					$('#main_container').html(screen);
@@ -461,9 +461,9 @@ function getReservas(fecha=null,scope_all='false'){
 }
 
 function setNewReserva(){
-	
-	$('#dpk_new_reserva').data("DateTimePicker").minDate(new Date());
-	$('#dpk_new_reserva').data("DateTimePicker").date(null);
+	window.tcx.crtindex = -1;
+	$('#dpk_modal_reserva').data("DateTimePicker").minDate(new Date());
+	$('#dpk_modal_reserva').data("DateTimePicker").date(null);
 	$("#selectHoraSalida").prop('selectedIndex',0);
 	$("#selectTipoPaseo").prop('selectedIndex',0);
 	$("#inpCantPax").val(0);
@@ -473,39 +473,168 @@ function setNewReserva(){
 	$("#imptEmailCli").val('');
 	$("#imptTelCli").val('');
 	$("#imptDetalle").val('');
+	$("#myModalReservasTitle").html("Crear Nueva Reserva")
 	$('#myModalReservas').modal('show'); 
+	$( "#reservasAutocmpl" ).autocomplete( "option", "appendTo", ".eventInsForm" );
+	$("#checkDeleteReserva").addClass('hidden');
+	$("#lblDeleteReserva").addClass('hidden');
+	$('#reservas_btn_ok').removeClass('btn btn-danger');
+	$('#reservas_btn_ok').addClass('btn btn-primary');
+	$('#reservas_btn_ok').html('Guardar');
 }
 
 function reservaEdit(index){
+	window.tcx.crtindex = index;
 	var d = window.tcx.data[index];
-	$('#dpk_new_reserva').data("DateTimePicker").minDate(moment("2000-01-01"));
-	$('#dpk_new_reserva').data("DateTimePicker").date(moment(d.fecha_reserva));
-	$("#selectHoraSalida").val(d.hora_salida);
+	console.log('tcx data',d);
+	$('#dpk_modal_reserva').data("DateTimePicker").minDate(moment("2000-01-01"));
+	$('#dpk_modal_reserva').data("DateTimePicker").date(moment(d.fecha_reserva));
+	$("#selectHoraSalida").val(d.horarios_id);
 	$("#selectTipoPaseo").val(d.servicios_id);
 	$("#inpCantPax").val(d.cant_pasajeros_reserva);
 	$("#inpMontoPagado").val(d.monto_pagado_reserva);
 	$("#inpMontoTotal").val(parseFloat(d.monto_total_reserva)-parseFloat(d.monto_pagado_reserva));
-	$("#reservasAutocmpl").val(d.razon_social_cliente);
+	$("#reservasAutocmpl").val(d.nombre_contacto_cliente);
 	$("#imptEmailCli").val(d.email_cliente);
 	$("#imptTelCli").val(d.telefono_contacto_cliente);
 	$("#imptDetalle").val(d.observaciones_reserva);
-	$('#myModalReservas').modal('show'); 
-
-
+	$("#myModalReservasTitle").html("Modificar Reserva")
+	$('#myModalReservas').modal('show');
+	$( "#reservasAutocmpl" ).autocomplete( "option", "appendTo", ".eventInsForm" ); 
+	$("#checkDeleteReserva").removeClass('hidden'),
+	$("#lblDeleteReserva").removeClass('hidden');
+	$("#checkDeleteReserva").prop('checked',false),
+	$('#reservas_btn_ok').removeClass('btn btn-danger');
+	$('#reservas_btn_ok').addClass('btn btn-primary');
+	$('#reservas_btn_ok').html('Guardar');
 }
 
 function checkCantPaxReservas(){
 
 	 
 	var result = $.grep(window.tcx.tarifas, function(e){ console.log(e,$("#selectTipoPaseo").val());return e.id == $("#selectTipoPaseo").val()});
+	console.log('ta',result)
 	var tot = (parseInt($("#inpCantPax").val()) * result[0].tarifa)- parseFloat($("#inpMontoPagado").val())
 	$("#inpMontoTotal").val(parseFloat(tot).toFixed(2));
 	//console.log('result',result[0].tarifa)
 	
 }
 
+function handlerDeleteReserva(){
+	
+	if($("#checkDeleteReserva").prop('checked')){
+		$('#reservas_btn_ok').removeClass('btn btn-primary');
+		$('#reservas_btn_ok').addClass('btn btn-danger');
+		$('#reservas_btn_ok').html('Eliminar Reserva');
+		return false;
+	}
+	$('#reservas_btn_ok').removeClass('btn btn-danger');
+	$('#reservas_btn_ok').addClass('btn btn-primary');
+	$('#reservas_btn_ok').html('Guardar');
+	return false;
+}
+
 function saveReserva(){
-	console.log('reserva save')
+	// validate del modal de reservas
+	var notvalid = ($("#inpCantPax").val() == '0' || $('#dpk_modal_reserva').find("input").val() == '' || $("#reservasAutocmpl").val().length < 3 || $("#imptEmailCli").val().indexOf("@") <= 0 );
+	if(notvalid){
+		($('#dpk_modal_reserva').find("input").val() =='')?$('#dpk_modal_reserva').addClass("has-error"):$('#dpk_modal_reserva').removeClass("has-error");
+		($("#inpCantPax").val() == '0')?$("#fgCantPax").addClass("has-error"):$("#fgCantPax").removeClass("has-error"); 
+		($("#reservasAutocmpl").val().length < 3)?$("#fgCliente").addClass("has-error"):$("#fgCliente").removeClass("has-error");
+		($("#imptEmailCli").val().indexOf("@") <= 0 )?$("#fgEmailCli").addClass("has-error"):$("#fgEmailCli").removeClass("has-error");
+		console.log('returning sin send')
+		return false;
+	}
+	// clean last red item on modal when validated ok 
+	var items = new Array($('#dpk_modal_reserva'),$("#fgCantPax"),$("#fgCliente"),$("#fgEmailCli"));
+	for (var i = items.length - 1; i >= 0; i--) {
+		items[i].removeClass("has-error");
+	}
+
+	// ***** new or edit *********** 
+	if(window.tcx.crtindex === -1){
+		data = {
+		'fecha_reserva':$('#dpk_modal_reserva').find("input").val(),
+		'horarios_id': $("#selectHoraSalida").val(),
+		'servicios_id': $("#selectTipoPaseo").val(),
+		'cant_pasajeros_reserva': $("#inpCantPax").val(),
+		'monto_pagado_reserva': $("#inpMontoPagado").val(),
+		'monto_total_reserva': $("#inpMontoTotal").val(),
+		'nombre_contacto_cliente': $("#reservasAutocmpl").val(),
+		'email_cliente':$("#imptEmailCli").val(),
+		'telefono_contacto_cliente':$("#imptTelCli").val(),
+		// 'servicio_bar_reserva':$('#servicio_bar').val(),
+		'observaciones_reserva':$("#imptDetalle").val(),
+		'usuarios_id':window.tcx.user.userId
+		};
+		var method = "create";
+	}else{
+		data = {
+		'id':window.tcx.data[window.tcx.crtindex].id_reserva,
+		'eliminar_reserva':$("#checkDeleteReserva").prop('checked'),
+		'fecha_reserva':$('#dpk_modal_reserva').find("input").val(),
+		'horarios_id': $("#selectHoraSalida").val(),
+		'servicios_id': $("#selectTipoPaseo").val(),
+		'cant_pasajeros_reserva': $("#inpCantPax").val(),
+		'monto_pagado_reserva': $("#inpMontoPagado").val(),
+		'monto_total_reserva': $("#inpMontoTotal").val(),
+		'nombre_contacto_cliente': $("#reservasAutocmpl").val(),
+		'email_cliente':$("#imptEmailCli").val(),
+		'telefono_contacto_cliente':$("#imptTelCli").val(),
+		// 'servicio_bar_reserva':$('#servicio_bar').val(),
+		'observaciones_reserva':$("#imptDetalle").val(),
+		'usuarios_id':window.tcx.user.userId
+		};
+		var method = "update";
+	}
+	console.log('tcx',window.tcx.user);
+	console.log('envio to reserva.php',data);
+		// show loading ....
+	$.blockUI({ message: null, baseZ: 10000  }); 
+	return $.ajax({
+	 	type : "POST",
+	 	url : "reservas/"+method,
+	 	data : data,
+	 	dataType : "json",
+	 	success : function(r) {
+	 		$.unblockUI(); 
+	 		 console.log('recieved from reservas',r)
+	 		
+	 		if(r.result === 'false'){
+	 			$('#totImporte').html('');
+	 			$('#modalFooterMsg').removeClass("label label-success glyphicon glyphicon-ok hidden")
+	 			$('#modalFooterMsg').addClass("label label-warning glyphicon glyphicon-remove hidden")
+	 			$('#modalFooterMsgtxt').html('<big>Error de comunicación...</big>');					
+	 			$('#modalFooterMsg').removeClass('hidden')
+	 			setTimeout(function() {
+	 				getReservas(r.fecha);
+	 				$('#modalFooterMsg').addClass('hidden');
+	 			},1500);
+	 		}else{
+					// respuesta ok de ajax
+					$('#modalFooterMsg').removeClass("label label-warning glyphicon glyphicon-remove hidden")
+					$('#modalFooterMsg').addClass("label label-success glyphicon glyphicon-ok hidden")
+					$('#modalFooterMsgtxt').html('<big>Guardando...</big>');					
+					$('#modalFooterMsg').removeClass('hidden')
+					setTimeout(function() {
+						$('#modalFooterMsg').addClass('hidden');
+						$('#myModalReservas').modal('hide')},2000);
+						getReservas(r.fecha);
+				}
+		},
+		error : function(xhr, ajaxOptions, thrownError) {
+				$.unblockUI();
+				console.log('err:',thrownError)
+				$('#modalFooterMsg').removeClass("label label-success glyphicon glyphicon-ok hidden")
+				$('#modalFooterMsg').addClass("label label-warning glyphicon glyphicon-remove hidden")
+				$('#modalFooterMsgtxt').html('Error de comunicación');					
+				$('#modalFooterMsg').removeClass('hidden')
+				setTimeout(function() {
+					$('#modalFooterMsg').addClass('hidden');
+				},2500);
+		}
+	});
+
 }
 
 

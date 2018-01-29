@@ -36,7 +36,7 @@ class Tickets extends CI_Controller {
     $stru = array(
               'fecha_servicio'=>'',
               //'hora_salida'=>'',
-              'codigo_tipo_servicios'=>1, 
+              'cod_tipo_subtipo_servicios'=>1, 
               'estado'=> 'D',
               'cant_pasajeros'=>0
             );

@@ -1,5 +1,6 @@
-<script type="text/javascript"> console.log(<?php echo json_encode($acts); ?>)</script>
-	<div class="navbar navbar-inverse" id="up_bar" >
+<script type="text/javascript"> //console.log('activities', <?php //echo json_encode($acts); ?>)
+</script>
+	<div class="navbar navbar-inverse navbar-fixed-top" id="up_bar" >
 		<div class="container-fluid">
 			<button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-2">
 				<span class="sr-only">Toggle navigation</span>

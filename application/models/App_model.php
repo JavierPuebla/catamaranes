@@ -12,13 +12,6 @@ class app_model extends CI_Model {
 
 	}
 
-	// function get_tkts_vta_online($filter=''){
-	// 	// $q = "SELECT c.*,s.tipo,s.subtipo ,(SELECT SUM(c.importe_neto))as total , COUNT(*) as cantkts FROM cat_comprobantes c LEFT OUTER JOIN cat_servicios s on s.id = c.servicios_id WHERE tipo = 'VTA-WEBSITE' AND c.tipo LIKE 'TIKET' AND c.estado_comprobantes = '1' {$filter} ";
-	// 	$q = "SELECT c.*,s.tipo,s.subtipo ,(SELECT SUM(c.importe_neto))as total , COUNT(*) as cantkts FROM cat_comprobantes c LEFT OUTER JOIN cat_servicios s on s.id = c.servicios_id WHERE c.tipo = 'VTA-WEBSITE' AND c.estado_comprobantes = '1' GROUP BY c.servicios_id";
-	// 	$x = $this->db->query($q);
-	// 	return ($x)?$x -> row_array() : false;
-	// }
-
 	function get_tkts_by_date($fin,$fout,$filter){
 		$q = "SELECT c.*,horas.hora_salida, s.tipo,s.subtipo ,(SELECT SUM(c.importe_neto))as total , COUNT(*) as cantkts FROM cat_comprobantes c LEFT OUTER JOIN cat_servicios s on s.id = c.servicios_id  LEFT OUTER JOIN cat_historial_servicios hs on hs.id = c.hist_servicio_id LEFT OUTER JOIN cat_horarios horas on horas.id = hs.horarios_id WHERE c.fecha >= '{$fin}' AND c.fecha <= '{$fout}'  {$filter} GROUP BY c.hist_servicio_id ";
 		$x = $this->db->query($q);
@@ -34,14 +27,14 @@ class app_model extends CI_Model {
 	}
 
 	function get_hist_servicios_ids($fechin,$fechout){
-		$q = "SELECT hs.id,hs.fecha_servicio,hs.codigo_tipo_servicios,hr.hora_salida hora_salida FROM `cat_historial_servicios` hs LEFT OUTER JOIN cat_horarios hr on hr.id = hs.horarios_id WHERE hs.fecha_servicio >= '{$fechin}' AND hs.fecha_servicio <= '{$fechout}' ORDER BY `id` ASC";
+		$q = "SELECT hs.id,hs.fecha_servicio,hs.cod_tipo_subtipo_servicios,hr.hora_salida hora_salida FROM `cat_historial_servicios` hs LEFT OUTER JOIN cat_horarios hr on hr.id = hs.horarios_id WHERE hs.fecha_servicio >= '{$fechin}' AND hs.fecha_servicio <= '{$fechout}' ORDER BY `id` ASC";
 		$x = $this->db->query($q);
 		return ($x)?$x -> result_array() : false;
 	}
 
 	function get_servicios($fecha){
 			$res = [];
-			$q= "SELECT hs.id,hs.fecha_servicio,hora.id as salida_id,hs.codigo_tipo_servicios, hora.hora_salida as hora_salida, s.subtipo, hs.estado, hs.cant_pasajeros,hs.tripulacion, s.tipo, s.id id_servicios, b.nombre_barco as barco, b.id_barco FROM `cat_historial_servicios` hs  LEFT OUTER JOIN cat_horarios hora on hora.id = hs.horarios_id LEFT OUTER JOIN cat_servicios s on hs.codigo_tipo_servicios = s.codigo_tipo LEFT OUTER JOIN cat_barcos b on hs.barcos_id = b.id_barco WHERE hs.fecha_servicio = '{$fecha}' GROUP BY hs.id ORDER BY hora_salida ASC";
+			$q= "SELECT hs.id,hs.fecha_servicio,hora.id as salida_id,hs.cod_tipo_subtipo_servicios, hora.hora_salida as hora_salida, s.subtipo, hs.estado, hs.cant_pasajeros,hs.tripulacion, s.tipo, s.id id_servicios, b.nombre_barco as barco, b.id_barco FROM `cat_historial_servicios` hs  LEFT OUTER JOIN cat_horarios hora on hora.id = hs.horarios_id LEFT OUTER JOIN cat_servicios s on hs.cod_tipo_subtipo_servicios = s.cod_tipo_subtipo LEFT OUTER JOIN cat_barcos b on hs.barcos_id = b.id_barco WHERE hs.fecha_servicio = '{$fecha}' GROUP BY hs.id ORDER BY hora_salida ASC";
 			$x = $this->db->query($q);
 			$hserv = $x -> result_array();
 			$trp = [];
@@ -67,7 +60,7 @@ class app_model extends CI_Model {
 
 	
 	function get_horarios(){
-		$q="SELECT * FROM `cat_horarios` WHERE disponible= 'S'";
+		$q="SELECT * FROM `cat_horarios` WHERE disponible = 'S'";
 		$x = $this->db->query($q);
 		return $x -> result_array();
 	}
@@ -79,16 +72,16 @@ class app_model extends CI_Model {
 	}
 
 	function get_servicios_disponibles($fecha,$horarios_id,$tipo,$subtipo){
-			$q= "SELECT hs.id,hs.fecha_servicio,hora.hora_salida,hs.horarios_id, s.tipo,s.subtipo,s.tarifa,s.id servicios_id,b.nombre_barco,b.capacidad_barco FROM `cat_historial_servicios` hs LEFT OUTER JOIN cat_horarios hora on hora.id = hs.horarios_id LEFT OUTER JOIN cat_servicios s on hs.codigo_tipo_servicios = s.codigo_tipo LEFT OUTER JOIN cat_barcos b on hs.barcos_id = b.id_barco WHERE hs.fecha_servicio = '{$fecha}' AND hs.horarios_id = '{$horarios_id}' AND s.tipo = '{$tipo}' AND s.subtipo = '{$subtipo}' AND hs.estado LIKE 'D' AND hora.id > 0 ORDER BY s.tipo ASC";
+			$q= "SELECT hs.id,hs.fecha_servicio,hora.hora_salida,hs.horarios_id, s.tipo,s.subtipo,s.tarifa,s.id servicios_id,b.nombre_barco,b.capacidad_barco FROM `cat_historial_servicios` hs LEFT OUTER JOIN cat_horarios hora on hora.id = hs.horarios_id LEFT OUTER JOIN cat_servicios s on hs.cod_tipo_subtipo_servicios = s.cod_tipo_subtipo LEFT OUTER JOIN cat_barcos b on hs.barcos_id = b.id_barco WHERE hs.fecha_servicio = '{$fecha}' AND hs.horarios_id = '{$horarios_id}' AND s.tipo = '{$tipo}' AND s.subtipo = '{$subtipo}' AND hs.estado LIKE 'D' AND hora.id > 0 ORDER BY s.tipo ASC";
 			$x = $this->db->query($q);
 			return ($x)?$x -> row() : false;
 	}
 
-	// function get_hora_servicios_disponibles($fecha){
-	// 	$q="SELECT DISTINCT hora_salida FROM `cat_historial_servicios` WHERE fecha_servicio = '{$fecha}' ORDER BY hora_salida";
-	// 	$x = $this->db->query($q);
-	// 	return ($x)?$x -> result_array() : false;
-	// }
+	function check_hs_exist($fecha, $horarios_id, $servicios_id){
+		$q= "SELECT * FROM `cat_historial_servicios` WHERE fecha_servicio = '{$fecha}' AND horarios_id = '{$horarios_id}' AND servicios_id = '{$servicios_id}' ";
+		$x = $this->db->query($q);
+		return $x -> row();
+	}	
 
 	function get_tipos_servicios(){
 		$q="SELECT DISTINCT tipo FROM `cat_servicios`";
@@ -114,6 +107,17 @@ class app_model extends CI_Model {
 		return ($x)?$x -> row_array() : false;
 	}
 
+	function get_all($table,$id=null){
+		$q="SELECT * from {$table}";
+		if($id != null)
+			$q .="WHERE id = {$id}";
+		$x = $this->db->query($q);
+		return $x -> row();
+	}
+
+	function delete($table,$field_name,$id){
+		$this->db->delete($table, array($field_name => $id));
+	}
 
 	function update($table,$data,$ikey,$id){
 
@@ -173,10 +177,9 @@ class app_model extends CI_Model {
 
 	function get_reservas_bydate($fecha,$scope_all){
 			$scp = ($scope_all === 'true')?'>=':"="; 
-			$q= "SELECT r.id_reserva,r.servicios_id,r.h_servicio_id,r.clientes_id,r.usuarios_id,r.puntodeventa_id,r.fecha_reserva,hs.hora_salida, s.tipo,s.subtipo,r.cant_pasajeros_reserva,r.monto_pagado_reserva,r.monto_total_reserva,s.tarifa,b.nombre_barco,u.usr_usuario,cl.razon_social_cliente,cl.email_cliente,cl.telefono_contacto_cliente,r.observaciones_reserva,r.estado_reserva,r.servicio_bar_reserva FROM cat_reservas r LEFT OUTER JOIN cat_servicios s ON r.servicios_id = s.id LEFT OUTER JOIN usuarios u ON r.usuarios_id = u.id_usuario LEFT OUTER JOIN cat_historial_servicios hs ON r.h_servicio_id = hs.id LEFT OUTER JOIN cat_clientes cl ON r.clientes_id = cl.id_cliente LEFT OUTER JOIN cat_barcos b ON b.id_barco = hs.barcos_id WHERE r.fecha_reserva {$scp} '{$fecha}' ORDER BY hs.hora_salida ASC";
+			$q= "SELECT r.id_reserva,hs.horarios_id,hs.servicios_id,r.historial_servicios_id,r.clientes_id,r.usuarios_id,r.puntodeventa_id,r.fecha_reserva, s.tipo,s.subtipo,r.cant_pasajeros_reserva,r.monto_pagado_reserva,r.monto_total_reserva,s.tarifa,b.nombre_barco,u.usr_usuario,cl.nombre_contacto_cliente,cl.email_cliente,cl.telefono_contacto_cliente,r.observaciones_reserva,r.estado_reserva,r.servicio_bar_reserva,horas.hora_salida FROM cat_reservas r LEFT OUTER JOIN usuarios u ON r.usuarios_id = u.id_usuario LEFT OUTER JOIN cat_historial_servicios hs ON r.historial_servicios_id = hs.id LEFT OUTER JOIN cat_horarios horas on horas.id = hs.horarios_id LEFT OUTER JOIN cat_clientes cl ON r.clientes_id = cl.id_cliente LEFT OUTER JOIN cat_barcos b ON b.id_barco = hs.barcos_id LEFT OUTER JOIN cat_servicios s ON hs.servicios_id = s.id WHERE r.fecha_reserva {$scp} '{$fecha}' ORDER BY r.fecha_reserva, hs.horarios_id ASC";
 			$x = $this->db->query($q);
-			$r = $x -> result_array();
-			return (!empty($r))?$r : false;
+			return $x -> result_array();
 	}
 
 	
@@ -198,7 +201,7 @@ class app_model extends CI_Model {
 
 		$q= "SELECT razon_social_cliente as label ,id_cliente,nombre_contacto_cliente,telefono_contacto_cliente,razon_social_cliente,email_cliente FROM `cat_clientes` WHERE nombre_contacto_cliente LIKE '%{$t}%' OR razon_social_cliente LIKE '%{$t}%'";
 		$x = $this->db->query($q);
-		return ($x)?$x -> result_array() : false;
+		return $x -> result_array();
 	}
 
 	function get_cliente_by_email($em){
@@ -210,6 +213,9 @@ class app_model extends CI_Model {
 		$query = $this -> db -> get_where('cat_clientes', array('id_cliente' => $id));
 		return ($query)?$query -> row() : false;
 	}
+
+
+
 
 
 //*************** funciones viejas  ********************

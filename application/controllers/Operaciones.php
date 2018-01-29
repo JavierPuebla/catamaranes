@@ -24,7 +24,7 @@ class Operaciones extends CI_Controller {
       $user_data = $this -> app_model -> get_user_data($user['userId']);
       
       $hora = $this ->cmn_functs->mk_dpdown('cat_horarios',['id','hora_salida'],'WHERE disponible = \'S\' AND id > 0 ORDER BY id ASC');  
-      $tps = $this ->cmn_functs->mk_dpdown('cat_servicios',['codigo_tipo','tipo','subtipo'],'GROUP BY codigo_tipo ASC');  
+      $tps = $this ->cmn_functs->mk_dpdown('cat_servicios',['cod_tipo_subtipo','tipo','subtipo'],'GROUP BY cod_tipo_subtipo ASC');  
       $bco = $this ->cmn_functs->mk_dpdown('cat_barcos',['id_barco','nombre_barco'],'WHERE estado_barco = \'D\'');  
       $trpl = $this ->cmn_functs->mk_dpdown('cat_personal',['id','nombre','apellido','actividad'],'');  
       $trpl_keys =array_keys($trpl);
@@ -61,9 +61,10 @@ class Operaciones extends CI_Controller {
 
   function listado_servicios_dia(){
     $data = $this->input->post();
-    $datefix_ymd = substr($data['fecha'],strrpos($data['fecha'],'/')+1).'/'.substr($data['fecha'],strpos($data['fecha'],'/')+1,2).'/'.substr($data['fecha'],0,strpos($data['fecha'],'/'));
+    $f = $this->cmn_functs->fixdate_ymd($data['fecha']);
+    // $datefix_ymd = substr($data['fecha'],strrpos($data['fecha'],'/')+1).'/'.substr($data['fecha'],strpos($data['fecha'],'/')+1,2).'/'.substr($data['fecha'],0,strpos($data['fecha'],'/'));
     
-    $result = $this -> app_model -> get_servicios($datefix_ymd); 
+    $result = $this -> app_model -> get_servicios($f); 
     $header = ['Fecha','Hora Salida','Tipo','Subtipo','Estado','Cant Pasaj','Barco','Tripul.','Acc.'];
     echo json_encode(array('header'=>$header, 'result'=>$result));
 

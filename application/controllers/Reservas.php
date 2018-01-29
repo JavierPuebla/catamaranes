@@ -25,7 +25,7 @@ class Reservas extends CI_Controller {
       $user_data = $this -> app_model -> get_user_data($user['userId']);
       $hoy = Date("d/m/Y");
       $hora = $this ->cmn_functs->mk_dpdown('cat_horarios',['id','hora_salida'],'WHERE disponible = \'S\' AND id > 0 ORDER BY id ASC');
-      $tpserv = $this ->cmn_functs->mk_dpdown('cat_servicios',['codigo_tipo','tipo','subtipo'],'GROUP BY codigo_tipo ASC');
+      $tpserv = $this ->cmn_functs->mk_dpdown('cat_servicios',['id','tipo','subtipo'],'GROUP BY cod_tipo_subtipo ASC');
 
 
       $var=array(
@@ -33,7 +33,7 @@ class Reservas extends CI_Controller {
         'dpdown_hora'=> $hora,
         'tpserv'=> $tpserv,
         'fecha'=> $hoy,
-        'user'=> $user['userId']
+        'user'=> $user
       );
 
         $this -> load -> view('header-responsive');
@@ -47,19 +47,39 @@ class Reservas extends CI_Controller {
   public function create(){
     $data = $this->input->post();
     $data['fecha_reserva'] = $this->cmn_functs->fixdate_ymd($data['fecha_reserva']);
-    $hay_servicios = $this->app_model->check_serv_exists($data['fecha_reserva'],);
-    $result = $this -> app_model -> insert('cat_historial_servicios',$data); 
-    echo json_encode(array('result'=>$result));
+    $hs_id = $this->cmn_functs->check_historial_servicios($data['fecha_reserva'],$data['horarios_id'],$data['servicios_id']);
+    $clid=$this->cmn_functs->check_cliente($data['nombre_contacto_cliente'],$data['telefono_contacto_cliente'],$data['email_cliente']);
+    $tsave = array(
+        'clientes_id'=>$clid,
+        'historial_servicios_id'=>$hs_id,
+        'fecha_reserva'=>$data['fecha_reserva'],
+        'cant_pasajeros_reserva'=>$data['cant_pasajeros_reserva'],
+        'monto_pagado_reserva'=>$data['monto_pagado_reserva'],
+        'monto_total_reserva'=>$data['monto_total_reserva'],
+        'observaciones_reserva'=>$data['observaciones_reserva'],
+        'usuarios_id'=>$data['usuarios_id'],
+
+    );
+    $result = $this -> app_model -> insert('cat_reservas',$tsave); 
+    echo json_encode(array('result'=>$result,'fecha'=>$data['fecha_reserva']));
   }
   
 
+  public function update(){
+    $this->app_model->delete('cat_reservas','id_reserva',$this->input->post('id'));
+    if($this->input->post('eliminar_reserva') == 'false'){
+      $this->create();
+    }else{
+      echo json_encode(array('result'=>'delete OK','fecha'=> $this->input->post('fecha_reserva')));  
+    }
+    
+  }
+
   public function list_reservas_dia(){
     $data = $this->input->post();
-    $datefix_ymd = substr($data['fecha'],strrpos($data['fecha'],'/')+1).'/'.substr($data['fecha'],strpos($data['fecha'],'/')+1,2).'/'.substr($data['fecha'],0,strpos($data['fecha'],'/'));
-    
-    
-    $result = $this -> app_model -> get_reservas_bydate($datefix_ymd,$data['scope_all']); 
-    $header = ['fecha', 'Hora Salida','Tipo','Subtipo','Cant Pax','Seña','Saldo','Barco','Operador','Cliente','Observac','Acc.'];
+    $date = $this->cmn_functs->fixdate_ymd($data['fecha']);
+    $result = $this -> app_model -> get_reservas_bydate($date,$data['scope_all']); 
+    $header = ['fecha', 'Hora Salida','Tipo','Subtipo','Cant Pax','Seña','Saldo','Barco','Operador','Observac','Acc.'];
     echo json_encode(array('header'=>$header,'result'=>$result));
 
   }
@@ -73,7 +93,16 @@ class Reservas extends CI_Controller {
   public function autocomplete_clientes(){
     parse_str($_SERVER['QUERY_STRING'], $_GET); 
     $r = $this->app_model->atcp_cli($_GET['term']);
-    //$res = Array('label'=>$r['razon_social_cliente'],'value'=> $r);
-    echo json_encode($r);
+    // echo json_encode(Array('label'=>$r['label'],'value'=> $r));
+    //echo json_encode($r);
+    foreach($r as $key => $value){
+        $res[] = array('label'=>$value['nombre_contacto_cliente'],
+                       'value'=>$value['nombre_contacto_cliente'],
+                       'email'=>$value['email_cliente'],
+                       'tel'=> $value['telefono_contacto_cliente'],
+                       'id_cliente'=> $value['id_cliente']
+                     );
+        }
+        echo json_encode($res);
   }
 }
