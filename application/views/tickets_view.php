@@ -12,20 +12,37 @@ $.blockUI({ message: null,
 
 			<?php 
 				$p ='';
-				foreach ($data as $servicio) {
-					foreach ($servicio as $hora){
-						$p .="<a href='#' class='list-group-item'><div class='col-md-6'><h4>Salida:&nbsp;
-							{$hora[0]->hora_salida}Hs &nbsp;Paseo:&nbsp; {$hora[0]->tipo} </h4></div>";
-						foreach ($hora as $h) {
+				// var_dump($data);
+				//$id = $data[0]['id'];
+				for ($i=0; $i < count($data); $i++) { 
+					$p .="<a href='#' class='list-group-item'><div class='col-md-6'><h4>{$data[$i]['hora_salida']}Hs &nbsp;Paseo:&nbsp; {$data[$i]['tipo']}</h4></div>";
+					$p .="<button class='btn btn-primary'style='margin-right:20px;' onclick=select_servicio('{$data[$i]['hora_salida']}','".str_replace(" ", "-", $data[$i]['tipo'])."','".str_replace(" ", "-", $data[$i]['subtipo'])."','".str_replace(" ", "-", $data[$i]['nombre_barco'])."','".$data[$i]['tarifa']."','".$data[$i]['id']."','".$data[$i]['fecha_servicio']."','".$data[$i]['servicios_id']."')>{$data[$i]['subtipo']}</button>";	
+					while ($i+1 < count($data) && $data[$i+1]['id'] == $data[$i]['id']) {
+						$i++;
+						$p .="<button class='btn btn-primary'style='margin-right:20px;' onclick= select_servicio('{$data[$i]['hora_salida']}','".str_replace(" ", "-", $data[$i]['tipo'])."','".str_replace(" ", "-", $data[$i]['subtipo'])."','".str_replace(" ", "-", $data[$i]['nombre_barco'])."','".$data[$i]['tarifa']."','".$data[$i]['id']."','".$data[$i]['fecha_servicio']."','".$data[$i]['servicios_id']."')>{$data[$i]['subtipo']}</button>";	
+						
+					}
+					$p .="</a>";
+				}
+				echo $p;
+				// foreach ($data as $servicio) {
+				// 	if()
+					//echo $servicio['id'];
+					// $p .="<a href='#' class='list-group-item'><div class='col-md-6'><h4>Salida:&nbsp;
+					// {$servicio->hora_salida}Hs &nbsp;Paseo:&nbsp; {$servicio->tipo} </h4></div>";
+
+					// foreach ($servicio as $hora){
+					// 	
+					// 	foreach ($hora as $h) {
 							
-							$p .="<button class='btn btn-primary' style='margin-right:20px;' onclick=select_servicio('{$h->hora_salida}','".str_replace(" ", "-", $h->tipo )."','".str_replace(" ", "-", $h->subtipo)."','".str_replace(" ", "-", $h->nombre_barco)."','".$h->tarifa."','".$h->id."','".$h->fecha_servicio."','".$h->servicios_id."')>{$h->subtipo}</button>";
-						}
+					// 		$p .="<button class='btn btn-primary' style='margin-right:20px;' >{$h->subtipo}</button>";
+					// 	}
 						
 						
-					}		
-					 $p .="</a>";
-				 };
-				 echo $p;
+					// }		
+					 // 
+				 // };
+				 //var_dump($p) ;
  			?>
 
 		</div>				

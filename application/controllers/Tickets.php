@@ -6,6 +6,7 @@ class Tickets extends CI_Controller {
     parent::__construct();
     $this ->load->model('app_model');
     $this->load->helper('array');
+    $this->load->library('cmn_functs');
     // Establecer la zona horaria predeterminada a usar
     date_default_timezone_set('America/Argentina/Buenos_Aires');
   }
@@ -19,10 +20,8 @@ class Tickets extends CI_Controller {
       // ****** GET SERVICIOS DISPONIBLES put it into var
       //$fechaHora = date('H:i');
       $fecha = Date('Y-m-d');
-      $hay_servicios = $this->app_model->check_serv_exists($fecha);
-      if(empty($hay_servicios))
-        $this -> create_dia_servicios_regulares();
-      $servicios = $this->get_servs_by_usertype($fecha,$user_data['tipo_usuario']);
+      $this->cmn_functs->create_dia_servicios_regulares($fecha);
+      $servicios = $this->app_model->get_servicios_boleteria($fecha);
         $var=array('data'=>$servicios,'user'=>array('id'=>$user_data['id_usuario'],'tipo'=>$user_data['tipo_usuario']));
         $this -> load -> view('header-responsive');
         $this -> load -> view('navbar',array('acts'=>$acts,'username'=>$user_data['usr_usuario']));
@@ -32,25 +31,7 @@ class Tickets extends CI_Controller {
     }
   }
 
-  function create_dia_servicios_regulares(){
-    $stru = array(
-              'fecha_servicio'=>'',
-              //'hora_salida'=>'',
-              'cod_tipo_subtipo_servicios'=>1, 
-              'estado'=> 'D',
-              'cant_pasajeros'=>0
-            );
-    $stru['fecha_servicio']= Date("Y-m-d");
-
-    $horas_disponibles = $this->app_model->get_horarios();
-    foreach ($horas_disponibles as $hd) {
-      //$stru['hora_salida']=$hd['hora_salida'];
-      $stru['horarios_id']=$hd['id'];
-      $this ->app_model->insert('cat_historial_servicios',$stru);  
-    }
-  }
-
-
+  
   public function make_tkt(){
     $data = $this->input->post();
     $result = $this -> app_model -> insert_tikets($data); 
@@ -58,7 +39,7 @@ class Tickets extends CI_Controller {
   }
 
   function get_servs_by_usertype($fecha,$utp){
-      $horarios = $this -> app_model -> get_horarios();
+      $horarios = $this -> app_model -> get_horarios('');
       $tipos = $this -> app_model -> get_tipos_servicios();
       $subtipos = $this -> app_model -> get_subtipos_servicios();
       
@@ -105,59 +86,44 @@ class Tickets extends CI_Controller {
 
   function reg_vnta_onl(){
     $data = $this->input->post();
-    //$myvars = 'nombre=' . $nombre . '&tel=' . $telefono. '&mail=' . $email . '&cant=' . $cantidad. '&tipo=1h';
-    $cli = $this->app_model->get_cliente_by_email($data['mail']);
-    if(!is_object($cli)){
-      $cl = array("nombre_contacto_cliente"=>$data['nombre'],'telefono_contacto_cliente'=>$data['tel'],'email_cliente'=>$data['mail'],'tipo_cliente'=>'website','fecha_alta_cliente'=>date("Y-m-d"));
-      $new_id = $this->app_model->insert('cat_clientes',$cl);
-      $cli = $this->app_model->get_cliente_by_id($new_id);
-    }
-    //var_dump($data);
     // define tarifa segun tipo ****
+    $clid=$this->cmn_functs->check_cliente($data['nombre'],$data['tel'],$data['mail']);
+    $fecha = date('Y-m-d');
     switch ($data['tipo_servicio']) {
           case 'Paseo 1 hora':
             $tarifa_gen = $this->app_model->get_tarifa_by_srvsid(1);
             $tarifa= intval($tarifa_gen) - 20;
             $srvs_id = 1;
-            $fecha = date('Y-m-d');
-            $hay_servicios = $this->app_model->check_serv_exists($fecha);
-            if(empty($hay_servicios))
-               $this -> create_dia_servicios_regulares();
-            $venta_web_hs = $this -> app_model-> get_venta_ws_hs_id($fecha);
-            $histServiciosId = $venta_web_hs->id;
+            $hs_id = $this->cmn_functs->create_servicio($fecha,'-1',$srvs_id);
           break;
           case 'Paseo 2 horas':
             $tarifa_gen = $this->app_model->get_tarifa_by_srvsid(2);
             $tarifa= intval($tarifa_gen) - 20;
             $srvs_id = 2;
-            $fecha = date('Y-m-d');
-            $hay_servicios = $this->app_model->check_serv_exists($fecha);
-            if(empty($hay_servicios))
-               $this -> create_dia_servicios_regulares();
-            $venta_web_hs = $this -> app_model-> get_venta_ws_hs_id($fecha);
-            $histServiciosId = $venta_web_hs->id;
+            $hs_id = $this->cmn_functs->create_servicio($fecha,'-1',$srvs_id);
           break;
-          case 'Vinos y Estrellas':
-            $tarifa = $this->app_model->get_tarifa_by_srvsid(13);
-            $srvs_id = 13;
-            $histServiciosId = 96;
+          case 'Delta Night':
+            $tarifa = $this->app_model->get_tarifa_by_srvsid(14);
+            $srvs_id = 14;
+            $hs_id = 146;
           break;
     }    
-     
+    
+    
+ 
     $tkts = [
         'cantTickets'=>$data['cant'],
-        'fecha'=> date("Y-m-d"),
-        'tipo_comp' =>'VTA-WEBSITE',
+        'fecha'=> $fecha,
+        'tipos_comprobantes_id' => 7,
         'tarifa' => $tarifa,
         'chk_sel' =>'1',
         'servicios_id'=>$srvs_id,
-        'histServiciosId' => $histServiciosId,
-        'formaDePago'=>'MP',
+        'hist_servicio_id' => $hs_id,
+        'forma_pago'=>'MP',
         'status'=> $data['status'],
         'id_transaccion' => $data['id_transaccion'],
         'puntodeventa_id' =>'999',
-        'user_id'=>null,
-        'clientes_id'=>$cli->id_cliente
+        'clientes_id'=>$clid
       ]; 
     $result = $this -> app_model -> insert_tikets($tkts); 
     echo json_encode(array('result'=>$result));

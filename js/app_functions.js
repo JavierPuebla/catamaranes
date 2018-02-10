@@ -1,50 +1,97 @@
+// ADMINISTRACION *******
+
+function getAdmCmpts(flt){
+	var data = {
+		'fecIn':$('#dpk_desde_'+flt).find("input").val(),
+		'fecOut':$('#dpk_hasta_'+flt).find("input").val(),
+	}
+	var d={
+			data:data,
+			filter:flt,
+			url:"administracion/get_cmprb",
+			OkMsg: ""
+		}
+		callToServer(d);
+
+}
+
+
+function NewAdmCmpts(flt){
+	window.tcx.currId=null;
+	window.tcx.currAction = 'new'+flt;
+	// default values que deben dar false en validate func 
+	window.tcx.validateDefVals = {'dpkModalAdm':'','selectUsuario':0,'inpMonto':''};
+	$('#dpkModalAdm').data("DateTimePicker").minDate(moment("2000-01-01"));
+	$('#dpkModalAdm').data("DateTimePicker").date(new Date());
+	$("#modalTitle").html('Nuevo Ingreso');
+	$("#selectUsuario").val(0);
+	$("#selectTipoComprob").val((flt == '_vta'?2:8));
+	$("#selectFormaPago").val('EFVO');	
+	$("#inpMonto").val('');
+	$("#myModal").modal('show');
+
+}
+
+function updAdmCmpts(index,flt){
+	window.tcx.currAction = 'upd'+flt;
+	// default values que deben dar false en validate func 
+	window.tcx.validateDefVals = {'dpkModalAdm':'','selectUsuario':0,'inpMonto':''};
+	var itm = window.tcx.data[index];
+	window.tcx.currId = itm['id'];
+	console.log('it',itm);	
+	$("#modalTitle").html('Modificar Ingreso')
+	$('#dpkModalAdm').data("DateTimePicker").minDate(moment("2000-01-01"));
+	$('#dpkModalAdm').data("DateTimePicker").date(moment(itm.fecha));
+	$("#selectUsuario").val(itm.personal_id);
+	$("#selectTipoComprob").val(itm.tipos_comprobantes_id);
+	$("#selectFormaPago").val(itm.forma_pago);	
+	$("#inpMonto").val(parseFloat(itm.importe_neto));
+	$("#myModal").modal('show');	
+}
+
+
+function saveAdm(){
+	
+	var contrUrl = "administracion/"+window.tcx.currAction.slice(0,(window.tcx.currAction.indexOf("_")))+"_cmprb"; 
+	var f = window.tcx.currAction.substring(window.tcx.currAction.indexOf("_"));
+	var data = {
+			'id':window.tcx.currId,
+			'fecha':$('#dpkModalAdm').find("input").val(),
+			'personal_id':$('#selectUsuario').val(),
+			'tipos_comprobantes_id':$('#selectTipoComprob').val(),
+			'forma_pago':$('#selectFormaPago').val(),
+			'importe_neto':$('#inpMonto').val()
+		}
+	var d={
+			data:data,
+			filter:f,
+			url:contrUrl,
+			OkMsg: "Guardando..."
+		}
+	//console.log('d',d);
+	let lmts = {'dpkModalAdm':$('#dpkModalAdm').find("input").val(),'selectUsuario':$('#selectUsuario').val(),'inpMonto':$('#inpMonto').val()}
+	var errs = validateInputs(lmts);
+	if(!errs){callToServer(d)};
+}
+
+
+
+// END ADMINISTRACION 
+
 
 // TIKETS ********
-function getTkts(filter){
-	data = {
-		'fecIn':$('#dpk_tkts_desde_'+filter).find("input").val(),
-		'fecOut':$('#dpk_tkts_hasta_'+filter).find("input").val(),
-		'filter':filter
+function getTkts(flt){
+	var data = {
+		'fecIn':$('#dpk_tkts_desde_'+flt).find("input").val(),
+		'fecOut':$('#dpk_tkts_hasta_'+flt).find("input").val(),
 	}
-	$.blockUI({ message: null, baseZ: 10000  }); 
-	return $.ajax({
-		type : "POST",
-		url : "reportes/get_tkts",
-		data : data,
-		dataType : "json",
-		success : function(r) {
-				//r.result = false;
-				$.unblockUI(); 
-				// console.log('recieved',r.result)
-				if(r.result === false){
-					myAlert("#main_container","warning","Error!","No hay Tickets para el dia seleccionado.");
-				}else{
-					// respuesta ok de ajax
-					window.tcx.data = r.result
-					 console.log('tikets',r);
-					var screen = '<table class=\"table table-responsive table-striped table-hover\"><thead><tr>';
-					for (var i = 0; i < r.header.length; i++) {
-						screen += "<th>"+r.header[i]+"</th>";
-					}
-					screen += "</tr></thead><tbody>";
-					var totImporte = 0.00;
-					var totTikets = 0;
-					for (var i = 0; i < r.result.length; i++) {
-						screen += "<tr><td>"+moment(r.result[i].fecha).format("DD/MM/YYYY")+"</td><td>"+r.result[i].tipo+" - "+r.result[i].subtipo+"</td><td>"+r.result[i].hora_salida+"</td><td>"+r.result[i].cantkts+"</td><td>"+r.result[i].total+"</td></tr>";
-						totImporte += parseFloat(r.result[i].total);
-						totTikets +=parseInt(r.result[i].cantkts);
-					}
-					screen += "<tr class='active bordered'><th class='text-center' colspan='3'>TOTALES</th><th>"+totTikets+"</th><th>"+totImporte.toFixed(2)+"</th></tr>";
-					screen +="</tbody></table>";
-					$('#main_container_'+filter).html(screen);
-				}
-			},
-			error : function(xhr, ajaxOptions, thrownError) {
-				$.unblockUI();
-				myAlert("danger","Error","Error de comunicación...");
-				console.log('err:',xhr)
-			}
-		});
+	var d={
+			data:data,
+			filter:flt,
+			url:"reportes/get_tkts",
+			OkMsg: ""
+		}
+		callToServer(d);
 }
 
 function anularTicket(conf){
@@ -87,20 +134,20 @@ function emitirTks(){
 	
 	data = {
 		'cantTickets':$('#cantidadTks').val(),
-		'tipo_comp':"TIKET",
+		'tipo':"VTA-TIKET",
 		'servicios_id': window.tcx.selectedService.servicios_id,
 		'hora_salida':window.tcx.selectedService.hora,
 		'tarifa':window.tcx.selectedService.tarifa,
 		'chk_sel':($("#formaDePago option:selected").val() == "TARJETA" ||	 $("#chk_selected").prop('checked')?1:0),
-		'formaDePago':$("#formaDePago option:selected").val(),
-		'nroTransacTarjeta':$("#nroTransacTarjeta").val(),
-		'histServiciosId':window.tcx.selectedService.hsId,
+		'forma_pago':$("#formaDePago option:selected").val(),
+		'id_transaccion':($("#nroTransacTarjeta").val() == '' ? '0':$("#nroTransacTarjeta").val()),
+		'hist_servicio_id':window.tcx.selectedService.hsId,
 		'fecha':window.tcx.selectedService.fecha_servicio,
-		'user_id':window.tcx.user.id,
+		'usuarios_id':window.tcx.user.id,
 		'clientes_id':''
 	}
 
-	//console.log('sending data',data);
+	console.log('sending tkt data',data);
 	// show loading ....
 	$.blockUI({ message: null, baseZ: 10000  }); 
 
@@ -217,9 +264,10 @@ function serv_edit(i){
 	// console.log('serv edit',d.id)
 	$('#myModalOperTitle').html('Modificando Servicio dia: <strong>'+ $('#dpk_servicios').find("input").val()+'</strong>');
 	$("#selectServicioHoraSalida").val(d.salida_id);
-	$("#selectTipoPaseo").val(d.cod_tipo_subtipo_servicios);
-	$("#selectBarco").val(d.id_barco);
-	$("#selectServicioEstado").val(d.estado);
+	$("#selectTipoPaseo").val(d.id_servicios);
+	$barco = (d.id_barco <= 0)?0:d.id_barco;
+	$("#selectBarco").val($barco);
+	// $("#selectServicioEstado").val(d.estado);
 	$('#myModalTrpTitle').addClass('hidden');
 	$('#myModalTrpBody').addClass('hidden');	
 	$('#myModalOperBody').removeClass('hidden');
@@ -231,10 +279,10 @@ function setNewServicios(){
 	window.tcx.crtindex = -1;
 	// var d = window.tcx.data[i].servicio;
 	// console.log('serv edit',d.id)
-	$('#myModalOperTitle').html('Crear Servicio');
-	// $("#selectServicioHoraSalida").val();
-	// $("#selectTipoPaseo").val(d.cod_tipo_subtipo_servicios);
-	// $("#selectBarco").val(d.id_barco);
+	$('#myModalOperTitle').html('Crear Servicio para el dia: <strong>'+ $('#dpk_servicios').find("input").val()+'</strong>');
+	$("#selectServicioHoraSalida").val(0);
+	$("#selectTipoPaseo").val(0);
+	$("#selectBarco").val(0);
 	// $("#selectServicioEstado").val(d.estado);
 	$('#myModalTrpTitle').addClass('hidden');
 	$('#myModalTrpBody').addClass('hidden');	
@@ -292,7 +340,6 @@ function getServicios(){
 		data : data,
 		dataType : "json",
 		success : function(r) {
-				//r.result = false;
 				$.unblockUI(); 
 				console.log('recieved',r.result)
 				if(r.result === false){
@@ -307,7 +354,8 @@ function getServicios(){
 					}
 					screen += "</tr></thead><tbody>";
 					for (var i = 0; i < r.result.length; i++) {
-						screen += "<tr><td>"+moment(r.result[i].servicio.fecha_servicio).format("DD/MM/YYYY")+"</td><td>"+r.result[i].servicio.hora_salida+"</td><td>"+r.result[i].servicio.tipo+"</td><td>"+r.result[i].servicio.subtipo+"</td><td>"+r.result[i].servicio.estado+"</td><td>"+r.result[i].servicio.cant_pasajeros+"</td><td>"+r.result[i].servicio.barco+"</td><td>"+(r.result[i].tripulacion.length>0? "<a href=\"#\" title=\'Ver Tripulación\'><span class=\"glyphicon glyphicon-user\" aria-hidden=\"true\" onClick='show_tripl("+i+")'></span></a>" :'<span class="glyphicon glyphicon-minus" aria-hidden="true"></span>')+"</td><td><a href=\"#\" title=\'Editar Servicio\'><span class=\"glyphicon glyphicon-edit\" aria-hidden=\"true\" onClick='serv_edit("+i+")'></a></span></td></tr>";
+						// fix cantpax ****
+						screen += "<tr><td>"+moment(r.result[i].servicio.fecha_servicio).format("DD/MM/YYYY")+"</td><td class='text-center'>"+r.result[i].servicio.hora_salida+"</td><td>"+r.result[i].servicio.tipo+"</td><td>"+r.result[i].servicio.subtipo+"</td><td class='text-center'>"+r.result[i].servicio.comprobantes_cantpax+"</td><td class='text-center'>"+ (r.result[i].servicio.reservas_cantpax != null ?r.result[i].servicio.reservas_cantpax:'0') +"</td><td>"+(r.result[i].servicio.barco != null ? r.result[i].servicio.barco : '<span class="glyphicon glyphicon-minus" aria-hidden="true"></span>')+"</td><td class='text-center'>"+(r.result[i].tripulacion.length>0? "<a href=\"#\" title=\'Ver Tripulación\'><span class=\"glyphicon glyphicon-user\" aria-hidden=\"true\" onClick='show_tripl("+i+")'></span></a>" :'<span class="glyphicon glyphicon-minus" aria-hidden="true"></span>')+"</td><td class='text-center'><a href=\"#\" title=\'Editar Servicio\'><span class=\"glyphicon glyphicon-edit\" aria-hidden=\"true\" onClick='serv_edit("+i+")'></a></span></td></tr>";
 					}
 					screen +="</tbody></table>";
 					$('#main_container').html(screen);
@@ -324,12 +372,32 @@ function getServicios(){
 
 
 function guardaServ(){
+	// validate del modal de sericios
+	var notvalid = ($("#selectTipoPaseo").val() <= '0' || $("#selectServicioHoraSalida").val() <= '0' );
+	if(notvalid){
+		($('#selectTipoPaseo').val() <='0')?$('#fgTipoPaseo').addClass("has-error"):$('#fgTipoPaseo').removeClass("has-error");
+		($('#selectServicioHoraSalida').val() <='0')?$('#fgHoraSalida').addClass("has-error"):$('#fgHoraSalida').removeClass("has-error");
+		$('#modalFooterMsg').removeClass("label label-success glyphicon glyphicon-ok hidden")
+	 	$('#modalFooterMsg').addClass("label label-warning glyphicon glyphicon-remove hidden")
+		$('#modalFooterMsgtxt').html('<big>Error: Falta completar datos </big>');
+		$('#modalFooterMsg').removeClass('hidden')
+		console.log('returning sin send')
+		return false;
+	}
+	// clean last red item on modal when validated ok 
+	var items = new Array($('#fgHoraSalida'),$('#fgTipoPaseo'));
+	for (var i = items.length - 1; i >= 0; i--) {
+		items[i].removeClass("has-error");
+	}
+	$('#modalFooterMsgtxt').html('');
+	$('#modalFooterMsg').addClass('hidden');
+
 	if(window.tcx.crtindex === -1){
 		data = {
 		'fecha_servicio':$('#dpk_servicios').find("input").val(),
 		'horarios_id': $("#selectServicioHoraSalida").val(),
-		'cod_tipo_subtipo_servicios': $("#selectTipoPaseo").val(),
-		'estado': $("#selectServicioEstado").val(),
+		'servicios_id': $("#selectTipoPaseo").val(),
+		//'estado': $("#selectServicioEstado").val(),
 		'barcos_id': $("#selectBarco").val(),
 		'tripulacion':$("#selectTrpl").val().join(", ")
 		};
@@ -337,17 +405,17 @@ function guardaServ(){
 	}else{
 		data = {
 		'id':window.tcx.data[window.tcx.crtindex].servicio.id,
+		'fecha_servicio':$('#dpk_servicios').find("input").val(),
 		'horarios_id': $("#selectServicioHoraSalida").val(),
-		'cod_tipo_subtipo_servicios': $("#selectTipoPaseo").val(),
-		'estado': $("#selectServicioEstado").val(),
+		'servicios_id': $("#selectTipoPaseo").val(),
+		//'estado': $("#selectServicioEstado").val(),
 		'barcos_id': $("#selectBarco").val(),
 		'tripulacion':$("#selectTrpl").val().join(", ")
 		};
 		var method = "update";
 	}
-	
 
-	//console.log('sending data',data);
+	console.log('sending ops data',data);
 	// show loading ....
 	$.blockUI({ message: null, baseZ: 10000  }); 
 
@@ -358,7 +426,7 @@ function guardaServ(){
 	 	dataType : "json",
 	 	success : function(r) {
 	 		$.unblockUI(); 
-	 		 console.log('recieved',r)
+	 		 console.log('recieved from ops',r)
 	 		if(r.result === false){
 	 			$('#totImporte').html('');
 	 			$('#modalFooterMsg').removeClass("label label-success glyphicon glyphicon-ok hidden")
@@ -419,8 +487,6 @@ function getTarifas(){
 			}
 		});
 }
-
-
 
 function getReservas(fecha=null,scope_all='false'){
 	data = {'fecha':fecha,'scope_all':scope_all};	
@@ -509,11 +575,12 @@ function reservaEdit(index){
 	$('#reservas_btn_ok').html('Guardar');
 }
 
-function checkCantPaxReservas(){
-
-	 
-	var result = $.grep(window.tcx.tarifas, function(e){ console.log(e,$("#selectTipoPaseo").val());return e.id == $("#selectTipoPaseo").val()});
-	console.log('ta',result)
+function checkCantPaxReservas(updateDpdn){
+	if(updateDpdn){
+		updateHorariosDropdown('#selectHoraSalida','#selectTipoPaseo'); 	
+	}
+	var result = $.grep(window.tcx.tarifas, function(e){return e.id == $("#selectTipoPaseo").val()});
+	//console.log('ta',result)
 	var tot = (parseInt($("#inpCantPax").val()) * result[0].tarifa)- parseFloat($("#inpMontoPagado").val())
 	$("#inpMontoTotal").val(parseFloat(tot).toFixed(2));
 	//console.log('result',result[0].tarifa)
@@ -536,22 +603,30 @@ function handlerDeleteReserva(){
 
 function saveReserva(){
 	// validate del modal de reservas
-	var notvalid = ($("#inpCantPax").val() == '0' || $('#dpk_modal_reserva').find("input").val() == '' || $("#reservasAutocmpl").val().length < 3 || $("#imptEmailCli").val().indexOf("@") <= 0 );
+	var notvalid = ($("#selectTipoPaseo").val() <= '0' || $("#selectHoraSalida").val() <= '0' || $("#inpCantPax").val() == '0' || $('#dpk_modal_reserva').find("input").val() == '' || $("#reservasAutocmpl").val().length < 3 || $("#imptEmailCli").val().indexOf("@") <= 0 );
 	if(notvalid){
+		($('#selectTipoPaseo').val() <='0')?$('#fgTipoPaseo').addClass("has-error"):$('#fgTipoPaseo').removeClass("has-error");
+		($('#selectHoraSalida').val() <='0')?$('#fgHoraSalida').addClass("has-error"):$('#fgHoraSalida').removeClass("has-error");
 		($('#dpk_modal_reserva').find("input").val() =='')?$('#dpk_modal_reserva').addClass("has-error"):$('#dpk_modal_reserva').removeClass("has-error");
 		($("#inpCantPax").val() == '0')?$("#fgCantPax").addClass("has-error"):$("#fgCantPax").removeClass("has-error"); 
 		($("#reservasAutocmpl").val().length < 3)?$("#fgCliente").addClass("has-error"):$("#fgCliente").removeClass("has-error");
 		($("#imptEmailCli").val().indexOf("@") <= 0 )?$("#fgEmailCli").addClass("has-error"):$("#fgEmailCli").removeClass("has-error");
+		$('#modalFooterMsg').removeClass("label label-success glyphicon glyphicon-ok hidden")
+	 	$('#modalFooterMsg').addClass("label label-warning glyphicon glyphicon-remove hidden")
+		$('#modalFooterMsgtxt').html('<big>Error: Falta completar datos </big>');
+		$('#modalFooterMsg').removeClass('hidden')
 		console.log('returning sin send')
 		return false;
 	}
 	// clean last red item on modal when validated ok 
-	var items = new Array($('#dpk_modal_reserva'),$("#fgCantPax"),$("#fgCliente"),$("#fgEmailCli"));
+	var items = new Array($('#dpk_modal_reserva'),$("#fgCantPax"),$("#fgCliente"),$("#fgEmailCli"),$('#fgHoraSalida'),$('#fgTipoPaseo'));
 	for (var i = items.length - 1; i >= 0; i--) {
 		items[i].removeClass("has-error");
 	}
-
-	// ***** new or edit *********** 
+	$('#modalFooterMsgtxt').html('');
+	$('#modalFooterMsg').addClass('hidden');
+	
+	// ***** define new or edit before save *********** 
 	if(window.tcx.crtindex === -1){
 		data = {
 		'fecha_reserva':$('#dpk_modal_reserva').find("input").val(),
@@ -649,409 +724,153 @@ function myAlert(container,type,tit='',msg=''){
 
 }
 
-/**************
-///TODO VIEJO
-/************************************
-/************************************
-/************************************
-* DEFINICIONES ESTRUCTURAS Y OBJETOS
-************************************/
-//GLOBAL WRAPPER
-	var TOP = {};
-// funciones para usar con .sort()
-	var by = function (name) {
-	return function (o, p) {
-		var a, b;
-		if (typeof o === 'object' && typeof p === 'object' && o && p) {
-			a = o[name];
-			b = p[name];
-			if (a === b) {
-				return 0;
-			}
-			if (typeof a === typeof b) {
-				return a < b ? -1 : 1;
-			}
-			return typeof a < typeof b ? -1 : 1;
-		} else {
-			throw {
-				name: 'Error',
-				message: 'Expected an object when sorting by ' + name
-			};
-		}
-	};
-	};
-	var by2 = function (name, minor) {
-	return function (o, p) {
-		var a, b;
-		if (o && p && typeof o === 'object' && typeof p === 'object') {
-			a = o[name];
-			b = p[name];
-			if (a === b) {
-				return typeof minor === 'function' ? minor(o, p) : 0;
-			}
-			if (typeof a === typeof b) {
-				return a < b ? -1 : 1;
-			}
-			return typeof a < typeof b ? -1 : 1;
-		} else {
-			throw {
-				name: 'Error',
-				message: 'Expected an object when sorting by ' + name
-			};
-		}
-	};
-	};
-	// find if is an array
-	var isArray=function (value) {
-  	return value &&
-	  typeof value === 'object' &&
-	  typeof value.length === 'number' &&
-	  typeof value.splice === 'function' &&
-	  !(value.propertyIsEnumerable('length'));
-  };
-
-	/**************************
-	* SEPARADORDE MILES CON .
-	***************************/
-	function numberWithDots(x) {
-    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-	}
-
-	/*************************
-	* RAMDOM COLOR GENERATOR
-	**************************/
-	function getRandomColor() {
-    //var letters = '0123456789ABCDEF'.split('');
-		var letters = 'CA6B6667896C6D8E'.split('');
-    var color = '#';
-    for (var i = 0; i < 6; i++ ) {
-        color += letters[Math.floor(Math.random() * 16)];
-    }
-		return color;
-}
-
-function rgbToHex(r, g, b) {
-console.log('rgb',r,g,b);
-console.log('hex',"#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1));
-		return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
-}
-
-function pickHex(color1, color2, weight) {
-console.log('colors',color1,color2,weight);
-    var p = weight/100;
-    var w = p * 2 - 1;
-    var w1 = (w/1+1) / 2;
-    var w2 = 1 - w1;
-    var rgb = [Math.round(color1[0] * w1 + color2[0] * w2),
-        Math.round(color1[1] * w1 + color2[1] * w2),
-        Math.round(color1[2] * w1 + color2[2] * w2)];
-    return rgbToHex(rgb[0],rgb[1],rgb[2]);
-}
-
-// ******** asigna un color al porcetaje en el param
-function colortemp(percent){
-	var p=percent+Math.pow(percent,2)/100
-	p=(p>100)?80:p;
-	console.log('perce',percent);
-	console.log('p',p);
-	var c1=[20,230,20]
-	var c2=[230,20,20]
-	return pickHex(c1,c2,p)
-}
-	/******************
-	* KNOWLEDGE DATA STRUCT
-	*******************/
-	var knldg= function(d){
-  	this.stk = d
-	}
-	knldg.prototype.search = function (lbl,val) {
-		var res = function lp(s,lbl,val,i){
-			if(i === s.length){return}
-			else{
-				if(s[i][lbl] === val){return i}
-				else{return lp(s,lbl,val,i+1)}
-			}
-		}
-		return res(this.stk,lbl,val,0);
-		};
-
-		knldg.prototype.group = function (lbl,val) {
-			var gruped = []
-			var res = function lp(s,lbl,val,i){
-				if(i === s.length){return gruped}
-				else{
-					if(s[i][lbl] === val){return
-						gruped.push(s[i]);
-						s.slice(i,1)
-						return lp(s,lbl,val,0)
+function updateHorariosDropdown(target_elem,caller){
+	$(target_elem).val(0);
+		// ajax que llama a update_dropdown en reservas.php
+		$.blockUI({ message: null, baseZ: 10000  }); 
+		var data = {'serv_id':$(caller).val()}
+		
+		return $.ajax({
+	 	type : "POST",
+	 	url : "reservas/update_drop_down",
+	 	data : data,
+	 	dataType : "json",
+	 	success : function(r) {
+	 		$.unblockUI(); 
+	 		if(r.length > 0){
+	 			// respuesta ok de ajax
+				var elm = $(target_elem) 
+				for (var i = 0; i < elm[0].length; i++) {
+					elm[0][i].disabled = true;
+					for (var x = 0; x < r.length; x++) {
+						
+						if(elm[0][i].value == r[x]){console.log('cc',elm[0][i].value);elm[0][i].disabled = false}
 					}
-					else{return lp(s,lbl,val,i+1)}
 				}
 			}
-			return res(this.stk,lbl,val,0);
-			};
-
-
-/**ACTIONS******************************/
-/********************************************************
-* LLAMA A UN controler O EJECUTA UNA ACTION pasa un objeto con: los params necesarios controller , datos
-* recibe un objeto con action y datos
-*********************************************************/
-
-//controler,action,user,dat
-// function Do(d){
-// 	if(d.typeof != 'undefined' ){
-// 		if(d.hasOwnProperty('controller')){
-// 			myAlertLoader('show');
-// 			return $.ajax({
-// 				type : "POST",
-// 				url : d.controller,
-// 				data : d,
-// 				dataType : "json",
-// 				success : function(r) {
-// 					myAlertLoader('hide');
-// 					console.log(r)
-// 					//window[r.action](r);
-// 				},
-// 				error : function(xhr, ajaxOptions, thrownError) {
-// 					console.log('err:',xhr)
-// 					myAlertLoader('failed',thrownError);
-// 				}
-// 			});
-
-// 		}else{
-// 				console.log('action',d)
-// 				window[d.action](d);
-// 		}
-// 	}
-// }
-// muestra un item de la tabla layout
-function show(i){
-	//i es el layout item
-	// SI ES UNA TABLA
-	if(i.element === 'table'){
-		if(i.usertype == 'supervisor'){
-			i.elem_contentData=TOP[i.data_container].stk[TOP.selectedAgId].map(function(lstline,stki){return{'attrib':i.elem_attribs,'items':i.elem_cont_data_src.map(function(ds,idx){return contentsFilter({'origin':i.data_container,'rowIndex':stki,'colIndex':idx},{'content':lstline[ds.content],'src':ds.content})})}});
-		}else if (i.usertype == 'agent'){
-			i.elem_contentData=TOP[i.data_container].stk.map(function(lstline,stki){return{'attrib':i.elem_attribs,'items':i.elem_cont_data_src.map(function(ds,idx){return contentsFilter({'origin':i.data_container,'rowIndex':stki,'colIndex':idx},{'content':lstline[ds.content],'src':ds.content})})}});
+		},
+		error : function(xhr, ajaxOptions, thrownError) {
+				$.unblockUI();
 		}
-	}
+	});	
 
-	// SI ES EL COLLAPSE DE FAMILIAS DE PRODUCTOS U OTRO CON SUBSTACK
-	// agrega collapseLines que es un objeto knldg con los contenidos de la tabla
-	if(i.element === 'collapse'){
-			i.collapseLines = TOP[i.data_container].stk.map(function(prlne,stki){return {'id':prlne.famdat.prod_families_id,'heading':' '+prlne.famdat.description,'contnt':prlne.prdata.map(function(lstline,sbstki){return{'attrib':i.elem_attribs,'items':i.elem_cont_data_src.map(function(ds,idx){return contentsFilter({'origin':i.data_container,'stkIndx':stki,'substackIndx':sbstki,'colIndex':idx},{'content':lstline[ds.content],'src':ds.content})})}})}})
-	}
-	window['mk_'+i.element](i);
-	postElemCreationHook(i)
-}
-// hook after make
-function postElemCreationHook(i){
-	// SI EL EL TITULO DEL LISTADO DE PRODUCTOS AGREGO UNA COLUMNA DE TOTAL DEL PEDIDO
-	if(i.elem_id == 'prodsPanel'){
-		$('#pnlHeading_prodsPanel').append("<div class='text-right'><big><strong>Total pedido $:&nbsp; <span id=cartTotal>0.00</span></big></strong></div>")
-	}
-	if(i.elem_id == 'cliPanel'){
-		$('#col_visita').html("<div class='text'><strong>Selecciona Un Cliente para registrar la visita o guardar un pedido</strong></div>")
-	}
 }
 
-	/********************************************************
-	* CONTROLA Y MODIFICA  LOS DATOS EN dta ANTES DE PONER EL CONTENIDO EN PANTALLA
-	PARAM:
-	------
-	dtOrig Object {
-		origin: "prodsList",
-		stkIndx: 2,
-		substackIndx: 12,
-		colIndex: 4
+// obj con  nombre:value de los elementos a validar, compara contra los defaults 
+// seteados en window.tcx.validateDefVals 
+function validateInputs(arr){
+	var err = false; 
+	for (let [key, value] of Object.entries(arr)) {  
+  		$("#fg"+key).removeClass("has-error");
+	  	if(value == window.tcx.validateDefVals[key]){
+	  		$($("#fg"+key).addClass("has-error"));
+	  		err = true
+	  	}
 	}
-	dta Object {
-		content: "10",
-		src: "cant_available"
-	}
-	********************************************************/
-	//
-function contentsFilter(dtOrig,dta){
-	// FILTROS PARA AGENT VIEW ****
-	//DEL LISTADO DE CLIENTES
-	//pone el nombre del cliente en lugar del id de cliente
-	if(dtOrig.origin == 'agIdActs' && dtOrig.colIndex == 1){
-		//console.log(dta.content);
-		dta.content = (typeof(TOP.clientsList.search('client_id',dta.content)!='undefined'))?TOP.clientsList.stk[TOP.clientsList.search('client_id',dta.content)].RAZON_SOCIAL:[];
-	}
-	//pone el nombre del cliente en lugar del id de cliente
-	if(dtOrig.origin == 'contacts'  && dtOrig.colIndex == 1){
-		dta.content = (typeof(TOP.clientsList.search('client_id',dta.content)!='undefined'))?TOP.clientsList.stk[TOP.clientsList.search('client_id',dta.content)].RAZON_SOCIAL:[];
-	}
-	//FILTROS DEL LISTADO DE PRODUCTOS
-	// pone image icon y funcion de llamada a foto en la columna donde esta el nombre del archivo.jpg
-	if (dtOrig.origin == 'prodsList' && dtOrig.colIndex == 2 && dtOrig.hasOwnProperty('substackIndx') && typeof(dta.content) != 'undefined') {
-		dta.content = "<button onClick=\"show_foto(\'"+dta.content+"\',\'"+TOP[dtOrig.origin].stk[dtOrig.stkIndx].prdata[dtOrig.substackIndx].descript+"')\" type='button' class='btn btn-sm btn-default'><span class='glyphicon glyphicon-camera' aria-hidden='true'></span></button>";
-	}
-	// cant_available ES EL NUMERO DE ITEMS QUE LE PONGO A MAXITEMS EN EL CAMPO NUMERICO DE SELECCION
-	if(dtOrig.origin == 'prodsList' && dta.src == "cant_available"){
-		var inpId = 'inpCant_'+dtOrig.stkIndx+'-'+dtOrig.substackIndx
-		dta.content = "<input id=\'"+inpId+"\' class='form-control' style='padding:5px;width:55px;display:inline;' type='number' min='0' max='"+dta.content+"' step='1' value=0 onChange=update_cart(\'"+JSON.stringify(dtOrig)+"\')>"
-	}
-	return dta;
+	if(err){
+		$('#modalFooterMsg').removeClass("label label-success glyphicon glyphicon-ok hidden")
+	 	$('#modalFooterMsg').addClass("label label-warning glyphicon glyphicon-remove hidden")
+		$('#modalFooterMsgtxt').html('<big>Error: Falta completar datos </big>');
+		$('#modalFooterMsg').removeClass('hidden')
+		return true;
+	}else{
+		$('#modalFooterMsgtxt').html('');
+		$('#modalFooterMsg').addClass('hidden');
+		return false;	
+	}	
 }
 
-	/********************************************************
-	* Hook de los cliks en listados  lmId = clicked: clientsList_table_row_3
-	********************************************************/
-	function clickedHook(lmId){
-		//parsing datos del elemento para identificarlo
-		var list = lmId.slice(0,lmId.indexOf("_"));
-		var element = lmId.slice((lmId.indexOf("_")+1),lmId.lastIndexOf("_"));
-		var listAndElement = lmId.slice(0,lmId.lastIndexOf("_"));
- 		var elementIndx = lmId.slice(lmId.lastIndexOf("_")+1);
-		var clicked = {
-			'list': list,
-			'element':element,
-			'listElemIndx': elementIndx ,
-			//'source':TOP.currentLayout.stk[TOP.currentLayout.search('elem_id',list+'_table')],
-			//'currElem': TOP.currentLayout.stk[TOP.currentLayout.search('elem_id',list+'_table')],
-			'action':'resToClickOn_'+ lmId.slice((lmId.indexOf("_")+1),lmId.lastIndexOf("_"))
+
+//llama a controler/function en url pasa data y OkMsg el controller debe pasar callback jsfunction y params 
+function callToServer(d){
+	// show loading ....
+	// console.log('call', d)
+	$.blockUI({ message: null, baseZ: 10000  }); 
+	return $.ajax({
+	 	type : "POST",
+	 	url : d.url,
+	 	data : d,
+	 	dataType : "json",
+	 	success : function(r) {
+	 		if(r.result == 'error'){
+	 			$.unblockUI(); 
+	 			//$('#totImporte').html('');
+	 			$('#modalFooterMsg').removeClass("label label-success glyphicon glyphicon-ok hidden");
+	 			$('#modalFooterMsg').addClass("label label-warning glyphicon glyphicon-remove hidden");
+	 			$('#modalFooterMsgtxt').html('<big>Error de comunicación...</big>');					
+	 			$('#modalFooterMsg').removeClass('hidden');
+	 			setTimeout(function() {
+	 				$('#modalFooterMsg').addClass('hidden');
+	 			},2500);
+	 		}else{
+					// respuesta ok de ajax
+					
+					$('#modalFooterMsg').removeClass("label label-warning glyphicon glyphicon-remove hidden");
+					$('#modalFooterMsg').addClass("label label-success glyphicon glyphicon-ok hidden");
+					$('#modalFooterMsgtxt').html(d.OkMsg);					
+					$('#modalFooterMsg').removeClass('hidden');
+					setTimeout(function() {
+						$('#modalFooterMsg').addClass('hidden');
+						$.unblockUI(); 
+						$('#myModal').modal('hide');
+					},1000);
+					window[r.callback](r.clbkparam);
+				}
+		},
+		error : function(xhr, ajaxOptions, thrownError) {
+				$.unblockUI();
+				console.log('err:',xhr)
+				$('#modalFooterMsg').removeClass("label label-success glyphicon glyphicon-ok hidden");
+				$('#modalFooterMsg').addClass("label label-warning glyphicon glyphicon-remove hidden");
+				$('#modalFooterMsgtxt').html('Error de comunicación...');					
+				$('#modalFooterMsg').removeClass('hidden');
+				setTimeout(function() {
+					$('#modalFooterMsg').addClass('hidden');
+				},2500);
 		}
-		Do(clicked);
+	});
+
+}
+
+
+function mk_list(data){
+	switch(data.tpl){
+		case 'compras-ventas':
+			window.tcx.data = data.list_data;
+			console.log('en list',window.tcx.data);
+			var screen = '<table class=\"table table-responsive table-striped table-hover\"><thead><tr>';
+						for (var i = 0; i < data.header.length; i++) {
+							screen += "<th>"+data.header[i]+"</th>";
+						}
+						screen += "<th></th></tr></thead><tbody>";
+						var totImporte = 0.00;
+						for (var i = 0; i < data.list_data.length; i++) {
+							var flt = data.filter.slice(data.filter.indexOf("_"));
+							screen += "<tr><td>"+moment(data.list_data[i].fecha).format("DD/MM/YYYY")+"</td><td>"+data.list_data[i].nombre+"</td><td>"+data.list_data[i].nombre_usuario+" "+data.list_data[i].apellido_usuario+"</td><td>"+data.list_data[i].importe_neto+"</td><td>&nbsp;&nbsp;&nbsp;<a href=\"#\" title=\'Editar Registro\'><span class=\"glyphicon glyphicon-edit text-center\" aria-hidden=\"true\" onClick='updAdmCmpts("+i+",\""+flt+"\")'></a></span></td></tr>";
+							totImporte += parseFloat(data.list_data[i].importe_neto);
+						}
+						screen += "<tr class='active bordered'><th class='text-right' colspan='3'>TOTALES</th><th>"+totImporte.toFixed(2)+"</th><th></th></tr>";
+						screen +="</tbody></table>";
+						$('#main_container_'+data.filter).html(screen);
+			break;
+		case 'tkts':
+			var screen = '<table class=\"table table-responsive table-striped table-hover\"><thead><tr>';
+			for (var i = 0; i < data.header.length; i++) {
+				screen += "<th>"+data.header[i]+"</th>";
+			}
+			screen += "</tr></thead><tbody>";
+			var totImporte = 0.00;
+			var totTikets = 0;
+			for (var i = 0; i < data.list_data.length; i++) {
+				screen += "<tr><td>"+moment(data.list_data[i].fecha).format("DD/MM/YYYY")+"</td><td>"+data.list_data[i].tipo+" - "+data.list_data[i].subtipo+"</td><td>"+data.list_data[i].hora_salida+"</td><td>"+data.list_data[i].cantkts+"</td><td>"+data.list_data[i].total+"</td></tr>";
+				totImporte += parseFloat(data.list_data[i].total);
+				totTikets +=parseInt(data.list_data[i].cantkts);
+			}
+			screen += "<tr class='active bordered'><th class='text-center' colspan='3'>TOTALES</th><th>"+totTikets+"</th><th>"+totImporte.toFixed(2)+"</th></tr>";
+			screen +="</tbody></table>";
+			$('#main_container_'+data.filter).html(screen);
+			break;
 	}
 
-
-	/********************************************************
-	* EVENTOS
-	********************************************************/
-
-	function resToClickOn_table_row(o){
-		switch (o.list) {
-			case 'clientsList':
-			TOP.selectedCliAddrs = TOP[o.list].stk[o.listElemIndx];
-			// filtro el contacts stak
-			var fCont = TOP.contacts.stk.filter(function(e){return e.client_id == TOP[o.list].stk[o.listElemIndx].client_id});
-			var tgtElm = TOP.currentLayout.stk[TOP.currentLayout.search('elem_id','contacts_table')];
-			refresh_element(fCont,tgtElm);
-			//muestra el boto de registrar visita
-			$('#col_visita').html("<button type='button' id='bot_visita' class='btn btn-success' onCLick=regVisita() >Registrar Visita</button>");
-			break;
-			default:
-			break;
-		}
-	}
-	function resToClickOn_table_headCol(o){
-		TOP[o.list].stk.sort(by(TOP.currentLayout.stk[TOP.currentLayout.search('elem_id',o.list+'_table')].elem_cont_data_src[o.listElemIndx ].content));
-		refresh_element(TOP[o.list].stk,o.currElem);
-	}
-
-	//******************************************************
-	// REHACE EL ELEMENTO SELECCIONADO EN target CON newCnt
-	//******************************************************
-	//PARAMS: TOP
-	function refresh_element(newCnt,target){
-		target.elem_contentData = newCnt.map(function(nc,stki){return {'attrib': target.elem_attribs,'items':target.elem_cont_data_src.map(function(ds,idx){return contentsFilter({'origin':target.data_container,'rowIndex':stki,'colIndex':idx},{'content':nc[ds.content],'src':ds.content})})}});
-		$('#'+target.container_div_id).empty();
-		window['mk_'+target.element](target);
-	}
-
-	/****************************************************************************
-	* LOCAL STORAGE  FALTA IMPLEMENTAR mantiene la persistencia de los objetos
-	* convirtiendo a string y parseando a objetos tipo KNOWLEDGE (knldg)
-	*****************************************************************************/
-	function localSave(o){
-		if (typeof(localStorage) == 'undefined' ) {
-		 alert('Este browser no soporta localStorage. actualizar el browser para resolver este problema');
-	 	}else {
-		 	try {
-				 //localStorage.setItem('topStore', JSON.stringify(TOP)); //saves to the database, “key”, “value”
-				 localStorage.topStore = JSON.stringify(o);
-		 	}catch (e) {
-			 	if (e == QUOTA_EXCEEDED_ERR) {
-				 	alert('no hay mas espacio en localStorage!'); //data wasn’t successfully saved due to quota exceed so throw an error
-			 	}
-		 	}
-		}
-	}
-
-	function localRecover(o){
-		console.log('dd',JSON.parse(localStorage.getItem('topStore')));
-
-	}
-		 //var restoredSession = JSON.parse(localStorage.getItem('topStore'));
-	 //console.log('topstore',localStorage.getItem('topStore'));
-	//top store recovered
-	//var r = new knldg(JSON.parse(localStorage.getItem('topStore')).o)
-
-	//return r;
-	 //localStorage.removeItem('name'); //deletes the matching item from the database
-	 //localStorage.clear();
-
-
-	/********************************************************
-	* LIMPIA LA PANTALLA ANTES DE PONER EL NUEVO CONTENIDO
-	********************************************************/
-	function clean(target) {
-		switch(target){
-			case 'campaign':
-				// linpieza del layout de campaña
-				$('#clientsList').empty();
-				$('#productsList').empty();
-				$('#contactsPanel').empty();
-				$('#condicPanel').empty();
-				$('#col_visita').empty();
-
-			break;
-			case 'report':
-				$('#content_pnl_1').empty();
-				$('#content_pnl_2').empty();
-				$('#content_pnl_3').empty();
-				$('#content_pnl_4').empty();
-				$('#footer').empty();
-			break;
-			case 'dd':
-				//limpieza selectors content
-				$('#sel_potencias').empty();
-				$('#sel_sectors').empty();
-			break;
-			case 'gg':
-				$('#container').empty();
-		}
-	}
-	/*************************************
-	VENTANA DE MENSAJES Y LOADER DEL AJAX
-	A REEMPLAZR CON JQUERY BLOCKUI  
-	**************************************/
-	function myAlertLoader(state, msg){
-		var res=true;
-		if (typeof(msg)==='undefined') msg = '';
-		switch(state){
-			case 'ask':
-			$.fancybox("<div style='width:250px;margin-top:23px;'><div class='alert alert-success' role='alert'><button type='button' onClick=myAlertLoader('hide') class='close' aria-label='Close'><span aria-hidden='true'>&times;</span></button><strong>Success!&nbsp;</strong>"+msg+"</div></div>", {
-					modal : true,
-					});
-			break;
-			case 'show':
-			$.fancybox("<div style='margin:20px;'><img src='/ciparts/images/ajax-loader.gif' width='60' height='60' /></div>", {
-					modal : true,
-					});
-			break;
-			case 'hide':
-			$.fancybox.close();
-			break;
-			case 'success':
-			$.fancybox("<div style='width:250px;margin-top:23px;'><div class='alert alert-success' role='alert'><button type='button' onClick=myAlertLoader('hide') class='close' aria-label='Close'><span aria-hidden='true'>&times;</span></button><strong>Success!&nbsp;</strong>"+msg+"</div></div>", {
-					modal : true,
-					});
-			break;
-			case 'warning':
-			$.fancybox("<div style='width:250px;margin-top:23px;'><div class='alert alert-warning' role='alert'><button type='button' onClick=myAlertLoader('hide') class='close' aria-label='Close'><span aria-hidden='true'>&times;</span></button><strong>Warning!&nbsp;</strong>"+msg+"</div></div>", {
-					modal : true,
-					});
-			break;
-			case 'failed':
-			$.fancybox("<div style='width:250px;margin-top:23px;'><div class='alert alert-danger' role='alert'><button type='button' onClick=myAlertLoader('hide') class='close' aria-label='Close'><span aria-hidden='true'>&times;</span></button><strong>Failed!&nbsp;</strong>"+msg+"</div></div>", {
-					modal : true,
-					});
-			break;
-
-		}
-		return res;
-	}
+	
+}

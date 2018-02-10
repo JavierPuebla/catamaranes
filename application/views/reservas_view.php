@@ -61,18 +61,18 @@
 								<script type="text/javascript">$(function () { 
 									$('#dpk_modal_reserva').datetimepicker({ minDate:new Date(),locale: 'es',allowInputToggle: true, format: 'DD/MM/YYYY',showClear: true, showClose: true }); });</script>
 							</div>	
-							<div class="form-group col-md-4" id="fgHoraSalida" >
+							<div class="form-group col-md-4" id="fgTipoPaseo">
+			                    <label class="control-label" for="selectTipoPaseo" id="lblTipoPaseo">Tipo de Paseo:</label>
+			                  	<?php 
+			                    	$attr = "class='form-control' id='selectTipoPaseo' onchange=checkCantPaxReservas(true)";
+			                    	echo form_dropdown('tipo_serv',$tpserv,'',$attr) ;
+			                    	?>
+			                </div>
+			                <div class="form-group col-md-4" id="fgHoraSalida" >
 			                  <label class="control-label" for="selectHoraSalida" id="lblHoraSalida">Hora Salida:</label>
 			                  <?php 
 			                    	$attr = "class='form-control' id='selectHoraSalida' ";
 			                    	echo form_dropdown('serv_hora',$dpdown_hora,'',$attr) ;
-			                    	?>
-			                </div>
-			                <div class="form-group col-md-4">
-			                    <label class="control-label" for="selectTipoPaseo" id="lblTipoPaseo">Tipo de Paseo:</label>
-			                  	<?php 
-			                    	$attr = "class='form-control' id='selectTipoPaseo' onchange=checkCantPaxReservas()";
-			                    	echo form_dropdown('tipo_serv',$tpserv,'',$attr) ;
 			                    	?>
 			                </div>	
 						</div>
@@ -82,11 +82,11 @@
 						<div class="panel-body">
 							<div class="form-group col-md-4" id="fgCantPax" >
 			                  <label class="control-label" for="inpCantPax" id="lblCantPax">Cantidad pasajeros</label>
-			                  <input class="form-control" id="inpCantPax" onchange="checkCantPaxReservas()" type="number" placeholder="ingresar cantidad pax" min="0">
+			                  <input class="form-control" id="inpCantPax" onchange="checkCantPaxReservas(false)" type="number" placeholder="ingresar cantidad pax" min="0">
 			                </div>
 			                <div class="form-group col-md-4">
 			                  <label class="control-label" for="inpMontoPagado" id="lblMontoPagado">Pagado </label>
-			                  <input class="form-control" id="inpMontoPagado" type="number" placeholder="ingresar monto en pesos" min="0" onchange="checkCantPaxReservas()">
+			                  <input class="form-control" id="inpMontoPagado" type="number" placeholder="ingresar monto en pesos" min="0" onchange="checkCantPaxReservas(false)">
 			                </div>
 			                <div class="form-group col-md-4" >
 			                  <label class="control-label" for="inpMontoTotal" id="lblMontoTotal">Saldo</label>
@@ -128,7 +128,7 @@
 						<big><strong><span id="modalFooterMsg"><span id="modalFooterMsgtxt" class="centered"></span> </span></strong></big>	
 					</div>
 					<div class="col-md-6">
-						<!-- <button type="button " class="btn btn-primary " data-dismiss="modal">Ok</button> -->
+						<button type="button " class="btn btn-default " data-dismiss="modal">Cancelar</button>
 						<button type="button" id="reservas_btn_ok" onclick="saveReserva()" class="btn btn-primary">Guardar</button>	
 					</div>
 				</div>

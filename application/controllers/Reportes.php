@@ -7,6 +7,7 @@ class Reportes extends CI_Controller {
 
     $this -> load -> model('app_model');
     $this->load->helper('array');
+     $this->load->library('cmn_functs');
     // Establecer la zona horaria predeterminada a usar. Disponible desde PHP 5.1
     date_default_timezone_set('America/Argentina/Buenos_Aires');
 
@@ -26,7 +27,7 @@ class Reportes extends CI_Controller {
       
       $fechin = date("Y-m-d");
       $fechout =date("Y-m-d");
-      $filter = "AND c.tipo = 'TIKET' AND c.estado_comprobantes = '1'";
+      $filter = "AND c.tipo = 'VTA-TIKET' AND c.estado_comprobantes = '1'";
       $tikets = $this-> app_model -> get_tkts_by_date($fechin,$fechout,$filter);
      
       
@@ -59,32 +60,27 @@ fecha_servicio:
   
   
   function get_tkts(){
-    $fin=$this->input->post('fecIn');
-    $fout=$this->input->post('fecOut');
-    $filter=$this->input->post('filter');
+    $data = $this->input->post('data');
+    $fin=$this->cmn_functs->fixdate_ymd($data['fecIn']);
+    $fout=$this->cmn_functs->fixdate_ymd($data['fecOut']);
+    $myfilter=$this->input->post('filter');
     $f='';
-     
-     switch ($filter) {
-      case 'venta_online':
-        $f = "AND c.tipo = 'VTA-WEBSITE' AND c.estado_comprobantes = '1'";
+     switch ($myfilter) {
+      case 'vta_oln':
+        $f = "AND c.tipos_comprobantes_id = '7' AND c.estado_comprobantes = '1'";
         break;
-      case 'all':
-        $f = "AND c.tipo = 'TIKET' AND c.estado_comprobantes = '1'";
+      case '_all':
+        $f = "AND c.tipos_comprobantes_id <= '6' AND c.estado_comprobantes = '1'";
         break;
       
       default:
-        $f = "AND c.tipo = 'TIKET' AND c.estado_comprobantes = '1'";
+        $f = "AND c.tipos_comprobantes_id <= '6' AND c.estado_comprobantes = '1'";
         break;
     }
-
     $header = ['Fecha','Servicio',' Hora','Cantidad Tickets','Total $'];
-    $tikets = $this-> app_model -> get_tkts_by_date($this->fixdate_ymd($fin),$this->fixdate_ymd($fout),$f);
-    echo json_encode(array('result'=>$tikets,'header'=>$header));
+    $tkts = $this-> app_model -> get_tkts_by_date($fin,$fout,$f);
+    $clbkparams=(array('header'=>$header,'filter'=>
+    $myfilter,'list_data'=>$tkts,'tpl'=>'tkts'));
+    echo json_encode(array('result'=>'ok','callback'=>'mk_list','clbkparam'=>$clbkparams));
   }
-
-  function fixdate_ymd($dt){
-    return substr($dt,strrpos($dt,'/')+1).'-'.substr($dt,strpos($dt,'/')+1,2).'-'.substr($dt,0,strpos($dt,'/'));
-  }
-
-
 }

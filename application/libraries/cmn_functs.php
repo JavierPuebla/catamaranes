@@ -13,7 +13,7 @@ class Cmn_functs {
                 $this->CMF ->load -> model('app_model');
         }
 
-
+  // ***** obtiene la data para el dropdown de la tabla asignada
   function mk_dpdown($tbl,$fields,$modif){
     $d = $this ->CMF ->app_model -> get_dpdown_data($tbl,implode(',',$fields),$modif);
     $r=[];
@@ -41,15 +41,33 @@ class Cmn_functs {
   }
 
 
-  function check_historial_servicios($fecha,$horarios_id,$servicios_id){
+  function create_servicio($fecha,$horarios_id,$servicios_id){
     $hs_id = $this ->CMF->app_model->check_hs_exist($fecha,$horarios_id,$servicios_id);
     if(empty($hs_id)){
-      $hs_id = $this ->CMF->app_model->insert('cat_historial_servicios',array('fecha_servicio'=>$fecha,'horarios_id'=>$horarios_id,'servicios_id'=>$servicios_id,'estado'=>'D'));
+      $hs_id = $this ->CMF->app_model->insert('cat_historial_servicios',array('fecha_servicio'=>$fecha,'horarios_id'=>$horarios_id,'servicios_id'=>$servicios_id));
       return $hs_id;  
     }
     return $hs_id->id;
-
   }
+
+
+
+  function create_dia_servicios_regulares($fecha){
+    foreach ($this->CMF->app_model->get_horarios("AND id > '0'") as $h) {
+        $hrtoserv = explode(',', $h['disp_servicios_id']);
+      foreach ($hrtoserv as $serv_id) {
+        $stru['fecha_servicio']= $fecha;
+        $stru['hora_salida'] = $h['id']; 
+        $stru['servicios_id']=$serv_id;
+        if($serv_id == '1' || $serv_id == '2')
+          $this ->create_servicio($fecha,$h['id'],$serv_id);
+      }
+      
+
+    } 
+  }
+
+
 
   function fixdate_ymd($dt){
     if(strpos($dt,'/') >0)

@@ -14,7 +14,7 @@
 					<?php 
 					foreach ($acts as $v) {
 						$acc = $this->app_model->get_acciones($v);
-						echo "<li><a href='{$acc['clase']}'>{$acc['nombre']}</a></li>";
+						echo "<li><a href='{$acc['controller']}'>{$acc['nombre']}</a></li>";
 					};
  					?>
 					<!-- 

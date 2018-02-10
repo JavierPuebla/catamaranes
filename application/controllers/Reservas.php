@@ -24,7 +24,7 @@ class Reservas extends CI_Controller {
     
       $user_data = $this -> app_model -> get_user_data($user['userId']);
       $hoy = Date("d/m/Y");
-      $hora = $this ->cmn_functs->mk_dpdown('cat_horarios',['id','hora_salida'],'WHERE disponible = \'S\' AND id > 0 ORDER BY id ASC');
+      $hora = $this ->cmn_functs->mk_dpdown('cat_horarios',['id','hora_salida'],'WHERE disponible = \'S\' AND id > -1 ORDER BY id ASC');
       $tpserv = $this ->cmn_functs->mk_dpdown('cat_servicios',['id','tipo','subtipo'],'GROUP BY cod_tipo_subtipo ASC');
 
 
@@ -47,7 +47,7 @@ class Reservas extends CI_Controller {
   public function create(){
     $data = $this->input->post();
     $data['fecha_reserva'] = $this->cmn_functs->fixdate_ymd($data['fecha_reserva']);
-    $hs_id = $this->cmn_functs->check_historial_servicios($data['fecha_reserva'],$data['horarios_id'],$data['servicios_id']);
+    $hs_id = $this->cmn_functs->create_servicio($data['fecha_reserva'],$data['horarios_id'],$data['servicios_id']);
     $clid=$this->cmn_functs->check_cliente($data['nombre_contacto_cliente'],$data['telefono_contacto_cliente'],$data['email_cliente']);
     $tsave = array(
         'clientes_id'=>$clid,
@@ -84,6 +84,20 @@ class Reservas extends CI_Controller {
 
   }
   
+  public function update_drop_down(){
+     $h = $this->app_model->get_horarios();
+     $res = array();
+     foreach ($h as $hr) {
+        $hrtoserv = explode(',', $hr['disp_servicios_id']);
+        foreach ($hrtoserv as $d) {
+          if($d == $this->input->post('serv_id') && $hr['id']>0)
+            $res[]=$hr['id'];    
+        }
+        
+      } 
+    echo json_encode($res);
+  }
+
   public function get_tarifas(){
     $result= $this->app_model->get_tarifas();
     echo json_encode(array('tarifas'=>$result));

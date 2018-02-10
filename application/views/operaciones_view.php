@@ -38,40 +38,40 @@
 				<div class="modal-body" id="myModalOperBody">
 					<div class="panel panel-default">
 						<div class="panel-body">
-							<div class="form-group col-md-3" id="fgHoraSalida" >
+							<div class="form-group col-md-5" id="fgTipoPaseo">
+			                    <label class="control-label" for="selectTipoPaseo" id="lblTipoPaseo">Tipo de Paseo:</label>
+			                  	<?php 
+			                    	$attr = "class='form-control' id='selectTipoPaseo' onChange=updateHorariosDropdown('#selectServicioHoraSalida','#selectTipoPaseo')";
+			                    	echo form_dropdown('tipo_serv',$tiposerv_dpdown_data,'',$attr) ;
+			                    ?>
+			                </div>
+							<div class="form-group col-md-5" id="fgHoraSalida" >
 			                  <label class="control-label" for="selectServicioHoraSalida" id="lblHoraSalida">Hora Salida:</label>
 			                 	<?php 
 			                    	$attr = "class='form-control' id='selectServicioHoraSalida' ";
 			                    	echo form_dropdown('serv_hora',$dpdown_hora,'',$attr) ;
 			                    	?>
 			                </div>
-			                <div class="form-group col-md-5">
-			                    <label class="control-label" for="selectTipoPaseo" id="lblTipoPaseo">Tipo de Paseo:</label>
-			                  		
-			                    <?php 
-			                    	$attr = "class='form-control' id='selectTipoPaseo' ";
-			                    	echo form_dropdown('tipo_serv',$tiposerv_dpdown_data,'',$attr) ;
-			                    ?>
-			                </div>
-			                <div class="form-group col-md-4">
+			                
+			               <!--  <div class="form-group col-md-3">
 			                	<label class="control-label" for="selectServicioEstado" id="lblTipoPaseo">Estado:</label>
 			                	<select class="form-control" id="selectServicioEstado">
 			                        <option value="D">Disponible</option>
 			                        <option value="S">Suspendido</option>
 			                    </select>
-			                </div>	
+			                </div>	 -->
 						</div>
 					</div>
 					<div class="panel panel-default">
 						<div class="panel-body">
-							<div class="form-group col-md-4" >
+							<div class="form-group col-md-5" >
 								<label class="control-label" for="selectBarco" >Barco:</label>
 				                  	<?php 
 			                    	$attr = "class='form-control' id='selectBarco' ";
 			                    	echo form_dropdown('dpdown_barco',$dpdown_barco,'',$attr) ;
 			                    	?>
 				            </div>
-				            <div class="form-group col-md-8" >
+				            <div class="form-group col-md-7" >
 								<label class="control-label" for="selectTrpl" >Tripulación:</label>
 				                  	<?php 
 			                    	$attr = "class='form-control' id='selectTrpl' ";

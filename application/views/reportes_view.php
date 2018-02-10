@@ -5,15 +5,15 @@ $.blockUI({ message: null,
 <div class="bs-component">
 	<div class="container" id='mainContainer'>
 		<ul class="nav nav-tabs">
-		  <li id="init"><a href="#hoy" data-toggle="tab">Tickets Hoy</a></li>
-		  <li ><a href="#venta_online" data-toggle="tab">Venta Online</a></li>
+		  <!-- <li ><a href="#hoy" data-toggle="tab">Tickets Hoy</a></li> -->
+		  <li id="init"><a href="#venta_online" data-toggle="tab">Venta Online</a></li>
 		  <li ><a href="#historico" data-toggle="tab">General</a></li>
   
 		</ul>
-		<div id="myTabContent" class="tab-content">
+		<!-- <div id="myTabContent" class="tab-content">
 			<div class="tab-pane fade active in" id="hoy">
-		   	
-			   	<table class="table table-bordered table-responsive table-striped table-hover">
+		 -->   	
+			   	<!-- <table class="table table-bordered table-responsive table-striped table-hover">
 						<thead>
 							<tr>
 								<?php 
@@ -32,48 +32,50 @@ $.blockUI({ message: null,
 								$totImporte = 0;
 								$it='';
 								foreach ($data as $itm) {
-									$totTikets += $itm['servicio']['cantkts'];
-									$totImporte += $itm['servicio']['total'];
-									$f = new DateTime($itm['servicio']['fecha']);
+									$totTikets += $itm['cantkts'];
+									$totImporte += $itm['total'];
+									$f = new DateTime($itm['fecha']);
 									$fecha = $f ->format("d/m/Y");
-									$it .="<tr><td>{$fecha}</td><td>{$itm['servicio']['tipo']}&nbsp;{$itm['servicio']['subtipo']}</td><td>{$itm['hora']}</td><td class='text-right'>{$itm['servicio']['cantkts']}</td><td class='text-right'>".number_format($itm['servicio']['total'],2)."</td></tr>";		
+									$it .="<tr><td>{$fecha}</td><td>{$itm['tipo']}</td><td>{$itm['hora_salida']}</td><td class='text-right'>{$itm['cantkts']}</td><td class='text-right'>".number_format($itm['total'],2)."</td></tr>";		
 								}
 								$it .="<tr class='active bordered'><th colspan='3'>TOTALES</th><th class='text-right'>{$totTikets}</th><th class='text-right'>".number_format($totImporte,2)."</th></tr>";
 								echo $it;
 							 ?>
 						</tbody>
-				</table> 
-		  	</div>
-			<div class="tab-pane fade" id="venta_online">
+				</table> --> 
+
+
+		  	<!-- </div> -->
+			<div class="tab-pane fade active in" id="venta_online">
 		    	<div class="panel panel-default">
 					<div class="panel-heading">
 						<h3 class="panel-title">
 							<div class='form-inline '>
 								<div class="form-group">
-									<label for="dpk_tkts_desde_venta_online"><h4>Listado Venta Online desde:</h4></label>
-									<div class='input-group date' id='dpk_tkts_desde_venta_online'>
+									<label for="dpk_tkts_desde_vta_oln"><h4>Listado Venta Online desde:</h4></label>
+									<div class='input-group date' id='dpk_tkts_desde_vta_oln'>
 										<input type='text' class="form-control" />
 										<span class="input-group-addon">
 											<span class="glyphicon glyphicon-calendar"></span>
 										</span>
 									</div>
-									<script type="text/javascript">$(function () { $('#dpk_tkts_desde_venta_online').datetimepicker({ locale: 'es', allowInputToggle: true, format: 'DD/MM/YYYY',showClear: true, showClose: true }); });</script>
+									<script type="text/javascript">$(function () { $('#dpk_tkts_desde_vta_oln').datetimepicker({ locale: 'es', allowInputToggle: true, format: 'DD/MM/YYYY',showClear: true, showClose: true }); });</script>
 								</div>
 								<div class="form-group">
-									<label for="dpk_tkts_hasta_venta_online"><h4>&nbsp;Hasta:</h4></label>
-									<div class='input-group date' id='dpk_tkts_hasta_venta_online'>
+									<label for="dpk_tkts_hasta_vta_oln"><h4>&nbsp;Hasta:</h4></label>
+									<div class='input-group date' id='dpk_tkts_hasta_vta_oln'>
 										<input type='text' class="form-control" />
 										<span class="input-group-addon">
 											<span class="glyphicon glyphicon-calendar"></span>
 										</span>
 									</div>
-									<script type="text/javascript">$(function () { $('#dpk_tkts_hasta_venta_online').datetimepicker({ locale: 'es', allowInputToggle: true, format: 'DD/MM/YYYY',showClear: true, showClose: true }); });</script>
+									<script type="text/javascript">$(function () { $('#dpk_tkts_hasta_vta_oln').datetimepicker({ locale: 'es', allowInputToggle: true, format: 'DD/MM/YYYY',showClear: true, showClose: true }); });</script>
 								</div>
-								<button type="button" class="btn btn-primary" onclick="getTkts('venta_online')" >Buscar</button>
+								<button type="button" class="btn btn-primary" onclick="getTkts('vta_oln')" >Buscar</button>
 							</div>
 						</h3>
 					</div>
-					<div class="panel-body fixed-scrolable" id="main_container_venta_online" ></div>
+					<div class="panel-body fixed-scrolable" id="main_container_vta_oln" ></div>
 				</div>
 			</div>
 		  	<div class="tab-pane fade" id="historico">
@@ -152,6 +154,8 @@ $.blockUI({ message: null,
 </div>
 <script type="text/javascript">
 	$( window ).load(function() {
+		// padding para fixed-top navbar ********
+		$("body").attr({style: 'padding-top: 70px;'});  
 		// Top context
 		window.tcx = {'userId':<?php echo json_encode($user); ?>};
 
@@ -159,8 +163,12 @@ $.blockUI({ message: null,
 		 $('#init').addClass('active');
 		 $.unblockUI();
 
-		// padding para fixed-top navbar ********
-		$("body").attr({style: 'padding-top: 70px;'});  
+		
+
+		var date = new Date(), y = date.getFullYear(), m = date.getMonth(), d = date.getDate();
+		$("#dpk_tkts_desde_vta_oln").data("DateTimePicker").date(new Date(y, m-1, d));
+		$("#dpk_tkts_hasta_vta_oln").data("DateTimePicker").date(new Date());
+		getTkts('vta_oln')
 	});
 </script>
 </html>
