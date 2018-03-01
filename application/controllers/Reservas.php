@@ -15,37 +15,47 @@ class Reservas extends CI_Controller {
   }
 
   public function index() {
+    $cls_name = 'reservas';
+    // ****** TABLA DE PERSISTENCIA DE DATOS DE LA CLASE 
+    $table = 'cat_reservas';
+    // ****** RUTA DE ACCESO DEL CONTROLLER
+    $route = 'reservas/';
+    // ****** ******************  
+
     $user = $this -> session -> userdata('logged_in');
     if (is_array($user)) {
-      
-    // ****** NAVBAR ********
+
+      // ****** NAVBAR ********
       $userActs = $this -> app_model -> get_activities($user['userId']);
       $acts = explode(',',$userActs['acciones_id']);
-    
+
+      // ************  INIT DATA PARA EL VIEW *********** 
       $user_data = $this -> app_model -> get_user_data($user['userId']);
       $hoy = Date("d/m/Y");
-      $hora = $this ->cmn_functs->mk_dpdown('cat_horarios',['id','hora_salida'],'WHERE disponible = \'S\' AND id > -1 ORDER BY id ASC');
-      $tpserv = $this ->cmn_functs->mk_dpdown('cat_servicios',['id','tipo','subtipo'],'GROUP BY cod_tipo_subtipo ASC');
-
+      $hora = $this ->cmn_functs->mk_dpdown('cat_horarios',['id','hora_salida'],'WHERE disponible = \'S\' AND id > -1 ORDER BY id ASC','selecciona un horario');
+      $tpserv = $this ->cmn_functs->mk_dpdown('cat_servicios',['id','tipo','subtipo'],'ORDER BY id ASC','selecciona un paseo');
+      $servicios_abordo_reserva = $this ->cmn_functs->mk_dpdown('cat_servicios_abordo_reserva',['id','nombre'],'ORDER BY id ASC','selecciona un servicio');
 
       $var=array(
         'data'=> '',
         'dpdown_hora'=> $hora,
         'tpserv'=> $tpserv,
+        'servicios_abordo_reserva'=>$servicios_abordo_reserva,
         'fecha'=> $hoy,
-        'user'=> $user
+        'user'=> $user,
+        'route'=>$route
       );
 
-        $this -> load -> view('header-responsive');
-        $this -> load -> view('navbar',array('acts'=>$acts,'username'=>$user_data['usr_usuario']));
-        $this -> load -> view('reservas_view',$var);
+      $this -> load -> view('header-responsive');
+      $this -> load -> view('navbar',array('acts'=>$acts,'username'=>$user_data['usr_usuario']));
+      $this -> load -> view($cls_name.'_view',$var);
     } else {
       redirect('login', 'refresh');
     }
   }
 
   public function create(){
-    $data = $this->input->post();
+    $data = $this->input->post('data');
     $data['fecha_reserva'] = $this->cmn_functs->fixdate_ymd($data['fecha_reserva']);
     $hs_id = $this->cmn_functs->create_servicio($data['fecha_reserva'],$data['horarios_id'],$data['servicios_id']);
     $clid=$this->cmn_functs->check_cliente($data['nombre_contacto_cliente'],$data['telefono_contacto_cliente'],$data['email_cliente']);
@@ -58,50 +68,81 @@ class Reservas extends CI_Controller {
         'monto_total_reserva'=>$data['monto_total_reserva'],
         'observaciones_reserva'=>$data['observaciones_reserva'],
         'usuarios_id'=>$data['usuarios_id'],
-
+        // 'servicios_abordo_reserva'=>$data['servicios_abordo_reserva']
     );
     $result = $this -> app_model -> insert('cat_reservas',$tsave); 
-    echo json_encode(array('result'=>$result,'fecha'=>$data['fecha_reserva']));
-  }
-  
-
-  public function update(){
-    $this->app_model->delete('cat_reservas','id_reserva',$this->input->post('id'));
-    if($this->input->post('eliminar_reserva') == 'false'){
-      $this->create();
-    }else{
-      echo json_encode(array('result'=>'delete OK','fecha'=> $this->input->post('fecha_reserva')));  
-    }
+    echo json_encode(array(
+                        'callback'=>'getReservas',
+                        'clbkparam'=> array(
+                          'fecha'=>$data['fecha_reserva'],   
+                          'scope'=>'day'
+                        )
+                      )
+                    );
     
   }
+  
+  public function update(){
+    $d = $this->input->post('data');
+    $this->app_model->delete('cat_reservas','id',$d['id']);
+    if($this->input->post('eliminar_reserva') != 'true'){
+      $this->create();
+    }else{
+      echo json_encode(array(
+                        'callback'=>'getReservas',
+                        'clbkparam'=> array(
+                          'fecha'=>$d['fecha_reserva'],   
+                          'scope'=>'day'
+                        )
+                      )
+                    );
+    }
+  }
+  
+  function upd(){
+    $p = $this->input->post();
+    if($p['deleterec'] == 'true'){
+      $this->app_model -> delete($p['info']['msg'],'id',$p['id']);  
+    }else{
+      $result = $this -> app_model -> update($p['info']['msg'],$p['data'],'id',$p['id']);    
+    }
+    echo json_encode(array(
+                        'callback'=>'call',
+                        'param'=>$p['info']
 
-  public function list_reservas_dia(){
-    $data = $this->input->post();
-    $date = $this->cmn_functs->fixdate_ymd($data['fecha']);
-    $result = $this -> app_model -> get_reservas_bydate($date,$data['scope_all']); 
-    $header = ['fecha', 'Hora Salida','Tipo','Subtipo','Cant Pax','Seña','Saldo','Barco','Operador','Observac','Acc.'];
-    echo json_encode(array('header'=>$header,'result'=>$result));
+                      )
+                    );
+  }
 
+  function meet(){
+    $p = $this->input->post('msg');
+    $date = $this->cmn_functs->fixdate_ymd($p['fecha']);
+    $recs = $this ->app_model->get_reservas_bydate($date,$p['scope']);
+    $ld = $this->cmn_functs->set_daos($recs);
+    echo json_encode(array(
+                      'info'=>$this->input->post(),
+                      'callback'=>'dao_mk_list',
+                      'param'=>array('list_data'=>$ld)
+                      )
+                    );
   }
   
   public function update_drop_down(){
-     $h = $this->app_model->get_horarios();
-     $res = array();
-     foreach ($h as $hr) {
-        $hrtoserv = explode(',', $hr['disp_servicios_id']);
-        foreach ($hrtoserv as $d) {
-          if($d == $this->input->post('serv_id') && $hr['id']>0)
-            $res[]=$hr['id'];    
-        }
-        
-      } 
+    $h = $this->app_model->get_horarios();
+    $res = array();
+    foreach ($h as $hr) {
+      $hrtoserv = explode(',', $hr['disp_servicios_id']);
+      foreach ($hrtoserv as $d) {
+        if($d == $this->input->post('serv_id') && $hr['id']>0)
+          $res[]=$hr['id'];    
+      }
+    } 
     echo json_encode($res);
   }
 
   public function get_tarifas(){
     $result= $this->app_model->get_tarifas();
     echo json_encode(array('tarifas'=>$result));
-
   }
 
   public function autocomplete_clientes(){
@@ -110,13 +151,14 @@ class Reservas extends CI_Controller {
     // echo json_encode(Array('label'=>$r['label'],'value'=> $r));
     //echo json_encode($r);
     foreach($r as $key => $value){
-        $res[] = array('label'=>$value['nombre_contacto_cliente'],
-                       'value'=>$value['nombre_contacto_cliente'],
-                       'email'=>$value['email_cliente'],
-                       'tel'=> $value['telefono_contacto_cliente'],
-                       'id_cliente'=> $value['id_cliente']
-                     );
-        }
-        echo json_encode($res);
+      $res[] = array('label'=>$value['nombre_contacto_cliente'],
+        'value'=>$value['nombre_contacto_cliente'],
+        'email'=>$value['email_cliente'],
+        'tel'=> $value['telefono_contacto_cliente'],
+        'id'=> $value['id']
+      );
+    }
+    echo json_encode($res);
   }
+// END *************************************************
 }

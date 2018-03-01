@@ -12,12 +12,12 @@ class Webtickets extends CI_Controller {
 
   public function index() {
     $user = $this -> session -> userdata('logged_in');
-    $user_data = array('id_usuario'=>999,'tipo_usuario'=>'web');
-    if ($user_data['id_usuario'] == 999) {
+    $user_data = array('id'=>999,'tipo_usuario'=>'web');
+    if ($user_data['id'] == 999) {
       // ****** GET SERVICIOS DISPONIBLES put it into var
      $fecha = Date('Y-m-d');
        $servicios = $this->get_serv_disponibles($fecha);
-        $var=array('data'=>$servicios,'user'=>array('id'=>$user_data['id_usuario'],'tipo'=>$user_data['tipo_usuario']));
+        $var=array('data'=>$servicios,'user'=>array('id'=>$user_data['id'],'tipo'=>$user_data['tipo_usuario']));
         $this -> load -> view('header-responsive');
         $this -> load -> view('webtickets_view',$var);
     } else {

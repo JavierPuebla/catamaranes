@@ -1,5 +1,7 @@
-// ADMINISTRACION *******
 
+
+
+// ADMINISTRACION *******
 function getAdmCmpts(flt){
 	var data = {
 		'fecIn':$('#dpk_desde_'+flt).find("input").val(),
@@ -29,7 +31,6 @@ function NewAdmCmpts(flt){
 	$("#selectFormaPago").val('EFVO');	
 	$("#inpMonto").val('');
 	$("#myModal").modal('show');
-
 }
 
 function updAdmCmpts(index,flt){
@@ -51,7 +52,6 @@ function updAdmCmpts(index,flt){
 
 
 function saveAdm(){
-	
 	var contrUrl = "administracion/"+window.tcx.currAction.slice(0,(window.tcx.currAction.indexOf("_")))+"_cmprb"; 
 	var f = window.tcx.currAction.substring(window.tcx.currAction.indexOf("_"));
 	var data = {
@@ -70,7 +70,7 @@ function saveAdm(){
 		}
 	//console.log('d',d);
 	let lmts = {'dpkModalAdm':$('#dpkModalAdm').find("input").val(),'selectUsuario':$('#selectUsuario').val(),'inpMonto':$('#inpMonto').val()}
-	var errs = validateInputs(lmts);
+	let errs = validateInputs(lmts);
 	if(!errs){callToServer(d)};
 }
 
@@ -265,7 +265,7 @@ function serv_edit(i){
 	$('#myModalOperTitle').html('Modificando Servicio dia: <strong>'+ $('#dpk_servicios').find("input").val()+'</strong>');
 	$("#selectServicioHoraSalida").val(d.salida_id);
 	$("#selectTipoPaseo").val(d.id_servicios);
-	$barco = (d.id_barco <= 0)?0:d.id_barco;
+	$barco = (d.id <= 0)?0:d.id;
 	$("#selectBarco").val($barco);
 	// $("#selectServicioEstado").val(d.estado);
 	$('#myModalTrpTitle').addClass('hidden');
@@ -354,8 +354,11 @@ function getServicios(){
 					}
 					screen += "</tr></thead><tbody>";
 					for (var i = 0; i < r.result.length; i++) {
-						// fix cantpax ****
-						screen += "<tr><td>"+moment(r.result[i].servicio.fecha_servicio).format("DD/MM/YYYY")+"</td><td class='text-center'>"+r.result[i].servicio.hora_salida+"</td><td>"+r.result[i].servicio.tipo+"</td><td>"+r.result[i].servicio.subtipo+"</td><td class='text-center'>"+r.result[i].servicio.comprobantes_cantpax+"</td><td class='text-center'>"+ (r.result[i].servicio.reservas_cantpax != null ?r.result[i].servicio.reservas_cantpax:'0') +"</td><td>"+(r.result[i].servicio.barco != null ? r.result[i].servicio.barco : '<span class="glyphicon glyphicon-minus" aria-hidden="true"></span>')+"</td><td class='text-center'>"+(r.result[i].tripulacion.length>0? "<a href=\"#\" title=\'Ver Tripulación\'><span class=\"glyphicon glyphicon-user\" aria-hidden=\"true\" onClick='show_tripl("+i+")'></span></a>" :'<span class="glyphicon glyphicon-minus" aria-hidden="true"></span>')+"</td><td class='text-center'><a href=\"#\" title=\'Editar Servicio\'><span class=\"glyphicon glyphicon-edit\" aria-hidden=\"true\" onClick='serv_edit("+i+")'></a></span></td></tr>";
+						// hjay que hacer un fix para cantpax si cambias el servicio de horario o que   ****
+						// ***** screen con accion to edit
+						// screen += "<tr><td>"+moment(r.result[i].servicio.fecha_servicio).format("DD/MM/YYYY")+"</td><td class='text-center'>"+r.result[i].servicio.hora_salida+"</td><td>"+r.result[i].servicio.tipo+"</td><td>"+r.result[i].servicio.subtipo+"</td><td class='text-center'>"+r.result[i].servicio.comprobantes_cantpax+"</td><td class='text-center'>"+ (r.result[i].servicio.reservas_cantpax != null ?r.result[i].servicio.reservas_cantpax:'0') +"</td><td>"+(r.result[i].servicio.barco != null ? r.result[i].servicio.barco : '<span class="glyphicon glyphicon-minus" aria-hidden="true"></span>')+"</td><td class='text-center'>"+(r.result[i].tripulacion.length>0? "<a href=\"#\" title=\'Ver Tripulación\'><span class=\"glyphicon glyphicon-user\" aria-hidden=\"true\" onClick='show_tripl("+i+")'></span></a>" :'<span class="glyphicon glyphicon-minus" aria-hidden="true"></span>')+"</td><td class='text-center'><a href=\"#\" title=\'Editar Servicio\'><span class=\"glyphicon glyphicon-edit\" aria-hidden=\"true\" onClick='serv_edit("+i+")'></a></span></td></tr>";
+						// ***** screen sin accion to edit
+						screen += "<tr><td>"+moment(r.result[i].servicio.fecha_servicio).format("DD/MM/YYYY")+"</td><td class='text-center'>"+r.result[i].servicio.hora_salida+"</td><td>"+r.result[i].servicio.tipo+"</td><td>"+r.result[i].servicio.subtipo+"</td><td class='text-center'>"+r.result[i].servicio.comprobantes_cantpax+"</td><td class='text-center'>"+ (r.result[i].servicio.reservas_cantpax != null ?r.result[i].servicio.reservas_cantpax:'0') +"</td><td>"+(r.result[i].servicio.barco != null ? r.result[i].servicio.barco : '<span class="glyphicon glyphicon-minus" aria-hidden="true"></span>')+"</td><td class='text-center'>"+(r.result[i].tripulacion.length>0? "<a href=\"#\" title=\'Ver Tripulación\'><span class=\"glyphicon glyphicon-user\" aria-hidden=\"true\" onClick='show_tripl("+i+")'></span></a>" :'<span class="glyphicon glyphicon-minus" aria-hidden="true"></span>')+"</td></tr>";
 					}
 					screen +="</tbody></table>";
 					$('#main_container').html(screen);
@@ -488,46 +491,28 @@ function getTarifas(){
 		});
 }
 
-function getReservas(fecha=null,scope_all='false'){
-	data = {'fecha':fecha,'scope_all':scope_all};	
-	$.blockUI({ message: null, baseZ: 10000  }); 
-	return $.ajax({
-		type : "POST",
-		url : "reservas/list_reservas_dia",
-		data : data,
-		dataType : "json",
-		success : function(r) {
-				//r.result = false;
-				$.unblockUI(); 
-				 console.log('recieved',r)
-				if(r.result.length == 0 ){
-					myAlert("#main_container","warning","No hay Reservas para el dia seleccionado.","");
-				}else{
-					// respuesta ok de ajax
-					window.tcx.data = r.result
-					console.log(' reserva',r.result)
-					var screen = '<table class=\"table table-responsive table-striped table-hover\"><thead><tr>';
-					for (var i = 0; i < r.header.length; i++) {
-						screen += "<th>"+r.header[i]+"</th>";
-					}
-					screen += "</tr></thead><tbody>";
-					for (var i = 0; i < r.result.length; i++) {
-						screen += "<tr><td>"+moment(r.result[i].fecha_reserva).format("DD/MM/YYYY")+"</td><td>"+r.result[i].hora_salida+"</td><td>"+r.result[i].tipo+"</td><td>"+r.result[i].subtipo+"</td><td>"+r.result[i].cant_pasajeros_reserva+"</td><td>"+r.result[i].monto_pagado_reserva+"</td><td>"+(parseFloat(r.result[i].monto_total_reserva)-parseFloat(r.result[i].monto_pagado_reserva))+"</td><td>"+r.result[i].nombre_barco+"</td><td>"+r.result[i].usr_usuario+"</td><td>"+r.result[i].observaciones_reserva+"</td><td>&nbsp;&nbsp;&nbsp;<a href=\"#\" title=\'Editar Reserva\'><span class=\"glyphicon glyphicon-edit text-center\" aria-hidden=\"true\" onClick='reservaEdit("+i+")'></a></span></td></tr>";
-					}
-					screen +="</tbody></table>";
-					$('#main_container').html(screen);
-				}
-			},
-			error : function(xhr, ajaxOptions, thrownError) {
-				$.unblockUI();
-				myAlert("danger","Error","Error de comunicación...");
-				console.log('err:',xhr)
-			}
-		});
+function getReservas(o){
+	console.log('f',o.fecha);
+	window.tcx.fecha = o.fecha
+	var d ={
+		method:'meet',
+		msg:{'fecha':o.fecha,'scope':o.scope},
+		// url:'reservas/list_reservas'
+	}
+	call(d);
 }
 
+
 function setNewReserva(){
-	window.tcx.crtindex = -1;
+	window.tcx.action = 'create';
+	window.tcx.validateDefVals = {
+		'dpk_modal_reserva':'',
+		'selectHoraSalida':0,
+		'selectTipoPaseo':0,
+		'inpCantPax':0,
+		'reservasAutocmpl':"",
+		'imptEmailCli':""
+		};
 	$('#dpk_modal_reserva').data("DateTimePicker").minDate(new Date());
 	$('#dpk_modal_reserva').data("DateTimePicker").date(null);
 	$("#selectHoraSalida").prop('selectedIndex',0);
@@ -539,8 +524,9 @@ function setNewReserva(){
 	$("#imptEmailCli").val('');
 	$("#imptTelCli").val('');
 	$("#imptDetalle").val('');
+	$("#slc_servicios_abordo_reserva").prop('selectedIndex',0);
 	$("#myModalReservasTitle").html("Crear Nueva Reserva")
-	$('#myModalReservas').modal('show'); 
+	$('#myModal').modal('show'); 
 	$( "#reservasAutocmpl" ).autocomplete( "option", "appendTo", ".eventInsForm" );
 	$("#checkDeleteReserva").addClass('hidden');
 	$("#lblDeleteReserva").addClass('hidden');
@@ -549,10 +535,18 @@ function setNewReserva(){
 	$('#reservas_btn_ok').html('Guardar');
 }
 
-function reservaEdit(index){
+function reservasUpd(index){
+	window.tcx.action = 'update'
 	window.tcx.crtindex = index;
 	var d = window.tcx.data[index];
-	console.log('tcx data',d);
+	window.tcx.validateDefVals = {
+		'dpk_modal_reserva':'',
+		'selectHoraSalida':0,
+		'selectTipoPaseo':0,
+		'inpCantPax':0,
+		'reservasAutocmpl':"",
+		'imptEmailCli':""
+		};
 	$('#dpk_modal_reserva').data("DateTimePicker").minDate(moment("2000-01-01"));
 	$('#dpk_modal_reserva').data("DateTimePicker").date(moment(d.fecha_reserva));
 	$("#selectHoraSalida").val(d.horarios_id);
@@ -564,8 +558,9 @@ function reservaEdit(index){
 	$("#imptEmailCli").val(d.email_cliente);
 	$("#imptTelCli").val(d.telefono_contacto_cliente);
 	$("#imptDetalle").val(d.observaciones_reserva);
+	// $("#slc_servicios_abordo_reserva").val(d.servicios_abordo_reserva);
 	$("#myModalReservasTitle").html("Modificar Reserva")
-	$('#myModalReservas').modal('show');
+	$('#myModal').modal('show');
 	$( "#reservasAutocmpl" ).autocomplete( "option", "appendTo", ".eventInsForm" ); 
 	$("#checkDeleteReserva").removeClass('hidden'),
 	$("#lblDeleteReserva").removeClass('hidden');
@@ -587,6 +582,8 @@ function checkCantPaxReservas(updateDpdn){
 	
 }
 
+
+
 function handlerDeleteReserva(){
 	
 	if($("#checkDeleteReserva").prop('checked')){
@@ -601,119 +598,58 @@ function handlerDeleteReserva(){
 	return false;
 }
 
-function saveReserva(){
-	// validate del modal de reservas
-	var notvalid = ($("#selectTipoPaseo").val() <= '0' || $("#selectHoraSalida").val() <= '0' || $("#inpCantPax").val() == '0' || $('#dpk_modal_reserva').find("input").val() == '' || $("#reservasAutocmpl").val().length < 3 || $("#imptEmailCli").val().indexOf("@") <= 0 );
-	if(notvalid){
-		($('#selectTipoPaseo').val() <='0')?$('#fgTipoPaseo').addClass("has-error"):$('#fgTipoPaseo').removeClass("has-error");
-		($('#selectHoraSalida').val() <='0')?$('#fgHoraSalida').addClass("has-error"):$('#fgHoraSalida').removeClass("has-error");
-		($('#dpk_modal_reserva').find("input").val() =='')?$('#dpk_modal_reserva').addClass("has-error"):$('#dpk_modal_reserva').removeClass("has-error");
-		($("#inpCantPax").val() == '0')?$("#fgCantPax").addClass("has-error"):$("#fgCantPax").removeClass("has-error"); 
-		($("#reservasAutocmpl").val().length < 3)?$("#fgCliente").addClass("has-error"):$("#fgCliente").removeClass("has-error");
-		($("#imptEmailCli").val().indexOf("@") <= 0 )?$("#fgEmailCli").addClass("has-error"):$("#fgEmailCli").removeClass("has-error");
-		$('#modalFooterMsg').removeClass("label label-success glyphicon glyphicon-ok hidden")
-	 	$('#modalFooterMsg').addClass("label label-warning glyphicon glyphicon-remove hidden")
-		$('#modalFooterMsgtxt').html('<big>Error: Falta completar datos </big>');
-		$('#modalFooterMsg').removeClass('hidden')
-		console.log('returning sin send')
-		return false;
+function handler_servicios_abordo_reserva(){
+	var t = $('#slc_servicios_abordo_reserva').find('option:selected').html();
+	if(t.indexOf('Selecciona el servicio') == -1){
+		$("#imptDetalle").val($("#imptDetalle").val()+t.trim()+", ");	
 	}
-	// clean last red item on modal when validated ok 
-	var items = new Array($('#dpk_modal_reserva'),$("#fgCantPax"),$("#fgCliente"),$("#fgEmailCli"),$('#fgHoraSalida'),$('#fgTipoPaseo'));
-	for (var i = items.length - 1; i >= 0; i--) {
-		items[i].removeClass("has-error");
-	}
-	$('#modalFooterMsgtxt').html('');
-	$('#modalFooterMsg').addClass('hidden');
 	
-	// ***** define new or edit before save *********** 
-	if(window.tcx.crtindex === -1){
-		data = {
-		'fecha_reserva':$('#dpk_modal_reserva').find("input").val(),
-		'horarios_id': $("#selectHoraSalida").val(),
-		'servicios_id': $("#selectTipoPaseo").val(),
-		'cant_pasajeros_reserva': $("#inpCantPax").val(),
-		'monto_pagado_reserva': $("#inpMontoPagado").val(),
-		'monto_total_reserva': $("#inpMontoTotal").val(),
-		'nombre_contacto_cliente': $("#reservasAutocmpl").val(),
-		'email_cliente':$("#imptEmailCli").val(),
-		'telefono_contacto_cliente':$("#imptTelCli").val(),
-		// 'servicio_bar_reserva':$('#servicio_bar').val(),
-		'observaciones_reserva':$("#imptDetalle").val(),
-		'usuarios_id':window.tcx.user.userId
-		};
-		var method = "create";
-	}else{
-		data = {
-		'id':window.tcx.data[window.tcx.crtindex].id_reserva,
-		'eliminar_reserva':$("#checkDeleteReserva").prop('checked'),
-		'fecha_reserva':$('#dpk_modal_reserva').find("input").val(),
-		'horarios_id': $("#selectHoraSalida").val(),
-		'servicios_id': $("#selectTipoPaseo").val(),
-		'cant_pasajeros_reserva': $("#inpCantPax").val(),
-		'monto_pagado_reserva': $("#inpMontoPagado").val(),
-		'monto_total_reserva': $("#inpMontoTotal").val(),
-		'nombre_contacto_cliente': $("#reservasAutocmpl").val(),
-		'email_cliente':$("#imptEmailCli").val(),
-		'telefono_contacto_cliente':$("#imptTelCli").val(),
-		// 'servicio_bar_reserva':$('#servicio_bar').val(),
-		'observaciones_reserva':$("#imptDetalle").val(),
-		'usuarios_id':window.tcx.user.userId
-		};
-		var method = "update";
-	}
-	console.log('tcx',window.tcx.user);
-	console.log('envio to reserva.php',data);
-		// show loading ....
-	$.blockUI({ message: null, baseZ: 10000  }); 
-	return $.ajax({
-	 	type : "POST",
-	 	url : "reservas/"+method,
-	 	data : data,
-	 	dataType : "json",
-	 	success : function(r) {
-	 		$.unblockUI(); 
-	 		 console.log('recieved from reservas',r)
-	 		
-	 		if(r.result === 'false'){
-	 			$('#totImporte').html('');
-	 			$('#modalFooterMsg').removeClass("label label-success glyphicon glyphicon-ok hidden")
-	 			$('#modalFooterMsg').addClass("label label-warning glyphicon glyphicon-remove hidden")
-	 			$('#modalFooterMsgtxt').html('<big>Error de comunicación...</big>');					
-	 			$('#modalFooterMsg').removeClass('hidden')
-	 			setTimeout(function() {
-	 				getReservas(r.fecha);
-	 				$('#modalFooterMsg').addClass('hidden');
-	 			},1500);
-	 		}else{
-					// respuesta ok de ajax
-					$('#modalFooterMsg').removeClass("label label-warning glyphicon glyphicon-remove hidden")
-					$('#modalFooterMsg').addClass("label label-success glyphicon glyphicon-ok hidden")
-					$('#modalFooterMsgtxt').html('<big>Guardando...</big>');					
-					$('#modalFooterMsg').removeClass('hidden')
-					setTimeout(function() {
-						$('#modalFooterMsg').addClass('hidden');
-						$('#myModalReservas').modal('hide')},2000);
-						getReservas(r.fecha);
-				}
-		},
-		error : function(xhr, ajaxOptions, thrownError) {
-				$.unblockUI();
-				console.log('err:',thrownError)
-				$('#modalFooterMsg').removeClass("label label-success glyphicon glyphicon-ok hidden")
-				$('#modalFooterMsg').addClass("label label-warning glyphicon glyphicon-remove hidden")
-				$('#modalFooterMsgtxt').html('Error de comunicación');					
-				$('#modalFooterMsg').removeClass('hidden')
-				setTimeout(function() {
-					$('#modalFooterMsg').addClass('hidden');
-				},2500);
-		}
-	});
+	
+}
 
+function saveReserva(){
+	data = {
+		'id':(window.tcx.action == 'update')?window.tcx.data[window.tcx.crtindex].id:null,
+		'fecha_reserva':$('#dpk_modal_reserva').find("input").val(),
+		'horarios_id': $("#selectHoraSalida").val(),
+		'servicios_id': $("#selectTipoPaseo").val(),
+		'cant_pasajeros_reserva': $("#inpCantPax").val(),
+		'monto_pagado_reserva': $("#inpMontoPagado").val(),
+		'monto_total_reserva': $("#inpMontoTotal").val(),
+		'nombre_contacto_cliente': $("#reservasAutocmpl").val(),
+		'email_cliente':$("#imptEmailCli").val(),
+		'telefono_contacto_cliente':$("#imptTelCli").val(),
+		// 'servicios_abordo_reserva':$('#slc_servicios_abordo_reserva').val(),
+		'observaciones_reserva':$("#imptDetalle").val(),
+		'usuarios_id':window.tcx.user.userId
+		};
+	var d={
+			data:data,
+			url:"reservas/"+window.tcx.action,
+			eliminar_reserva:$("#checkDeleteReserva").prop('checked'),
+			OkMsg: "Guardando..."
+		}
+	let errs = validateInputs(getCurrentInputsValues());
+	if(!errs){callToServer(d)};
 }
 
 
 // GENERALES ************
+function handlerDelete(){
+	if($("#checkDelete").prop('checked')){
+		$('#btn_ok').removeClass('btn btn-primary');
+		$('#btn_ok').addClass('btn btn-danger');
+		$('#btn_ok').html('Eliminar item');
+		window.tcx.deleterec = true;
+		return false;
+	}
+	$('#btn_ok').removeClass('btn btn-danger');
+	$('#btn_ok').addClass('btn btn-primary');
+	$('#btn_ok').html('Guardar');
+	window.tcx.deleterec = false;
+	return false;
+}
+
 
 function myAlert(container,type,tit='',msg=''){
 	var scrn = "<div class=\"alert alert-dismissible alert-"+type+"\">\
@@ -756,15 +692,38 @@ function updateHorariosDropdown(target_elem,caller){
 
 }
 
+function getCurrentInputsValues(){
+	let e1 = Object.getOwnPropertyNames(window.tcx.validateDefVals);
+	let e2={};
+	e1.map(function(l){
+		if(l.indexOf('dpk_')> -1){
+			e2[l] = $('#'+l).find("input").val();	
+		}else{
+			e2[l] = $('#'+l).val();
+		}
+	}); 
+	return e2;
+}
+
+
+function cleanHasError(){
+	Object.getOwnPropertyNames(window.tcx.validateDefVals).map(function(i){
+		$("#fg"+i).removeClass("has-error");
+	});
+	$('#modalFooterMsgtxt').html('');
+	$('#modalFooterMsg').addClass('hidden');
+	return false;	
+}
+
 // obj con  nombre:value de los elementos a validar, compara contra los defaults 
 // seteados en window.tcx.validateDefVals 
-function validateInputs(arr){
+function validateInputs(obj){
 	var err = false; 
-	for (let [key, value] of Object.entries(arr)) {  
+	for (let [key, value] of Object.entries(obj)) {  
   		$("#fg"+key).removeClass("has-error");
 	  	if(value == window.tcx.validateDefVals[key]){
 	  		$($("#fg"+key).addClass("has-error"));
-	  		err = true
+	  		err = true;
 	  	}
 	}
 	if(err){
@@ -772,6 +731,7 @@ function validateInputs(arr){
 	 	$('#modalFooterMsg').addClass("label label-warning glyphicon glyphicon-remove hidden")
 		$('#modalFooterMsgtxt').html('<big>Error: Falta completar datos </big>');
 		$('#modalFooterMsg').removeClass('hidden')
+		setTimeout('cleanHasError()',3500);
 		return true;
 	}else{
 		$('#modalFooterMsgtxt').html('');
@@ -781,6 +741,161 @@ function validateInputs(arr){
 }
 
 
+
+function modal_setup(){
+	$('#myModalLabel').html(window.tcx.currActionTit);
+	$('#modal_content').html('');
+	$('#modalFooterMsgtxt').html('');
+	$('#modalFooterMsg').addClass('hidden');
+	$('#btn_ok').removeClass('btn btn-danger');
+	$('#btn_ok').addClass('btn btn-primary');
+	$('#btn_ok').html('Guardar');
+}
+
+function mkModal(o){
+	
+console.log('obj mk_modal',o )
+console.log('tcx',window.tcx);
+	window.tcx.deleterec = false;
+	window.tcx.validateDefVals = {};
+	window.tcx.currActionTit = o.title;
+	window.tcx.currMethod = o.method
+	modal_setup();
+	// contenido del Modal window
+	// let f=window.tcx.selected
+	// let h=window.tcx.last_call_param.list_data;
+	
+	// selected es el record a modificar si esta agregando es 0
+	let d=window.tcx.selected
+	// console.log('d',d)
+	var val='';
+	var scr='';	
+	for (var i = 1; i < d.length; i++) {
+		window.tcx.validateDefVals[d[i]['field']] = '';
+		scr += "<div class='form-group col-md-4' id='fg"+d[i]['field']+"'><label class='control-label' for='"+d[i]['field']+"'>"+d[i]['title']+"</label>";
+		val = (o.method == 'upd')?d[i]['value']:'';
+		scr += "<input class='form-control' type='text' id='"+d[i]['field']+"'' value='"+val+"' ></div>"
+		}
+	// agrego delete checkbox
+	scr += (o.method == 'upd')?"<div class=\'form-group col-md-4\'><div class=\'custom-control custom-checkbox\'><input type=\'checkbox\' class=\'custom-control-input\' id=\'checkDelete\' onchange=\'handlerDelete()\'><label class=\'custom-control-label\' id=\'lblDelete\' for=\'checkDelete\'>&nbsp;Eliminar</label></div></div>":"";
+	console.log('modal cont',scr)
+	$('#modal_content').html(scr);
+	// $("#myModal").modal('show');
+}
+
+
+function wideSave(){
+	console.log('s',window.tcx.selected);
+	var rec = window.tcx.selected;
+	var dao = {};
+	for (var i = 1; i < rec.length; i++) {
+		dao[rec[i]['field']]= $('#'+rec[i]['field']).val();
+	}
+	let d={
+			data:dao,
+			// filter:null,
+			method:window.tcx.currMethod,
+			url:window.tcx.route+window.tcx.currMethod,
+			info:window.tcx.info,
+			id:(window.tcx.currMethod == 'add')?null:window.tcx.selected[0]['value'],
+			deleterec:window.tcx.deleterec,
+			OkMsg: "Guardando..."
+		}
+	let err = validateInputs(dao);
+	console.log('sending',d,err);
+	if(!err){d.saving = true;call(d)}
+}
+
+function validate_call(o){
+	switch(o.method){
+		case 'meet':
+			var r = true;
+			Object.getOwnPropertyNames(o.msg).map(function(i){if(o['msg'][i] == 'null'){r=false}});
+			return r;
+		break;	
+		case 'add' :
+			if(o.saving){
+				return true
+			}else{
+				o.title='Agregar Item '
+				window.tcx.selected = window.tcx.last_call_param.list_data[0]
+				mkModal(o);
+				return false;
+			}
+		break;
+		case 'upd' :
+			if(o.saving){
+				return true
+			}else{
+				o.title='Modificar Item ';
+				window.tcx.selected = window.tcx.last_call_param.list_data[o.list_data_index];
+				mkModal(o);
+				return false;	
+			}
+		break;
+	}
+}
+
+function call(obj){
+	// **** CHECKEA SI LA LLAMADA ES OK Y SI ES PARA JS O PARA PHP 
+	var x = validate_call(obj);
+	if(x){
+		// show loading ....
+		$.blockUI({ message: null, baseZ: 10000  }); 
+		return $.ajax({
+		 	type : "POST",
+		 	url : window.tcx.route+obj.method,
+		 	data : obj,
+		 	dataType : "json",
+		 	success : function(r) {
+		 		console.log('result',r)
+		 		console.log('current_knldg',window.tcx)
+		 		if(r.result == 'error'){
+		 			$.unblockUI(); 
+		 			//$('#totImporte').html('');
+		 			$('#modalFooterMsg').removeClass("label label-success glyphicon glyphicon-ok hidden");
+		 			$('#modalFooterMsg').addClass("label label-warning glyphicon glyphicon-remove hidden");
+		 			$('#modalFooterMsgtxt').html('<big>Error de comunicación...</big>');					
+		 			$('#modalFooterMsg').removeClass('hidden');
+		 			setTimeout(function() {
+		 				$('#modalFooterMsg').addClass('hidden');
+		 			},2500);
+		 		}else{
+						// respuesta ok de ajax
+						$('#modalFooterMsg').removeClass("label label-warning glyphicon glyphicon-remove hidden");
+						$('#modalFooterMsg').addClass("label label-success glyphicon glyphicon-ok hidden");
+						$('#modalFooterMsgtxt').html(obj.OkMsg);					
+						$('#modalFooterMsg').removeClass('hidden');
+						setTimeout(function() {
+							$('#modalFooterMsg').addClass('hidden');
+							$.unblockUI(); 
+							$('#myModal').modal('hide');
+						},1500);
+						window.tcx.info = r.info;
+						window.tcx.last_call = r.callback;
+						window.tcx.last_call_param = r.param;
+						console.log('r',r.param)
+						window[r.callback](r.param);
+						
+					}
+			},
+			error : function(xhr, ajaxOptions, thrownError) {
+					$.unblockUI();
+					console.log('err:',xhr)
+					$('#modalFooterMsg').removeClass("label label-success glyphicon glyphicon-ok hidden");
+					$('#modalFooterMsg').addClass("label label-warning glyphicon glyphicon-remove hidden");
+					$('#modalFooterMsgtxt').html('Error de comunicación...');					
+					$('#modalFooterMsg').removeClass('hidden');
+					setTimeout(function() {
+						$('#modalFooterMsg').addClass('hidden');
+					},2500);
+			}
+		});
+	}
+}
+
+
+//deprecate
 //llama a controler/function en url pasa data y OkMsg el controller debe pasar callback jsfunction y params 
 function callToServer(d){
 	// show loading ....
@@ -792,6 +907,7 @@ function callToServer(d){
 	 	data : d,
 	 	dataType : "json",
 	 	success : function(r) {
+	 		console.log('result',r)
 	 		if(r.result == 'error'){
 	 			$.unblockUI(); 
 	 			//$('#totImporte').html('');
@@ -833,16 +949,39 @@ function callToServer(d){
 }
 
 
+function dao_mk_list(d){
+	console.log('dao',d);
+	// **********  HEADER 
+	var screen = '<table class=\"table table-responsive table-striped table-hover\"><thead><tr>';
+	r = d.list_data[0];
+	for (var x = 0; x < r.length; x++) {
+		screen += "<th>"+r[x]['title']+"</th>";
+	}
+	// deberia poner if acciones ?? *****
+	screen += "<th>Acción</th></tr></thead><tbody>";
+	// ******* LISTADO
+	var l = d.list_data;
+	for(var i=0;i<l.length;i++){
+		screen += "<tr>";
+		for (var x = 0; x < l[i].length; x++) {
+			screen +="<td>"+l[i][x]['value']+"</td>";
+		}
+		screen += "<td><a href=\"#\" title=\'Modificar\'><span class=\"glyphicon glyphicon-edit text-center\" aria-hidden=\"true\" onClick=call({\'method\':\'upd\',\'list_data_index\':\'"+i+"\'})></a></span></td></tr>";	
+	}
+	screen +="</tbody></table>";
+	$('#main_container').html(screen);
+}
+
+
 function mk_list(data){
+	// window.tcx.data = data.list_data;
 	switch(data.tpl){
 		case 'compras-ventas':
-			window.tcx.data = data.list_data;
-			console.log('en list',window.tcx.data);
 			var screen = '<table class=\"table table-responsive table-striped table-hover\"><thead><tr>';
 						for (var i = 0; i < data.header.length; i++) {
 							screen += "<th>"+data.header[i]+"</th>";
 						}
-						screen += "<th></th></tr></thead><tbody>";
+						
 						var totImporte = 0.00;
 						for (var i = 0; i < data.list_data.length; i++) {
 							var flt = data.filter.slice(data.filter.indexOf("_"));
@@ -870,7 +1009,96 @@ function mk_list(data){
 			screen +="</tbody></table>";
 			$('#main_container_'+data.filter).html(screen);
 			break;
-	}
+		case 'config':
+			var screen = '<table class=\"table table-responsive table-striped table-hover\"><thead><tr>';
+			// ***** headings
+			for (var i = 0; i < data.header.length; i++) {
+				screen += "<th>"+data.header[i]+"</th>";
+			}
+			screen += "<th>Acción</th></tr></thead><tbody>";
+			// ****** filas
+			for (var x = 0; x < data.list_data.length; x++) {
+				screen += "<tr>";
+				// ******* columnas
+				for (var n = 0; n < data.flds.length; n++) {
+					screen += "<td>"+ data.list_data[x][data.flds[n]]+"</td>";
+				}
+				screen += "<td>&nbsp;&nbsp;&nbsp;<a href=\"#\" title=\'Modificar\'><span class=\"glyphicon glyphicon-edit text-center\" aria-hidden=\"true\" onClick=call({\'method\':\'upd\',\'list_data_index\':\'"+x+"\'})></a></span></td></tr>";	
+			}
+			screen +="</tbody></table>";
+			$('#main_container').html(screen);
+			break;
+		case 'reservas':
+			// console.log(' reserva',data)
+				// ********** TITLE
+				var tit = (data.scope == 'all')?"Listado De Reservas ":"Listado De Reservas del dia "+window.tcx.fecha
+				$('#screenTitle').html(tit);
+				$('#printTitle').html(tit);	
+				// ***********  TABLA
+				var printer = screen = '<table class=\"table table-responsive table-sm table-striped table-hover\"><thead><tr>';
+					// ***************  HEADINGS
+					for (var i = 0; i < data.header.length; i++) {
+						if(data.scope == 'day' && data.header[i] == 'Fecha'){
+							// no agrego header fecha	
+						}else{
+							screen += "<th>"+data.header[i]+"</th>";
+						}
+						
+						if(data.header[i] != 'Barco' && data.header[i] != 'Operador'){
+							if(data.scope == 'day' && data.header[i] == 'Fecha'){
+								// no agrego header fecha	
+							}else{
+								printer += "<th>"+data.header[i]+"</th>";
+							}
+						}
 
-	
+					}
+					screen += "<th>Acción</th></tr></thead><tbody>";
+					printer += "</tr></thead><tbody>";
+					// ********* LIST DATA
+					for (var i = 0; i < data.list_data.length; i++) {
+						for (var n = 0; n < data.flds.length; n++) {
+							// ************** Screen Version 
+							if(data.scope == 'day' && data.flds[n] == 'fecha_reserva'){
+								// no cargo la fecha
+							}else if(data.scope == 'all' && data.flds[n] == 'fecha_reserva'){
+								screen += "<td>"+moment(data.list_data[i][data.flds[n]]).format("DD/MM/YYYY")+"</td>";
+							}
+							else{
+								screen += "<td>"+ data.list_data[i][data.flds[n]]+"</td>";	
+							}
+							
+							// ********** Printer version 
+							if(data.flds[n] != 'nombre_barco' && data.flds[n] != 'usr_usuario'){
+								if(data.scope == 'day' && data.flds[n] == 'fecha_reserva'){
+									// no carg la fecha 
+								}else if(data.flds[n] == 'fecha_reserva'){
+									printer += "<td>"+moment(data.list_data[i][data.flds[n]]).format("DD/MM/YYYY")+"</td>";
+								}
+								else{
+									printer += "<td>"+ data.list_data[i][data.flds[n]]+"</td>";	
+								}
+							}
+							
+
+						}
+						screen += "<td>&nbsp;&nbsp;&nbsp;<a href=\"#\" title=\'Modificar\'><span class=\"glyphicon glyphicon-edit text-center\" aria-hidden=\"true\" onClick='reservasUpd("+i+")'></a></span></td></tr>";
+						printer +="</tr>";
+					}
+					screen +="</tbody></table>";
+					printer +="</tbody></table>";
+					$('#printable_content').html(printer);
+					$('#main_container').html(screen);
+			break;
+	}
+}
+
+
+function printDiv(nombreDiv) {
+     var contenido = document.getElementById(nombreDiv).innerHTML;
+     var contenidoOriginal = document.body.innerHTML;
+     document.body.innerHTML = contenido;
+     window.print();
+     document.body.innerHTML = "<h3>Imprimiendo Reservas...</h3>";
+     window.location.reload(true);
 }

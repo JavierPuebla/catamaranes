@@ -31,6 +31,9 @@
 		// padding para fixed-top navbar ********
 		$("body").attr({style: 'padding-top: 70px;'});
 
+		// Top context
+		window.tcx = {};
+		
 		
 		console.log(<?php echo json_encode(array('controller'=>$controller,'user'=>$user)); ?>)
 		//Do(	<?php echo json_encode(array('controller'=>$controller,'user'=>$user)); ?>)

@@ -24,7 +24,7 @@ class Administracion extends CI_Controller {
       $user_data = $this -> app_model -> get_user_data($user['userId']);
     // ******** DATA SET UP    
       $hoy = Date("d/m/Y");
-      $usuarios = $this ->cmn_functs->mk_dpdown('usuarios',['id_usuario','nombre_usuario','apellido_usuario'],"WHERE permisos_usuario = '4' OR permisos_usuario = '0' ORDER BY permisos_usuario ASC");
+      $usuarios = $this ->cmn_functs->mk_dpdown('usuarios',['id','nombre_usuario','apellido_usuario'],"WHERE permisos_usuario = '4' OR permisos_usuario = '0' ORDER BY permisos_usuario ASC");
       $tpcomp = $this ->cmn_functs->mk_dpdown('cat_tipos_comprobantes',['id','nombre'],'where id < 3 OR id > 7');
       $formaDePago = array('NULL'=>'Selecciona forma de pago','EFVO'=>'Efectivo','BCO'=>'Deposito / Transferencia','CHQ'=>'Cheque','MP'=>'Mercado Pago');
       $header = ['Fecha','Tipo','Cantidad','Total $'];

@@ -17,7 +17,7 @@ class Init extends CI_Controller {
       // proceso eligiendo eltipo de accion segun el usuario
       $user= $this->input->post('user');
       $userType=null;//$user['userType'];
-      $userId=$user['id_usuario'];
+      $userId=$user['id'];
       
       $actividades = $this->app_model->get_activities($userId);
 

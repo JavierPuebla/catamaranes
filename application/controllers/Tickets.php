@@ -22,7 +22,7 @@ class Tickets extends CI_Controller {
       $fecha = Date('Y-m-d');
       $this->cmn_functs->create_dia_servicios_regulares($fecha);
       $servicios = $this->app_model->get_servicios_boleteria($fecha);
-        $var=array('data'=>$servicios,'user'=>array('id'=>$user_data['id_usuario'],'tipo'=>$user_data['tipo_usuario']));
+        $var=array('data'=>$servicios,'user'=>array('id'=>$user_data['id'],'tipo'=>$user_data['tipo_usuario']));
         $this -> load -> view('header-responsive');
         $this -> load -> view('navbar',array('acts'=>$acts,'username'=>$user_data['usr_usuario']));
         $this -> load -> view('tickets_view',$var);

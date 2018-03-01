@@ -20,14 +20,15 @@ class app_model extends CI_Model {
 	}
 
 	function get_comprobantes_by_date($fin,$fout,$f){
-		$q = "SELECT c.*, cmps.nombre, u.nombre_usuario, u.apellido_usuario FROM cat_comprobantes c LEFT OUTER JOIN cat_tipos_comprobantes cmps on cmps.id = c.tipos_comprobantes_id LEFT OUTER JOIN usuarios u ON u.id_usuario = c.personal_id WHERE c.fecha >= '{$fin}' AND c.fecha <= '{$fout}'  $f ORDER BY c.fecha,c.personal_id,c.tipos_comprobantes_id";
+		$q = "SELECT c.*, cmps.nombre, u.nombre_usuario, u.apellido_usuario FROM cat_comprobantes c LEFT OUTER JOIN cat_tipos_comprobantes cmps on cmps.id = c.tipos_comprobantes_id LEFT OUTER JOIN usuarios u ON u.id = c.personal_id WHERE c.fecha >= '{$fin}' AND c.fecha <= '{$fout}'  $f ORDER BY c.fecha,c.personal_id,c.tipos_comprobantes_id";
 		$x = $this->db->query($q);
 		return $x -> result_array();
 	}
 
 	
 	function get_dpdown_data($tbl,$fields,$modif){
-		$q = "SELECT $fields FROM $tbl $modif ";
+		$f=implode('`,`', $fields);
+		$q = "SELECT `{$f}` FROM `{$tbl}` {$modif} ";
 		$x = $this->db->query($q);
 		return $x -> result_array();
 	}
@@ -53,8 +54,8 @@ class app_model extends CI_Model {
 
 	function get_servicios($fecha){
 			$res = [];
-			//$q= "SELECT hs.id,hs.fecha_servicio,hora.id as salida_id,hs.cod_tipo_subtipo_servicios, hora.hora_salida as hora_salida, s.subtipo, hs.estado, hs.cant_pasajeros,hs.tripulacion, s.tipo, s.id id_servicios, b.nombre_barco as barco, b.id_barco FROM `cat_historial_servicios` hs  LEFT OUTER JOIN cat_horarios hora on hora.id = hs.horarios_id LEFT OUTER JOIN cat_servicios s on hs.servicios_id = s.id LEFT OUTER JOIN cat_barcos b on hs.barcos_id = b.id_barco WHERE hs.fecha_servicio = '{$fecha}' GROUP BY hs.id ORDER BY hora_salida ASC";
-			$q="SELECT hs.id,hs.fecha_servicio,hora.id as salida_id,hs.cod_tipo_subtipo_servicios, hora.hora_salida as hora_salida, s.subtipo, hs.estado, hs.cant_pasajeros,hs.tripulacion, s.tipo, s.id id_servicios, b.nombre_barco as barco, b.id_barco,(SELECT COUNT(*) FROM cat_comprobantes WHERE hist_servicio_id = hs.id) comprobantes_cantpax, (SELECT SUM(cant_pasajeros_reserva) FROM cat_reservas WHERE historial_servicios_id = hs.id) reservas_cantpax FROM `cat_historial_servicios` hs  LEFT OUTER JOIN cat_horarios hora on hora.id = hs.horarios_id LEFT OUTER JOIN cat_servicios s on hs.servicios_id = s.id LEFT OUTER JOIN cat_barcos b on hs.barcos_id = b.id_barco  WHERE hs.fecha_servicio = '{$fecha}' GROUP BY hs.id ORDER BY hora_salida ASC";
+			//$q= "SELECT hs.id,hs.fecha_servicio,hora.id as salida_id,hs.cod_tipo_subtipo_servicios, hora.hora_salida as hora_salida, s.subtipo, hs.estado, hs.cant_pasajeros,hs.tripulacion, s.tipo, s.id id_servicios, b.nombre_barco as barco, b.id FROM `cat_historial_servicios` hs  LEFT OUTER JOIN cat_horarios hora on hora.id = hs.horarios_id LEFT OUTER JOIN cat_servicios s on hs.servicios_id = s.id LEFT OUTER JOIN cat_barcos b on hs.barcos_id = b.id WHERE hs.fecha_servicio = '{$fecha}' GROUP BY hs.id ORDER BY hora_salida ASC";
+			$q="SELECT hs.id,hs.fecha_servicio,hora.id as salida_id,hora.hora_salida as hora_salida, s.subtipo, hs.tripulacion, s.tipo, s.id id_servicios, b.nombre_barco as barco, b.id,(SELECT COUNT(*) FROM cat_comprobantes WHERE hist_servicio_id = hs.id) comprobantes_cantpax, (SELECT SUM(cant_pasajeros_reserva) FROM cat_reservas WHERE historial_servicios_id = hs.id) reservas_cantpax FROM `cat_historial_servicios` hs  LEFT OUTER JOIN cat_horarios hora on hora.id = hs.horarios_id LEFT OUTER JOIN cat_servicios s on hs.servicios_id = s.id LEFT OUTER JOIN cat_barcos b on hs.barcos_id = b.id  WHERE hs.fecha_servicio = '{$fecha}' GROUP BY hs.id ORDER BY hora_salida ASC";
 			$x = $this->db->query($q);
 			$hserv = $x -> result_array();
 			$trp = [];
@@ -100,13 +101,13 @@ class app_model extends CI_Model {
 	}
 
 	function get_servicios_disponibles($fecha,$horarios_id,$tipo,$subtipo){
-			$q= "SELECT hs.id,hs.fecha_servicio,hora.hora_salida,hs.horarios_id, s.tipo,s.subtipo,s.tarifa,s.id servicios_id,b.nombre_barco,b.capacidad_barco FROM `cat_historial_servicios` hs LEFT OUTER JOIN cat_horarios hora on hora.id = hs.horarios_id LEFT OUTER JOIN cat_servicios s on hs.servicios_id = s.id LEFT OUTER JOIN cat_barcos b on hs.barcos_id = b.id_barco WHERE hs.fecha_servicio = '{$fecha}' AND hs.horarios_id = '{$horarios_id}' AND s.tipo = '{$tipo}' AND s.subtipo = '{$subtipo}' AND hs.estado LIKE 'D' AND hora.id > 0 ORDER BY s.tipo ASC";
+			$q= "SELECT hs.id,hs.fecha_servicio,hora.hora_salida,hs.horarios_id, s.tipo,s.subtipo,s.tarifa,s.id servicios_id,b.nombre_barco,b.capacidad_barco FROM `cat_historial_servicios` hs LEFT OUTER JOIN cat_horarios hora on hora.id = hs.horarios_id LEFT OUTER JOIN cat_servicios s on hs.servicios_id = s.id LEFT OUTER JOIN cat_barcos b on hs.barcos_id = b.id WHERE hs.fecha_servicio = '{$fecha}' AND hs.horarios_id = '{$horarios_id}' AND s.tipo = '{$tipo}' AND s.subtipo = '{$subtipo}' AND hs.estado LIKE 'D' AND hora.id > 0 ORDER BY s.tipo ASC";
 			$x = $this->db->query($q);
 			return ($x)?$x -> row() : false;
 	}
 
 	function get_servicios_boleteria($fecha){
-		$q ="SELECT hs.id,hs.fecha_servicio,hora.hora_salida,hs.horarios_id, s.tipo,s.subtipo,s.tarifa,s.id servicios_id,b.nombre_barco,b.capacidad_barco FROM `cat_historial_servicios` hs LEFT OUTER JOIN cat_horarios hora on hora.id = hs.horarios_id LEFT OUTER JOIN cat_servicios s on hs.servicios_id = s.cod_tipo_subtipo LEFT OUTER JOIN cat_barcos b on hs.barcos_id = b.id_barco WHERE hs.fecha_servicio = '{$fecha}'  AND hora.id > 0 ORDER BY `hora`.`hora_salida` ASC, `s`.`tipo` DESC, `s`.`subtipo` DESC";
+		$q ="SELECT hs.id,hs.fecha_servicio,hora.hora_salida,hs.horarios_id, s.tipo,s.subtipo,s.tarifa,s.id servicios_id,b.nombre_barco,b.capacidad_barco FROM `cat_historial_servicios` hs LEFT OUTER JOIN cat_horarios hora on hora.id = hs.horarios_id LEFT OUTER JOIN cat_servicios s on hs.servicios_id = s.cod_tipo_subtipo LEFT OUTER JOIN cat_barcos b on hs.barcos_id = b.id WHERE s.subtipo != 'NULL' AND hs.fecha_servicio = '{$fecha}' AND hora.id > 0 ORDER BY `hora`.`hora_salida` ASC, `s`.`tipo` DESC, `s`.`subtipo` DESC";
 		$x = $this->db->query($q);
 		return $x -> result_array();
 	}
@@ -137,13 +138,14 @@ class app_model extends CI_Model {
 		return ($x)?$x -> row_array() : false;
 	}
 
-	function get_all($table,$id=null){
-		$q="SELECT * from {$table}";
-		if($id != null)
-			$q .="WHERE id = {$id}";
+	function get_table($fields,$tablename,$condition=null){
+		
+		$q="SELECT {$fields} FROM {$tablename} ";
+		if($condition != null)
+			$q .= $condition ;
 		$x = $this->db->query($q);
-		return $x -> row();
-	}
+		return $x -> result_array();
+	}	
 
 	function delete($table,$field_name,$id){
 		$this->db->delete($table, array($field_name => $id));
@@ -180,16 +182,16 @@ class app_model extends CI_Model {
 			$table ='cat_comprobantes';
 			$datos = [
 				'fecha'=> $data['fecha'],
-				'tipos_comprobantes_id' => $data['tipos_comprobantes_id'],
+				// 'id' => $data['tipos_comprobantes_id'],
 				'importe_neto' => $data['tarifa'],
 				'rnr_id' => $data['chk_sel'],
 				'servicios_id'=> $data['servicios_id'],
 				'hist_servicio_id' => $data['hist_servicio_id'],
 				'forma_pago'=> $data['forma_pago'],
 				'usuarios_id' => $data['usuarios_id'],
-				'clientes_id' => $data['clientes_id'],
-				'status' => $data['status'],
-				'id_transaccion' =>$data['id_transaccion']
+				// 'clientes_id' => $data['clientes_id'],
+				// 'status' => $data['status'],
+				// 'id_transaccion' =>$data['id_transaccion']
 			];  
 			// $hs_data = $this ->get_cant_pasajeros($data['histServiciosId']);
 			// $last_cantpax = intval($hs_data['cant_pasajeros'])+1;
@@ -205,9 +207,13 @@ class app_model extends CI_Model {
 	}
 
 
-	function get_reservas_bydate($fecha,$scope_all){
-			$scp = ($scope_all === 'true')?'>=':"="; 
-			$q= "SELECT r.id_reserva,hs.horarios_id,hs.servicios_id,r.historial_servicios_id,r.clientes_id,r.usuarios_id,r.puntodeventa_id,r.fecha_reserva, s.tipo,s.subtipo,r.cant_pasajeros_reserva,r.monto_pagado_reserva,r.monto_total_reserva,s.tarifa,b.nombre_barco,u.usr_usuario,cl.nombre_contacto_cliente,cl.email_cliente,cl.telefono_contacto_cliente,r.observaciones_reserva,r.estado_reserva,r.servicio_bar_reserva,horas.hora_salida FROM cat_reservas r LEFT OUTER JOIN usuarios u ON r.usuarios_id = u.id_usuario LEFT OUTER JOIN cat_historial_servicios hs ON r.historial_servicios_id = hs.id LEFT OUTER JOIN cat_horarios horas on horas.id = hs.horarios_id LEFT OUTER JOIN cat_clientes cl ON r.clientes_id = cl.id_cliente LEFT OUTER JOIN cat_barcos b ON b.id_barco = hs.barcos_id LEFT OUTER JOIN cat_servicios s ON hs.servicios_id = s.id WHERE r.fecha_reserva {$scp} '{$fecha}' ORDER BY r.fecha_reserva, hs.horarios_id ASC";
+/*
+$q= "SELECT r.id,hs.horarios_id,hs.servicios_id,r.historial_servicios_id,r.clientes_id,r.usuarios_id,r.puntodeventa_id,r.fecha_reserva, s.tipo,s.subtipo,r.cant_pasajeros_reserva,r.monto_pagado_reserva,r.monto_total_reserva,s.tarifa,b.nombre_barco,u.usr_usuario,cl.nombre_contacto_cliente,cl.email_cliente,cl.telefono_contacto_cliente,r.observaciones_reserva,r.estado_reserva,r.servicios_abordo_reserva,horas.hora_salida FROM cat_reservas r LEFT OUTER JOIN usuarios u ON r.usuarios_id = u.id LEFT OUTER JOIN cat_historial_servicios hs ON r.historial_servicios_id = hs.id LEFT OUTER JOIN cat_horarios horas on horas.id = hs.horarios_id LEFT OUTER JOIN cat_clientes cl ON r.clientes_id = cl.id LEFT OUTER JOIN cat_barcos b ON b.id = hs.barcos_id LEFT OUTER JOIN cat_servicios s ON hs.servicios_id = s.id WHERE r.fecha_reserva {$scp} '{$fecha}' ORDER BY r.fecha_reserva, hs.horarios_id ASC";
+
+*/
+	function get_reservas_bydate($fecha,$scope){
+			$scp = ($scope === 'all')?'>=':"="; 
+			$q= "SELECT r.fecha_reserva fecha, s.tipo paseo ,s.subtipo det ,r.cant_pasajeros_reserva pax ,r.monto_pagado_reserva seña ,r.monto_total_reserva saldo,s.tarifa tarifa,u.usr_usuario operador ,cl.nombre_contacto_cliente cliente,cl.telefono_contacto_cliente tel ,r.observaciones_reserva detalle  FROM cat_reservas r LEFT OUTER JOIN usuarios u ON r.usuarios_id = u.id LEFT OUTER JOIN cat_historial_servicios hs ON r.historial_servicios_id = hs.id LEFT OUTER JOIN cat_horarios horas on horas.id = hs.horarios_id LEFT OUTER JOIN cat_clientes cl ON r.clientes_id = cl.id LEFT OUTER JOIN cat_barcos b ON b.id = hs.barcos_id LEFT OUTER JOIN cat_servicios s ON hs.servicios_id = s.id WHERE r.fecha_reserva {$scp} '{$fecha}' ORDER BY r.fecha_reserva, hs.horarios_id ASC";
 			$x = $this->db->query($q);
 			return $x -> result_array();
 	}
@@ -229,7 +235,7 @@ class app_model extends CI_Model {
 	// autocomplete de clientes
 	function atcp_cli($t){
 
-		$q= "SELECT razon_social_cliente as label ,id_cliente,nombre_contacto_cliente,telefono_contacto_cliente,razon_social_cliente,email_cliente FROM `cat_clientes` WHERE nombre_contacto_cliente LIKE '%{$t}%' OR razon_social_cliente LIKE '%{$t}%'";
+		$q= "SELECT razon_social_cliente as label ,id,nombre_contacto_cliente,telefono_contacto_cliente,razon_social_cliente,email_cliente FROM `cat_clientes` WHERE nombre_contacto_cliente LIKE '%{$t}%' OR razon_social_cliente LIKE '%{$t}%'";
 		$x = $this->db->query($q);
 		return $x -> result_array();
 	}
@@ -240,7 +246,7 @@ class app_model extends CI_Model {
 	}
 
 	function get_cliente_by_id($id){
-		$query = $this -> db -> get_where('cat_clientes', array('id_cliente' => $id));
+		$query = $this -> db -> get_where('cat_clientes', array('id' => $id));
 		return ($query)?$query -> row() : false;
 	}
 
@@ -470,7 +476,7 @@ public function parcial_part_number($n){
 	}
 
 	public function get_user_data($userid){
-		$query = $this -> db -> get_where('usuarios', array('id_usuario' => $userid));
+		$query = $this -> db -> get_where('usuarios', array('id' => $userid));
 		return $query -> row_array();
 
 	}

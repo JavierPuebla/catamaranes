@@ -27,7 +27,7 @@ Class User extends CI_Model
 	function u_data($id){
 		$this -> db -> select('nombre, apellido, email, direccion, ciudad, provincia, idpais');
 		$this -> db -> from('usuarios');
-		$this -> db -> where("id_usuario = " . "'" . $id. "'");
+		$this -> db -> where("id = " . "'" . $id. "'");
 		$this -> db -> limit(1);
 
 		$query = $this -> db -> get();
