@@ -127,6 +127,9 @@ class Reservas extends CI_Controller {
                     );
   }
   
+
+
+  
   public function update_drop_down(){
     $h = $this->app_model->get_horarios();
     $res = array();

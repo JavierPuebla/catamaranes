@@ -492,8 +492,8 @@ function getTarifas(){
 }
 
 function getReservas(o){
-	console.log('f',o.fecha);
 	window.tcx.fecha = o.fecha
+	window.tcx.modalElements = ['dpk_modal_reserva','selectTipoPaseo','selectHoraSalida','inpCantPax','inpMontoPagado','inpMontoTotal','cliente','imptEmailCli','imptTelCli','imptDetalle','slc_servicios_abordo_reserva'];
 	var d ={
 		method:'meet',
 		msg:{'fecha':o.fecha,'scope':o.scope},
@@ -502,7 +502,7 @@ function getReservas(o){
 	call(d);
 }
 
-
+// deprecate
 function setNewReserva(){
 	window.tcx.action = 'create';
 	window.tcx.validateDefVals = {
@@ -510,7 +510,7 @@ function setNewReserva(){
 		'selectHoraSalida':0,
 		'selectTipoPaseo':0,
 		'inpCantPax':0,
-		'reservasAutocmpl':"",
+		'cliente':"",
 		'imptEmailCli':""
 		};
 	$('#dpk_modal_reserva').data("DateTimePicker").minDate(new Date());
@@ -520,21 +520,21 @@ function setNewReserva(){
 	$("#inpCantPax").val(0);
 	$("#inpMontoPagado").val(0);
 	$("#inpMontoTotal").val(0);
-	$("#reservasAutocmpl").val("");
+	$("#cliente").val("");
 	$("#imptEmailCli").val('');
 	$("#imptTelCli").val('');
 	$("#imptDetalle").val('');
 	$("#slc_servicios_abordo_reserva").prop('selectedIndex',0);
 	$("#myModalReservasTitle").html("Crear Nueva Reserva")
 	$('#myModal').modal('show'); 
-	$( "#reservasAutocmpl" ).autocomplete( "option", "appendTo", ".eventInsForm" );
+	$( "#cliente" ).autocomplete( "option", "appendTo", ".eventInsForm" );
 	$("#checkDeleteReserva").addClass('hidden');
 	$("#lblDeleteReserva").addClass('hidden');
 	$('#reservas_btn_ok').removeClass('btn btn-danger');
 	$('#reservas_btn_ok').addClass('btn btn-primary');
 	$('#reservas_btn_ok').html('Guardar');
 }
-
+//deprecate
 function reservasUpd(index){
 	window.tcx.action = 'update'
 	window.tcx.crtindex = index;
@@ -544,7 +544,7 @@ function reservasUpd(index){
 		'selectHoraSalida':0,
 		'selectTipoPaseo':0,
 		'inpCantPax':0,
-		'reservasAutocmpl':"",
+		'cliente':"",
 		'imptEmailCli':""
 		};
 	$('#dpk_modal_reserva').data("DateTimePicker").minDate(moment("2000-01-01"));
@@ -554,14 +554,14 @@ function reservasUpd(index){
 	$("#inpCantPax").val(d.cant_pasajeros_reserva);
 	$("#inpMontoPagado").val(d.monto_pagado_reserva);
 	$("#inpMontoTotal").val(parseFloat(d.monto_total_reserva)-parseFloat(d.monto_pagado_reserva));
-	$("#reservasAutocmpl").val(d.nombre_contacto_cliente);
+	$("#cliente").val(d.nombre_contacto_cliente);
 	$("#imptEmailCli").val(d.email_cliente);
 	$("#imptTelCli").val(d.telefono_contacto_cliente);
 	$("#imptDetalle").val(d.observaciones_reserva);
 	// $("#slc_servicios_abordo_reserva").val(d.servicios_abordo_reserva);
 	$("#myModalReservasTitle").html("Modificar Reserva")
 	$('#myModal').modal('show');
-	$( "#reservasAutocmpl" ).autocomplete( "option", "appendTo", ".eventInsForm" ); 
+	$( "#cliente" ).autocomplete( "option", "appendTo", ".eventInsForm" ); 
 	$("#checkDeleteReserva").removeClass('hidden'),
 	$("#lblDeleteReserva").removeClass('hidden');
 	$("#checkDeleteReserva").prop('checked',false),
@@ -616,7 +616,7 @@ function saveReserva(){
 		'cant_pasajeros_reserva': $("#inpCantPax").val(),
 		'monto_pagado_reserva': $("#inpMontoPagado").val(),
 		'monto_total_reserva': $("#inpMontoTotal").val(),
-		'nombre_contacto_cliente': $("#reservasAutocmpl").val(),
+		'nombre_contacto_cliente': $("#cliente").val(),
 		'email_cliente':$("#imptEmailCli").val(),
 		'telefono_contacto_cliente':$("#imptTelCli").val(),
 		// 'servicios_abordo_reserva':$('#slc_servicios_abordo_reserva').val(),
@@ -754,8 +754,8 @@ function modal_setup(){
 
 function mkModal(o){
 	
-console.log('obj mk_modal',o )
-console.log('tcx',window.tcx);
+//console.log('obj mk_modal',o )
+// console.log('tcx',window.tcx);
 	window.tcx.deleterec = false;
 	window.tcx.validateDefVals = {};
 	window.tcx.currActionTit = o.title;
@@ -767,7 +767,9 @@ console.log('tcx',window.tcx);
 	
 	// selected es el record a modificar si esta agregando es 0
 	let d=window.tcx.selected
-	// console.log('d',d)
+	 console.log('d',d)
+	// check if is array para lopear y rellenar los elementos existentes
+	//if(window.tcx.modalElements.)
 	var val='';
 	var scr='';	
 	for (var i = 1; i < d.length; i++) {
@@ -780,7 +782,7 @@ console.log('tcx',window.tcx);
 	scr += (o.method == 'upd')?"<div class=\'form-group col-md-4\'><div class=\'custom-control custom-checkbox\'><input type=\'checkbox\' class=\'custom-control-input\' id=\'checkDelete\' onchange=\'handlerDelete()\'><label class=\'custom-control-label\' id=\'lblDelete\' for=\'checkDelete\'>&nbsp;Eliminar</label></div></div>":"";
 	console.log('modal cont',scr)
 	$('#modal_content').html(scr);
-	// $("#myModal").modal('show');
+	 $("#myModal").modal('show');
 }
 
 
